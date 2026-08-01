@@ -77,6 +77,13 @@ describe('bundle entry', () => {
     }
   });
 
+  it('defines the header card without listing it in the picker', () => {
+    expect(customElements.get('quiet-luxe-header-card')).toBe(bundle.QuietLuxeHeaderCard);
+    expect((window.customCards ?? []).some((card) => card.type === 'quiet-luxe-header-card')).toBe(
+      false,
+    );
+  });
+
   it('re-exports the Plan 3b public API', () => {
     expect(bundle.QuietLuxeMediaCard).toBeDefined();
     expect(bundle.QuietLuxeCameraCard).toBeDefined();

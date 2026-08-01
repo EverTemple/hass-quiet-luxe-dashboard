@@ -80,4 +80,6 @@ export const zhHant: TranslationTable = {
   'section.car': '車輛',
   'section.vacuum': '掃地機',
   'section.network': '網絡與流程',
+  'header.nobody_home': '無人在家',
+  'header.home_suffix': '在家',
 };

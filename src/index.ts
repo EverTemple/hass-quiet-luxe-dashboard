@@ -28,6 +28,7 @@ import './cards/ql-row-door-motion';
 import './cards/ql-row-network-flow';
 import './cards/quiet-luxe-device-cutout-card';
 import './cards/quiet-luxe-language-card';
+import './cards/quiet-luxe-header-card';
 
 export { QlBaseCard, type EntityAvailability } from './cards/ql-base-card';
 export { QlCanvas } from './elements/ql-canvas';
@@ -147,6 +148,11 @@ export {
   type LanguageCardConfig,
   type LanguageTile,
 } from './cards/quiet-luxe-language-card';
+export {
+  QuietLuxeHeaderCard,
+  variantForWidth,
+  type HeaderCardConfig,
+} from './cards/quiet-luxe-header-card';
 
 injectFontStylesheet(document, import.meta.url);
 

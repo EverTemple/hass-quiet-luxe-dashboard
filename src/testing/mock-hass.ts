@@ -21,6 +21,8 @@ export interface MockHassOptions {
   readonly apiResponses?: Readonly<Record<string, unknown>>;
   /** callWS stubs keyed by `message.type`. */
   readonly wsResponses?: Readonly<Record<string, unknown>>;
+  /** hass.user double for RBAC/greeting tests. */
+  readonly user?: HomeAssistant['user'];
 }
 
 /** HomeAssistant double with service/api/ws spies. Test/dev-harness use only. */
@@ -106,6 +108,7 @@ export function makeMockHass(
     states: Object.fromEntries(entities.map((entity) => [entity.entity_id, entity])),
     language,
     locale: { language },
+    user: opts.user,
     calls,
     apiCalls,
     wsCalls,

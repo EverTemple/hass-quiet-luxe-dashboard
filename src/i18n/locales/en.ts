@@ -78,6 +78,8 @@ export const en = {
   'section.car': 'Car',
   'section.vacuum': 'Vacuum',
   'section.network': 'Network & flows',
+  'header.nobody_home': 'Nobody home',
+  'header.home_suffix': 'home',
 } as const;
 
 export type TranslationKey = keyof typeof en;

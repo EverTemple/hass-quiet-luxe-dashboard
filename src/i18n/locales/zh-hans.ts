@@ -80,4 +80,6 @@ export const zhHans: TranslationTable = {
   'section.car': '车辆',
   'section.vacuum': '扫地机',
   'section.network': '网络与流程',
+  'header.nobody_home': '无人在家',
+  'header.home_suffix': '在家',
 };

@@ -9,6 +9,12 @@ export interface HomeAssistant {
   readonly states: Readonly<Record<string, HassEntity>>;
   readonly language: string;
   readonly locale?: { readonly language: string };
+  /** Current user; absent in narrow mocks. is_admin drives the RBAC admin tier. */
+  readonly user?: {
+    readonly id: string;
+    readonly name: string;
+    readonly is_admin: boolean;
+  };
   callService(
     domain: string,
     service: string,

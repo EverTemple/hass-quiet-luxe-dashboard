@@ -80,4 +80,6 @@ export const ms: TranslationTable = {
   'section.car': 'Kereta',
   'section.vacuum': 'Vakum',
   'section.network': 'Rangkaian & aliran',
+  'header.nobody_home': 'Tiada sesiapa di rumah',
+  'header.home_suffix': 'di rumah',
 };
