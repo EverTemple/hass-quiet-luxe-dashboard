@@ -72,4 +72,6 @@ export const zhHans: TranslationTable = {
   'motion.toggle_label': '移动侦测',
   'flow.confirm_hint': '点两次以生效',
   'section.presence': '在家状态',
+  'section.sensors': '空气与传感',
+  'section.doors': '门窗与动态',
 };

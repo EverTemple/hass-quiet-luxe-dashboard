@@ -72,4 +72,6 @@ export const ms: TranslationTable = {
   'motion.toggle_label': 'Pengesanan pergerakan',
   'flow.confirm_hint': 'Ketik dua kali untuk melaksana',
   'section.presence': 'Kehadiran',
+  'section.sensors': 'Udara & penderia',
+  'section.doors': 'Pintu & pergerakan',
 };

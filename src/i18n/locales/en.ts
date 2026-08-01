@@ -70,6 +70,8 @@ export const en = {
   'motion.toggle_label': 'Motion detection',
   'flow.confirm_hint': 'Tap twice to apply',
   'section.presence': 'Presence',
+  'section.sensors': 'Air & sensors',
+  'section.doors': 'Doors & motion',
 } as const;
 
 export type TranslationKey = keyof typeof en;

@@ -72,4 +72,6 @@ export const zhHant: TranslationTable = {
   'motion.toggle_label': '動態偵測',
   'flow.confirm_hint': '點兩次以生效',
   'section.presence': '在家狀態',
+  'section.sensors': '空氣與感測',
+  'section.doors': '門窗與動態',
 };
