@@ -9,7 +9,11 @@ Design source of truth: Figma file `vaDrJjhYuziE1lVvNvJqwP`.
 ## Install (per instance)
 
 1. HACS → Custom repositories → add this repo as type **Dashboard**.
-2. Install **Quiet Luxe**; HACS registers `quiet-luxe.js` as a dashboard resource.
+2. Install **Quiet Luxe**. HACS downloads the release asset `quiet-luxe.zip`
+   and extracts it (bundle + fonts) to `www/community/quiet-luxe/`. Check
+   Settings → Dashboards → ⋮ → Resources contains
+   `/hacsfiles/quiet-luxe/quiet-luxe.js` (JavaScript module); add it manually
+   if HACS did not register it.
 3. Copy `themes/quiet-luxe.yaml` into your `config/themes/` directory (ensure
    `frontend: themes: !include_dir_merge_named themes` in `configuration.yaml`),
    then select the **quiet-luxe** theme in your user profile. Light/dark follow
@@ -25,7 +29,8 @@ your HA instance — no external font CDN is contacted at runtime.
 
 - `npm install` then `npm run test` / `npm run lint` / `npm run typecheck`
 - `npm run build` → `dist/quiet-luxe.js` + `dist/fonts/`
-- `dist/` is committed only by the release workflow.
+- `dist/` is never committed; releases attach `quiet-luxe.zip` (bundle +
+  woff2 fonts) as a GitHub release asset which HACS installs (`zip_release`).
 
 ## Repository docs
 

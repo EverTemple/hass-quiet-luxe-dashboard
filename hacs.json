@@ -1,6 +1,7 @@
 {
   "name": "Quiet Luxe",
-  "filename": "quiet-luxe.js",
+  "filename": "quiet-luxe.zip",
+  "zip_release": true,
   "render_readme": true,
   "homeassistant": "2025.6.0"
 }

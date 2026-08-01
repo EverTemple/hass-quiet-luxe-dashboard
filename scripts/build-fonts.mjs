@@ -1,4 +1,4 @@
-// Copies the required @fontsource weights (css + woff2/woff slices) into
+// Copies the required @fontsource weights (css + woff2 slices) into
 // dist/fonts/ and writes dist/fonts/fonts.css. Runs after `vite build`.
 // Fails loudly if any expected fontsource file is missing.
 import { cpSync, existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
@@ -31,8 +31,8 @@ for (const { pkg, weights } of FONTS) {
     }
     cpSync(cssPath, join(destDir, cssName));
     imports.push(`@import url("./${family}/${weight}.css");`);
-    const sliceFiles = readdirSync(join(srcDir, 'files')).filter((f) =>
-      f.includes(`-${weight}-normal`),
+    const sliceFiles = readdirSync(join(srcDir, 'files')).filter(
+      (f) => f.includes(`-${weight}-normal`) && f.endsWith('.woff2'),
     );
     if (sliceFiles.length === 0) {
       throw new Error(`build-fonts: no font files for ${pkg} weight ${weight}`);
