@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-01
 **Status:** Approved section-by-section in brainstorming; pending final user review of this document
-**Figma file:** https://www.figma.com/design/vaDrJjhYuziE1lVvNvJqwP/Untitled?node-id=0-1
+**Figma file:** <https://www.figma.com/design/vaDrJjhYuziE1lVvNvJqwP/Untitled?node-id=0-1>
 
 ## 1. Goal
 
@@ -21,7 +21,7 @@ Design (in Figma) and implement (in Home Assistant) a cohesive, modern, image-ri
 ### Homes and per-home matrix
 
 | | Subang Jaya | Tung Chung | Xiamen |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Speakers | Sonos + nearly all speakers (Bose portables) | minimal | minimal |
 | TV | Samsung (multiple) | LG | TCL |
 | Covers | Vertical shades + horizontal curtains | Horizontal curtains | Horizontal curtains |
@@ -29,10 +29,14 @@ Design (in Figma) and implement (in Home Assistant) a cohesive, modern, image-ri
 | Car | BMW (CarData) | Audi | Li Auto L7 (integration UNCONFIRMED) |
 | Cameras | Dahua NVR | Generic RTSP (SriHome) | Dahua via 大华云联 cloud (integration path TBD: Dahua/Imou integration or go2rtc) |
 | Vacuum | — | — | Dreame X30 Pro |
+| Broadlink RF/IR | ✓ | ✓ | — |
+| Calendar/tasks | Google Calendar + Tasks | Google Calendar + Tasks | none (Google unreachable in China) |
 
-All homes: Philips Hue + WiZ lights, Z2M light switches, ACs/fans/exhausts, Xiaomi dehumidifiers, Dyson purifiers, Broadlink RF fans, motion + door sensors, air-quality sensors per room. Rooms include storage room, helper's room; Subang has a main living room and a side living room; some toilets are ensuite, some dedicated; bathrooms have controllable lighting. Actual entity inventories are **UNCONFIRMED** (instances unreachable during design); the architecture treats rooms/entities as discovered data, so validation happens at implementation time via Nabu Casa or the Cloudflare-Access tunnels.
+All homes: Philips Hue + WiZ lights, Z2M light switches, ACs/fans/exhausts, Xiaomi dehumidifiers, Dyson purifiers, motion + door sensors, air-quality sensors per room. Broadlink RF/IR fan control: Subang Jaya and Tung Chung only. Rooms include storage room, helper's room; Subang has a main living room and a side living room; some toilets are ensuite, some dedicated; bathrooms have controllable lighting. Actual entity inventories are **UNCONFIRMED** (instances unreachable during design); the architecture treats rooms/entities as discovered data, so validation happens at implementation time via Nabu Casa or the Cloudflare-Access tunnels.
 
-Calendar/tasks source: Google Calendar + Google Tasks. Weather: HA-configured provider per home (incl. rain probability + UV index).
+Calendar/tasks source: Google Calendar + Google Tasks on Subang Jaya and Tung Chung; **none on Xiamen** — the schedule card is disabled there via `calendar: none` (a China-reachable CalDAV source may be added later). Weather: HA-configured provider per home (incl. rain probability + UV index); Xiamen's provider must be China-reachable.
+
+**China-reachability rule (Xiamen):** the Xiamen instance must never depend on services blocked in China. Consequences for the whole package: fonts are bundled in the package (no Google Fonts CDN at runtime, anywhere), no Google API dependency in any core card, and per-home services (weather, calendar, album art / media metadata) are chosen per home for reachability.
 
 ### Users and devices
 
@@ -43,7 +47,7 @@ Calendar/tasks source: Google Calendar + Google Tasks. Weather: HA-configured pr
 ## 3. Decisions log
 
 | # | Decision | Choice |
-|---|---|---|
+| --- | --- | --- |
 | 1 | Entity discovery | Assume + mark UNCONFIRMED; validate later against live instances |
 | 2 | Multi-home model | One shared design system + per-home configuration |
 | 3 | Variant roles | Mobile personal / iPad shared kiosk / desktop admin |
@@ -64,7 +68,7 @@ Calendar/tasks source: Google Calendar + Google Tasks. Weather: HA-configured pr
 ### Color
 
 | Token | Light | Dark |
-|---|---|---|
+| --- | --- | --- |
 | Background (radial center → edge) | warm luminous ivory → `#F4F0E8` | faint warm glow → `#161310` |
 | Card surface | `#FDFBF6` + soft warm shadow | `rgba(255,250,240,.055)` + 1px `rgba(237,230,216,.10)` border + blur (glass) |
 | Ink | `#2B2620` | `#EDE6D8` |
@@ -95,7 +99,7 @@ Three sanctioned types: (1) room photos (Unsplash-sourced placeholders acceptabl
 
 Pages (feature-flagged per home, RBAC-gated per user):
 
-```
+```text
 Home          all users
 Room views    drill-in per room; sections render only what the room has
 Media         all homes; Sonos group builder where Sonos exists
@@ -158,7 +162,7 @@ Every component ships variants for mode (light/dark) and, where relevant, size, 
 
 **Convention over configuration:** the strategy reads HA area/device/entity registries at load: areas = rooms (floors supported), entities bucketed per area by domain and device-class. HA labels refine: `ql-favorite`, `ql-hidden`, `ql-primary-camera`.
 
-**Per-home config:** home name, feature flags (energy, `car: bmw|audi|liauto|none`, vacuum, media-rich), room display order, camera engine (`webrtc|snapshot`), energy tariff, default/kiosk language, RBAC tier membership.
+**Per-home config:** home name, feature flags (energy, `car: bmw|audi|liauto|none`, `calendar: google|none`, vacuum, media-rich), room display order, camera engine (`webrtc|snapshot`), energy tariff, default/kiosk language, RBAC tier membership.
 
 **Community cards where best-in-class:** apexcharts-card (charts), kiosk-mode (iPad chrome), go2rtc/WebRTC card (camera streams). Everything user-visible otherwise is ours.
 
@@ -197,7 +201,8 @@ Figma variables/tokens export to CSS custom properties in the theme so design an
 - Li Auto L7 HA integration availability — research task; fallback `car: none`.
 - Dahua 大华云联 camera access path (official/Imou/go2rtc restream) — research task; snapshot fallback designed.
 - HA versions on the three instances support sections view + current strategy APIs — verify before implementation.
-- Google Calendar/Tasks integrations authorized on each instance.
+- Google Calendar/Tasks integrations authorized on the Subang Jaya and Tung Chung instances.
+- All third-party services used by the Xiamen instance verified reachable from mainland China.
 
 ## 14. Out of scope (deferred)
 
