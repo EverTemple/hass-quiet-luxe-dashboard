@@ -1,4 +1,4 @@
-import type { HomeAssistant } from '../types/home-assistant';
+import type { HassEntity, HomeAssistant } from '../types/home-assistant';
 
 export const LABEL_FAVORITE = 'ql-favorite';
 export const LABEL_HIDDEN = 'ql-hidden';
@@ -110,4 +110,96 @@ export async function fetchRegistrySnapshot(hass: HomeAssistant): Promise<Regist
   } catch (error) {
     throw new QuietLuxeRegistryError(error instanceof Error ? error.message : String(error));
   }
+}
+
+export interface RegistryIndex {
+  /** All areas, sorted by name. Ordering/hiding per home config is a section concern. */
+  readonly areas: ReadonlyArray<AreaEntry>;
+  area(areaId: string): AreaEntry | undefined;
+  /** All visible entity ids assigned (directly or via device) to the area. */
+  inAreaAll(areaId: string): ReadonlyArray<string>;
+  inArea(areaId: string, domain: string, deviceClass?: string): ReadonlyArray<string>;
+  all(domain: string, deviceClass?: string): ReadonlyArray<string>;
+  hasLabel(entityId: string, label: string): boolean;
+  platformOf(entityId: string): string | undefined;
+  /** Visible entities sharing the entity's device (motion-toggle discovery). */
+  siblings(entityId: string): ReadonlyArray<string>;
+}
+
+const EMPTY: ReadonlyArray<string> = [];
+
+/**
+ * Pure index over a registry snapshot. Visibility rules (spec §8):
+ * hidden_by/disabled_by set, entity_category set (config/diagnostic), or the
+ * ql-hidden label → excluded everywhere. ql-favorite sorts first per bucket.
+ */
+export function buildRegistryIndex(
+  snapshot: RegistrySnapshot,
+  states: Readonly<Record<string, HassEntity>>,
+): RegistryIndex {
+  const areaById = new Map(snapshot.areas.map((area) => [area.area_id, area]));
+  const deviceById = new Map(snapshot.devices.map((device) => [device.id, device]));
+  const favoriteRank = (entity: EntityEntry): number =>
+    entity.labels.includes(LABEL_FAVORITE) ? 0 : 1;
+  const visible = snapshot.entities
+    .filter(
+      (entity) =>
+        entity.hidden_by === null &&
+        entity.disabled_by === null &&
+        entity.entity_category === null &&
+        !entity.labels.includes(LABEL_HIDDEN),
+    )
+    .sort(
+      (a, b) => favoriteRank(a) - favoriteRank(b) || a.entity_id.localeCompare(b.entity_id),
+    );
+  const entityById = new Map(visible.map((entity) => [entity.entity_id, entity]));
+  const ordered = visible.map((entity) => entity.entity_id);
+
+  const effectiveArea = (entity: EntityEntry): string | null =>
+    entity.area_id ??
+    (entity.device_id === null ? null : (deviceById.get(entity.device_id)?.area_id ?? null));
+
+  const byArea = new Map<string, string[]>();
+  const byDevice = new Map<string, string[]>();
+  for (const entity of visible) {
+    const areaId = effectiveArea(entity);
+    if (areaId !== null) {
+      byArea.set(areaId, [...(byArea.get(areaId) ?? []), entity.entity_id]);
+    }
+    if (entity.device_id !== null) {
+      byDevice.set(entity.device_id, [...(byDevice.get(entity.device_id) ?? []), entity.entity_id]);
+    }
+  }
+
+  const domainOf = (id: string): string => id.split('.')[0] ?? '';
+  const deviceClassOf = (id: string): string | undefined => {
+    const deviceClass: unknown = states[id]?.attributes.device_class;
+    return typeof deviceClass === 'string' ? deviceClass : undefined;
+  };
+  const matching = (
+    ids: ReadonlyArray<string>,
+    domain: string,
+    deviceClass?: string,
+  ): ReadonlyArray<string> =>
+    ids.filter(
+      (id) =>
+        domainOf(id) === domain && (deviceClass === undefined || deviceClassOf(id) === deviceClass),
+    );
+
+  return {
+    areas: [...snapshot.areas].sort((a, b) => a.name.localeCompare(b.name)),
+    area: (areaId) => areaById.get(areaId),
+    inAreaAll: (areaId) => byArea.get(areaId) ?? EMPTY,
+    inArea: (areaId, domain, deviceClass) => matching(byArea.get(areaId) ?? EMPTY, domain, deviceClass),
+    all: (domain, deviceClass) => matching(ordered, domain, deviceClass),
+    hasLabel: (entityId, label) => entityById.get(entityId)?.labels.includes(label) ?? false,
+    platformOf: (entityId) => entityById.get(entityId)?.platform,
+    siblings: (entityId): ReadonlyArray<string> => {
+      const deviceId = entityById.get(entityId)?.device_id ?? null;
+      if (deviceId === null) {
+        return EMPTY;
+      }
+      return (byDevice.get(deviceId) ?? EMPTY).filter((id) => id !== entityId);
+    },
+  };
 }

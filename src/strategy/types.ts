@@ -1,3 +1,8 @@
+import type { HassEntity } from '../types/home-assistant';
+import type { Locale } from '../i18n/types';
+import type { HomeConfig } from './config';
+import type { RegistryIndex } from './registry';
+
 /**
  * Lovelace JSON emitted by the strategy. Shapes follow the HA sections-view
  * YAML schema (home-assistant.io/dashboards/sections + /views, verified
@@ -51,4 +56,15 @@ export function isSection(
   section: LovelaceSectionConfig | null,
 ): section is LovelaceSectionConfig {
   return section !== null;
+}
+
+/** Everything section/view builders may read. Builders stay pure over this. */
+export interface StrategyContext {
+  readonly home: HomeConfig;
+  readonly registry: RegistryIndex;
+  readonly states: Readonly<Record<string, HassEntity>>;
+  readonly locale: Locale;
+  readonly tier: Tier;
+  readonly hasApexcharts: boolean;
+  readonly hasWebrtcCard: boolean;
 }
