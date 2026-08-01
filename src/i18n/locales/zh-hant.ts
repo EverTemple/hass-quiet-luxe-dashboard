@@ -48,4 +48,6 @@ export const zhHant: TranslationTable = {
   'schedule.no_events': '沒有即將到來的行程',
   'schedule.view_soon': '即將推出',
   'schedule.all_day': '全天',
+  'tasks.open': '項未完成',
+  'tasks.all_done': '全部完成',
 };

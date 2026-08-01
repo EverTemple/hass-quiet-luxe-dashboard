@@ -48,4 +48,6 @@ export const zhHans: TranslationTable = {
   'schedule.no_events': '没有即将到来的日程',
   'schedule.view_soon': '即将推出',
   'schedule.all_day': '全天',
+  'tasks.open': '项未完成',
+  'tasks.all_done': '全部完成',
 };

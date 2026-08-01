@@ -46,6 +46,8 @@ export const en = {
   'schedule.no_events': 'No upcoming events',
   'schedule.view_soon': 'Coming soon',
   'schedule.all_day': 'All day',
+  'tasks.open': 'open',
+  'tasks.all_done': 'All done',
 } as const;
 
 export type TranslationKey = keyof typeof en;

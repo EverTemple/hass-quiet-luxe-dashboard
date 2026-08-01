@@ -48,4 +48,6 @@ export const ms: TranslationTable = {
   'schedule.no_events': 'Tiada acara akan datang',
   'schedule.view_soon': 'Akan datang',
   'schedule.all_day': 'Sepanjang hari',
+  'tasks.open': 'belum selesai',
+  'tasks.all_done': 'Semua selesai',
 };
