@@ -40,4 +40,5 @@ export const zhHans: TranslationTable = {
   'media.join': '加入群组',
   'camera.live': '直播',
   'camera.snapshot_unavailable': '无法获取画面',
+  'energy.today': '今日',
 };

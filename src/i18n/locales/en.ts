@@ -38,6 +38,7 @@ export const en = {
   'media.join': 'Join group',
   'camera.live': 'LIVE',
   'camera.snapshot_unavailable': 'Snapshot unavailable',
+  'energy.today': 'Today',
 } as const;
 
 export type TranslationKey = keyof typeof en;

@@ -40,4 +40,5 @@ export const ms: TranslationTable = {
   'media.join': 'Sertai kumpulan',
   'camera.live': 'LANGSUNG',
   'camera.snapshot_unavailable': 'Petikan tidak tersedia',
+  'energy.today': 'Hari ini',
 };

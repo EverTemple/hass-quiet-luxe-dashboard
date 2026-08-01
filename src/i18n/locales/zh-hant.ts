@@ -40,4 +40,5 @@ export const zhHant: TranslationTable = {
   'media.join': '加入群組',
   'camera.live': '直播',
   'camera.snapshot_unavailable': '無法取得畫面',
+  'energy.today': '今日',
 };

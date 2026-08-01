@@ -40,4 +40,5 @@ export const id: TranslationTable = {
   'media.join': 'Gabung grup',
   'camera.live': 'LANGSUNG',
   'camera.snapshot_unavailable': 'Cuplikan tidak tersedia',
+  'energy.today': 'Hari ini',
 };
