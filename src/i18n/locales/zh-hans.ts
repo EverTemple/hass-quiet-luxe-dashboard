@@ -77,4 +77,7 @@ export const zhHans: TranslationTable = {
   'section.speakers': '音箱',
   'section.groups': '音箱分组',
   'energy.history': '历史',
+  'section.car': '车辆',
+  'section.vacuum': '扫地机',
+  'section.network': '网络与流程',
 };

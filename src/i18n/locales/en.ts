@@ -75,6 +75,9 @@ export const en = {
   'section.speakers': 'Speakers',
   'section.groups': 'Speaker groups',
   'energy.history': 'History',
+  'section.car': 'Car',
+  'section.vacuum': 'Vacuum',
+  'section.network': 'Network & flows',
 } as const;
 
 export type TranslationKey = keyof typeof en;

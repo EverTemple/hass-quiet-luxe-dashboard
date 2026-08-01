@@ -77,4 +77,7 @@ export const zhHant: TranslationTable = {
   'section.speakers': '喇叭',
   'section.groups': '喇叭群組',
   'energy.history': '歷史',
+  'section.car': '車輛',
+  'section.vacuum': '掃地機',
+  'section.network': '網絡與流程',
 };

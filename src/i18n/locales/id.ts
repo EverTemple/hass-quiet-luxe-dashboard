@@ -77,4 +77,7 @@ export const id: TranslationTable = {
   'section.speakers': 'Speaker',
   'section.groups': 'Grup speaker',
   'energy.history': 'Riwayat',
+  'section.car': 'Mobil',
+  'section.vacuum': 'Vakum',
+  'section.network': 'Jaringan & alur',
 };

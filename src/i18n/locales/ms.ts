@@ -77,4 +77,7 @@ export const ms: TranslationTable = {
   'section.speakers': 'Pembesar suara',
   'section.groups': 'Kumpulan pembesar suara',
   'energy.history': 'Sejarah',
+  'section.car': 'Kereta',
+  'section.vacuum': 'Vakum',
+  'section.network': 'Rangkaian & aliran',
 };
