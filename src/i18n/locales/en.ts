@@ -69,6 +69,7 @@ export const en = {
   'motion.clear': 'Clear',
   'motion.toggle_label': 'Motion detection',
   'flow.confirm_hint': 'Tap twice to apply',
+  'section.presence': 'Presence',
 } as const;
 
 export type TranslationKey = keyof typeof en;

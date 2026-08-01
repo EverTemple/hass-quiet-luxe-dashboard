@@ -71,4 +71,5 @@ export const zhHant: TranslationTable = {
   'motion.clear': '無動靜',
   'motion.toggle_label': '動態偵測',
   'flow.confirm_hint': '點兩次以生效',
+  'section.presence': '在家狀態',
 };

@@ -71,4 +71,5 @@ export const zhHans: TranslationTable = {
   'motion.clear': '无动静',
   'motion.toggle_label': '移动侦测',
   'flow.confirm_hint': '点两次以生效',
+  'section.presence': '在家状态',
 };

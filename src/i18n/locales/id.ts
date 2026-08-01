@@ -71,4 +71,5 @@ export const id: TranslationTable = {
   'motion.clear': 'Tidak ada gerakan',
   'motion.toggle_label': 'Deteksi gerakan',
   'flow.confirm_hint': 'Ketuk dua kali untuk menerapkan',
+  'section.presence': 'Kehadiran',
 };

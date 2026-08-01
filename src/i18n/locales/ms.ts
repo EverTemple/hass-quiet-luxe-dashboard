@@ -71,4 +71,5 @@ export const ms: TranslationTable = {
   'motion.clear': 'Tiada pergerakan',
   'motion.toggle_label': 'Pengesanan pergerakan',
   'flow.confirm_hint': 'Ketik dua kali untuk melaksana',
+  'section.presence': 'Kehadiran',
 };
