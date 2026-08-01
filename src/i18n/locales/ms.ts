@@ -31,4 +31,11 @@ export const ms: TranslationTable = {
   'section.cameras': 'Kamera',
   'section.energy': 'Tenaga',
   'section.all_climates': 'Semua iklim',
+  'media.idle': 'Tiada apa-apa dimainkan',
+  'media.play': 'Main',
+  'media.pause': 'Jeda',
+  'media.next': 'Seterusnya',
+  'media.previous': 'Sebelumnya',
+  'media.volume': 'Kelantangan',
+  'media.join': 'Sertai kumpulan',
 };

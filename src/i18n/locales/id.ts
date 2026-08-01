@@ -31,4 +31,11 @@ export const id: TranslationTable = {
   'section.cameras': 'Kamera',
   'section.energy': 'Energi',
   'section.all_climates': 'Semua iklim',
+  'media.idle': 'Tidak ada yang diputar',
+  'media.play': 'Putar',
+  'media.pause': 'Jeda',
+  'media.next': 'Berikutnya',
+  'media.previous': 'Sebelumnya',
+  'media.volume': 'Volume',
+  'media.join': 'Gabung grup',
 };

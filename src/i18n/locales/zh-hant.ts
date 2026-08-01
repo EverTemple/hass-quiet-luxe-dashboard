@@ -31,4 +31,11 @@ export const zhHant: TranslationTable = {
   'section.cameras': '攝影機',
   'section.energy': '能源',
   'section.all_climates': '所有溫控設備',
+  'media.idle': '未在播放',
+  'media.play': '播放',
+  'media.pause': '暫停',
+  'media.next': '下一首',
+  'media.previous': '上一首',
+  'media.volume': '音量',
+  'media.join': '加入群組',
 };

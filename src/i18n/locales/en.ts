@@ -29,6 +29,13 @@ export const en = {
   'section.cameras': 'Cameras',
   'section.energy': 'Energy',
   'section.all_climates': 'All climates',
+  'media.idle': 'Nothing playing',
+  'media.play': 'Play',
+  'media.pause': 'Pause',
+  'media.next': 'Next',
+  'media.previous': 'Previous',
+  'media.volume': 'Volume',
+  'media.join': 'Join group',
 } as const;
 
 export type TranslationKey = keyof typeof en;

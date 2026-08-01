@@ -31,4 +31,11 @@ export const zhHans: TranslationTable = {
   'section.cameras': '摄像头',
   'section.energy': '能源',
   'section.all_climates': '所有温控设备',
+  'media.idle': '未在播放',
+  'media.play': '播放',
+  'media.pause': '暂停',
+  'media.next': '下一首',
+  'media.previous': '上一首',
+  'media.volume': '音量',
+  'media.join': '加入群组',
 };
