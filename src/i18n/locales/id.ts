@@ -83,4 +83,7 @@ export const id: TranslationTable = {
   'header.nobody_home': 'Tidak ada orang di rumah',
   'header.home_suffix': 'di rumah',
   'view.home': 'Beranda',
+  'section.lights': 'Lampu',
+  'section.covers': 'Tirai',
+  'section.switches': 'Sakelar',
 };

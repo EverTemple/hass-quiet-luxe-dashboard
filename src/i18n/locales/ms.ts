@@ -83,4 +83,7 @@ export const ms: TranslationTable = {
   'header.nobody_home': 'Tiada sesiapa di rumah',
   'header.home_suffix': 'di rumah',
   'view.home': 'Utama',
+  'section.lights': 'Lampu',
+  'section.covers': 'Langsir',
+  'section.switches': 'Suis',
 };

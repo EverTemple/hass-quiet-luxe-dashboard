@@ -83,4 +83,7 @@ export const zhHant: TranslationTable = {
   'header.nobody_home': '無人在家',
   'header.home_suffix': '在家',
   'view.home': '首頁',
+  'section.lights': '燈光',
+  'section.covers': '窗簾',
+  'section.switches': '開關',
 };

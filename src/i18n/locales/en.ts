@@ -81,6 +81,9 @@ export const en = {
   'header.nobody_home': 'Nobody home',
   'header.home_suffix': 'home',
   'view.home': 'Home',
+  'section.lights': 'Lights',
+  'section.covers': 'Covers',
+  'section.switches': 'Switches',
 } as const;
 
 export type TranslationKey = keyof typeof en;
