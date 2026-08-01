@@ -70,4 +70,5 @@ export const zhHant: TranslationTable = {
   'motion.detected': '偵測到動靜',
   'motion.clear': '無動靜',
   'motion.toggle_label': '動態偵測',
+  'flow.confirm_hint': '點兩次以生效',
 };

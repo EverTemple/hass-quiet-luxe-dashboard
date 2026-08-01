@@ -70,4 +70,5 @@ export const id: TranslationTable = {
   'motion.detected': 'Gerakan terdeteksi',
   'motion.clear': 'Tidak ada gerakan',
   'motion.toggle_label': 'Deteksi gerakan',
+  'flow.confirm_hint': 'Ketuk dua kali untuk menerapkan',
 };
