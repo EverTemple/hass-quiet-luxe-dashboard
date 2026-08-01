@@ -72,6 +72,9 @@ export const en = {
   'section.presence': 'Presence',
   'section.sensors': 'Air & sensors',
   'section.doors': 'Doors & motion',
+  'section.speakers': 'Speakers',
+  'section.groups': 'Speaker groups',
+  'energy.history': 'History',
 } as const;
 
 export type TranslationKey = keyof typeof en;

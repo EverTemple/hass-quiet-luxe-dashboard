@@ -74,4 +74,7 @@ export const zhHans: TranslationTable = {
   'section.presence': '在家状态',
   'section.sensors': '空气与传感',
   'section.doors': '门窗与动态',
+  'section.speakers': '音箱',
+  'section.groups': '音箱分组',
+  'energy.history': '历史',
 };

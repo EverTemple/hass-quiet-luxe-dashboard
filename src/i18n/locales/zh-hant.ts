@@ -74,4 +74,7 @@ export const zhHant: TranslationTable = {
   'section.presence': '在家狀態',
   'section.sensors': '空氣與感測',
   'section.doors': '門窗與動態',
+  'section.speakers': '喇叭',
+  'section.groups': '喇叭群組',
+  'energy.history': '歷史',
 };

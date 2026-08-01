@@ -74,4 +74,7 @@ export const id: TranslationTable = {
   'section.presence': 'Kehadiran',
   'section.sensors': 'Udara & sensor',
   'section.doors': 'Pintu & gerakan',
+  'section.speakers': 'Speaker',
+  'section.groups': 'Grup speaker',
+  'energy.history': 'Riwayat',
 };
