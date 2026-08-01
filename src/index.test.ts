@@ -12,6 +12,10 @@ const ELEMENT_TAGS = [
   'ql-section-eyebrow',
   'ql-header-home',
   'ql-header-room',
+  'ql-idle-clock',
+  'ql-row-presence',
+  'ql-row-door-motion',
+  'ql-row-network-flow',
 ] as const;
 
 const CARD_TAGS = [
@@ -20,6 +24,15 @@ const CARD_TAGS = [
   'quiet-luxe-light-card',
   'quiet-luxe-cover-card',
   'quiet-luxe-sensor-tile',
+  'quiet-luxe-media-card',
+  'quiet-luxe-camera-card',
+  'quiet-luxe-energy-card',
+  'quiet-luxe-schedule-card',
+  'quiet-luxe-tasks-card',
+  'quiet-luxe-car-card',
+  'quiet-luxe-vacuum-card',
+  'quiet-luxe-device-cutout-card',
+  'quiet-luxe-language-card',
 ] as const;
 
 describe('bundle entry', () => {
@@ -55,5 +68,35 @@ describe('bundle entry', () => {
     expect(bundle.formatSensorValue('aqi', '18')).toBe('18');
     expect(typeof bundle.navigate).toBe('function');
     expect(typeof bundle.registerCard).toBe('function');
+  });
+
+  it('keeps rows and idle clock out of the card picker', () => {
+    const types = (window.customCards ?? []).map((entry) => entry.type);
+    for (const tag of ['ql-row-presence', 'ql-row-door-motion', 'ql-row-network-flow', 'ql-idle-clock']) {
+      expect(types.includes(tag), tag).toBe(false);
+    }
+  });
+
+  it('re-exports the Plan 3b public API', () => {
+    expect(bundle.QuietLuxeMediaCard).toBeDefined();
+    expect(bundle.QuietLuxeCameraCard).toBeDefined();
+    expect(bundle.QuietLuxeEnergyCard).toBeDefined();
+    expect(bundle.QuietLuxeScheduleCard).toBeDefined();
+    expect(bundle.QuietLuxeTasksCard).toBeDefined();
+    expect(bundle.QuietLuxeCarCard).toBeDefined();
+    expect(bundle.QuietLuxeVacuumCard).toBeDefined();
+    expect(bundle.QuietLuxeDeviceCutoutCard).toBeDefined();
+    expect(bundle.QuietLuxeLanguageCard).toBeDefined();
+    expect(bundle.QlRowPresence).toBeDefined();
+    expect(bundle.QlRowDoorMotion).toBeDefined();
+    expect(bundle.QlRowNetworkFlow).toBeDefined();
+    expect(bundle.QlIdleClock).toBeDefined();
+    expect(bundle.formatPower(1236)).toBe('1.24 kW');
+    expect(bundle.formatEnergy(8.61)).toBe('8.6 kWh');
+    expect(bundle.LANGUAGE_TILES).toHaveLength(5);
+    expect(bundle.CAR_BODY_PATHS.bmw.startsWith('M')).toBe(true);
+    expect(typeof bundle.fetchAgenda).toBe('function');
+    expect(typeof bundle.fetchTodoItems).toBe('function');
+    expect(typeof bundle.updateTodoItem).toBe('function');
   });
 });

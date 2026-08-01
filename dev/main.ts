@@ -17,23 +17,99 @@ const PHOTO_LIVING =
 const PHOTO_STUDY =
   'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&q=70';
 
-const hass = makeMockHass([
-  lightEntity('light.pendant', 'on', 178),
-  lightEntity('light.floor_lamp', 'off'),
-  lightEntity('light.offline_lamp', 'unavailable'),
-  makeEntity('light.living_group', 'on'),
-  climateEntity('climate.living_ac', 'cool', { hvac_action: 'cooling' }),
-  climateEntity('climate.master_ac', 'off'),
-  makeEntity('fan.study_fan', 'on'),
-  makeEntity('switch.bath_exhaust', 'off'),
-  coverEntity('cover.living_curtain', 65, { device_class: 'curtain' }),
-  coverEntity('cover.study_shade', 0, { device_class: 'shade' }),
-  sensorEntity('sensor.living_aqi', '18'),
-  sensorEntity('sensor.living_temp', '24.5'),
-  sensorEntity('sensor.living_humidity', '62'),
-  sensorEntity('sensor.uv_index', '7'),
-  sensorEntity('sensor.rain_chance', '80'),
-]);
+const hass = makeMockHass(
+  [
+    lightEntity('light.pendant', 'on', 178),
+    lightEntity('light.floor_lamp', 'off'),
+    lightEntity('light.offline_lamp', 'unavailable'),
+    makeEntity('light.living_group', 'on'),
+    climateEntity('climate.living_ac', 'cool', { hvac_action: 'cooling' }),
+    climateEntity('climate.master_ac', 'off'),
+    makeEntity('fan.study_fan', 'on'),
+    makeEntity('switch.bath_exhaust', 'off'),
+    coverEntity('cover.living_curtain', 65, { device_class: 'curtain' }),
+    coverEntity('cover.study_shade', 0, { device_class: 'shade' }),
+    sensorEntity('sensor.living_aqi', '18'),
+    sensorEntity('sensor.living_temp', '24.5'),
+    sensorEntity('sensor.living_humidity', '62'),
+    sensorEntity('sensor.uv_index', '7'),
+    sensorEntity('sensor.rain_chance', '80'),
+    makeEntity('media_player.living_sonos', 'playing', {
+      friendly_name: 'Living Sonos',
+      media_title: 'So What',
+      media_artist: 'Miles Davis',
+      media_album_name: 'Kind of Blue',
+      source: 'Spotify',
+      volume_level: 0.34,
+      entity_picture: PHOTO_STUDY,
+      group_members: ['media_player.living_sonos', 'media_player.kitchen_sonos'],
+    }),
+    makeEntity('media_player.kitchen_sonos', 'playing', {
+      friendly_name: 'Kitchen Sonos',
+      volume_level: 0.2,
+    }),
+    makeEntity('media_player.study_sonos', 'idle', { friendly_name: 'Study Sonos' }),
+    makeEntity('media_player.tv', 'off', { friendly_name: 'Living TV' }),
+    makeEntity('camera.front_door', 'streaming', {
+      friendly_name: 'Front Door',
+      entity_picture: PHOTO_LIVING,
+    }),
+    makeEntity('camera.gate', 'unavailable', { friendly_name: 'Gate' }),
+    sensorEntity('sensor.power_total', '1236'),
+    sensorEntity('sensor.energy_today', '8.61'),
+    sensorEntity('sensor.phase_l1', '2300'),
+    sensorEntity('sensor.phase_l2', '840'),
+    sensorEntity('sensor.phase_l3', '410'),
+    makeEntity('todo.family', '2', { friendly_name: 'Family Tasks' }),
+    makeEntity('person.steven', 'home', { friendly_name: 'Steven' }),
+    makeEntity('person.mei', 'not_home', {
+      friendly_name: 'Mei',
+      entity_picture: PHOTO_STUDY,
+    }),
+    makeEntity('binary_sensor.front_door', 'off', {
+      friendly_name: 'Front Door',
+      device_class: 'door',
+    }),
+    makeEntity('binary_sensor.hall_motion', 'on', {
+      friendly_name: 'Hall Motion',
+      device_class: 'motion',
+    }),
+    makeEntity('switch.hall_motion_detection', 'on'),
+    makeEntity('switch.guest_wifi', 'on', { friendly_name: 'Guest Wi-Fi' }),
+    sensorEntity('sensor.car_battery', '76'),
+    sensorEntity('sensor.car_fuel', '55'),
+    sensorEntity('sensor.car_range', '412', { unit_of_measurement: 'km' }),
+    makeEntity('binary_sensor.car_lock', 'off', { device_class: 'lock' }),
+    makeEntity('switch.car_precondition', 'off'),
+    sensorEntity('sensor.car_location', 'Subang Jaya'),
+    makeEntity('vacuum.robot', 'cleaning', { friendly_name: 'Robot', battery_level: 76 }),
+  ],
+  {
+    apiResponses: {
+      'calendars/calendar.family': [
+        {
+          summary: 'Dentist',
+          start: { dateTime: '2026-08-03T09:30:00+08:00' },
+          end: { dateTime: '2026-08-03T10:30:00+08:00' },
+        },
+        {
+          summary: 'Sports day',
+          start: { date: '2026-08-02' },
+          end: { date: '2026-08-03' },
+        },
+      ],
+    },
+    wsResponses: {
+      'todo/item/list': {
+        items: [
+          { uid: 'a1', summary: 'Buy milk', status: 'needs_action', due: '2026-07-31' },
+          { uid: 'a2', summary: 'Water plants', status: 'needs_action' },
+          { uid: 'a3', summary: 'Book flights', status: 'completed' },
+        ],
+      },
+    },
+  },
+);
 
 type CardElement = HTMLElement & {
   hass: unknown;
@@ -239,6 +315,168 @@ function buildPane(mode: ThemeMode): HTMLElement {
           metric: 'rain',
         }),
       ]),
+    ]),
+    section('Media', [
+      makeCard('quiet-luxe-media-card', {
+        type: 'custom:quiet-luxe-media-card',
+        entity: 'media_player.living_sonos',
+        form: 'player',
+      }),
+      makeCard('quiet-luxe-media-card', {
+        type: 'custom:quiet-luxe-media-card',
+        entity: 'media_player.living_sonos',
+        form: 'bar',
+      }),
+      makeCard('quiet-luxe-media-card', {
+        type: 'custom:quiet-luxe-media-card',
+        entity: 'media_player.kitchen_sonos',
+        form: 'group-row',
+        leader: 'media_player.living_sonos',
+      }),
+      makeCard('quiet-luxe-media-card', {
+        type: 'custom:quiet-luxe-media-card',
+        entity: 'media_player.study_sonos',
+        form: 'group-row',
+        leader: 'media_player.living_sonos',
+      }),
+    ]),
+    section('Cameras', [
+      row([
+        makeCard('quiet-luxe-camera-card', {
+          type: 'custom:quiet-luxe-camera-card',
+          entity: 'camera.front_door',
+          form: 'full',
+        }),
+        makeCard('quiet-luxe-camera-card', {
+          type: 'custom:quiet-luxe-camera-card',
+          entity: 'camera.front_door',
+          form: 'glance',
+        }),
+        makeCard('quiet-luxe-camera-card', {
+          type: 'custom:quiet-luxe-camera-card',
+          entity: 'camera.gate',
+          form: 'glance',
+        }),
+      ]),
+    ]),
+    section('Energy', [
+      makeCard('quiet-luxe-energy-card', {
+        type: 'custom:quiet-luxe-energy-card',
+        power_entity: 'sensor.power_total',
+        today_entity: 'sensor.energy_today',
+      }),
+      row([
+        makeCard('quiet-luxe-energy-card', {
+          type: 'custom:quiet-luxe-energy-card',
+          form: 'ring',
+          power_entity: 'sensor.phase_l1',
+          name: 'L1',
+        }),
+        makeCard('quiet-luxe-energy-card', {
+          type: 'custom:quiet-luxe-energy-card',
+          form: 'ring',
+          power_entity: 'sensor.phase_l2',
+          name: 'L2',
+        }),
+        makeCard('quiet-luxe-energy-card', {
+          type: 'custom:quiet-luxe-energy-card',
+          form: 'ring',
+          power_entity: 'sensor.phase_l3',
+          name: 'L3',
+        }),
+      ]),
+    ]),
+    section('Schedule & Tasks', [
+      makeCard('quiet-luxe-schedule-card', {
+        type: 'custom:quiet-luxe-schedule-card',
+        calendars: ['calendar.family'],
+        todo_entity: 'todo.family',
+      }),
+      makeCard('quiet-luxe-tasks-card', {
+        type: 'custom:quiet-luxe-tasks-card',
+        entity: 'todo.family',
+      }),
+    ]),
+    section('Car', [
+      makeCard('quiet-luxe-car-card', {
+        type: 'custom:quiet-luxe-car-card',
+        brand: 'liauto',
+        name: 'Li Auto L7',
+        battery_entity: 'sensor.car_battery',
+        fuel_entity: 'sensor.car_fuel',
+        range_entity: 'sensor.car_range',
+        lock_entity: 'binary_sensor.car_lock',
+        precondition_entity: 'switch.car_precondition',
+        location_entity: 'sensor.car_location',
+      }),
+      row([
+        makeCard('quiet-luxe-car-card', {
+          type: 'custom:quiet-luxe-car-card',
+          brand: 'bmw',
+          name: 'BMW',
+          battery_entity: 'sensor.car_battery',
+        }),
+        makeCard('quiet-luxe-car-card', {
+          type: 'custom:quiet-luxe-car-card',
+          brand: 'audi',
+          name: 'Audi',
+          range_entity: 'sensor.car_range',
+        }),
+      ]),
+    ]),
+    section('Vacuum', [
+      makeCard('quiet-luxe-vacuum-card', {
+        type: 'custom:quiet-luxe-vacuum-card',
+        entity: 'vacuum.robot',
+        rooms: [
+          { name: 'Living', params: { segments: [3] } },
+          { name: 'Kitchen', params: { segments: [5] } },
+        ],
+      }),
+    ]),
+    section('Rows', [
+      makeCard('ql-row-presence', {
+        type: 'custom:ql-row-presence',
+        entities: ['person.steven', 'person.mei'],
+      }),
+      makeCard('ql-row-door-motion', {
+        type: 'custom:ql-row-door-motion',
+        entity: 'binary_sensor.front_door',
+      }),
+      makeCard('ql-row-door-motion', {
+        type: 'custom:ql-row-door-motion',
+        entity: 'binary_sensor.hall_motion',
+        toggle_entity: 'switch.hall_motion_detection',
+        show_toggle: true,
+      }),
+      makeCard('ql-row-network-flow', {
+        type: 'custom:ql-row-network-flow',
+        entity: 'switch.guest_wifi',
+        name: 'Guest Wi-Fi',
+        description: 'UniFi guest network',
+      }),
+      makeCard('quiet-luxe-device-cutout-card', {
+        type: 'custom:quiet-luxe-device-cutout-card',
+        entity: 'media_player.tv',
+        name: 'Living TV',
+      }),
+    ]),
+    section('Language', [
+      makeCard('quiet-luxe-language-card', { type: 'custom:quiet-luxe-language-card' }),
+    ]),
+    section('Idle clock', [
+      ((): HTMLElement => {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'height:320px;border-radius:18px;overflow:hidden;';
+        wrap.append(
+          el('ql-idle-clock', {
+            time: '21:42',
+            date: 'Friday, 1 August',
+            weather: '29° · Rain 80% · AQI 42',
+          }),
+        );
+        return wrap;
+      })(),
     ]),
   );
   pane.append(canvas, content);

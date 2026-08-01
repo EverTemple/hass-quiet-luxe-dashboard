@@ -69,3 +69,51 @@ describe('ql-segmented', () => {
     el.remove();
   });
 });
+
+describe('ql-segmented disabled options', () => {
+  const MIXED: ReadonlyArray<QlSegmentOption> = [
+    { value: 'agenda', label: 'Agenda' },
+    { value: 'day', label: 'Day', disabled: true, hint: 'Coming soon' },
+    { value: 'week', label: 'Week' },
+  ];
+
+  async function mountMixed(value = 'agenda'): Promise<QlSegmented> {
+    const el = document.createElement('ql-segmented') as QlSegmented;
+    el.options = MIXED;
+    el.value = value;
+    document.body.append(el);
+    await el.updateComplete;
+    return el;
+  }
+
+  it('renders disabled options with the native disabled attribute and hint title', async () => {
+    const el = await mountMixed();
+    const day = buttons(el)[1];
+    expect(day?.disabled).toBe(true);
+    expect(day?.getAttribute('title')).toBe('Coming soon');
+    el.remove();
+  });
+
+  it('never selects a disabled option, even programmatically via keyboard focus path', async () => {
+    const el = await mountMixed();
+    const events: unknown[] = [];
+    el.addEventListener('ql-change', (e) => events.push(e));
+    buttons(el)[1]?.click();
+    await el.updateComplete;
+    expect(el.value).toBe('agenda');
+    expect(events).toEqual([]);
+    el.remove();
+  });
+
+  it('arrow keys skip disabled options and wrap', async () => {
+    const el = await mountMixed();
+    const group = el.shadowRoot?.querySelector("[role='radiogroup']");
+    group?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await el.updateComplete;
+    expect(el.value).toBe('week');
+    group?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await el.updateComplete;
+    expect(el.value).toBe('agenda');
+    el.remove();
+  });
+});

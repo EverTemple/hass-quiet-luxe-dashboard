@@ -14,6 +14,18 @@ export interface HomeAssistant {
     service: string,
     serviceData?: Record<string, unknown>,
   ): Promise<unknown>;
+  /**
+   * REST helper; path WITHOUT the /api/ prefix, e.g. `calendars/calendar.x?start=…`
+   * (HA REST API, verified 2026-08-01). Optional because narrow mocks may omit
+   * it — callers guard and degrade gracefully (console error + muted UI).
+   * HA implements this as a closure, so it is safe to call unbound.
+   */
+  callApi?<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string): Promise<T>;
+  /**
+   * WebSocket command helper, e.g. `{ type: 'todo/item/list', entity_id }`
+   * (HA frontend data/todo.ts, verified 2026-08-01). Optional as above.
+   */
+  callWS?<T>(message: { readonly type: string } & Record<string, unknown>): Promise<T>;
 }
 
 export type { HassEntity };

@@ -60,3 +60,38 @@ describe('makeMockHass', () => {
     ]);
   });
 });
+
+describe('makeMockHass api/ws spies', () => {
+  it('still accepts a plain language string (Plan 3a call sites)', () => {
+    expect(makeMockHass([], 'ms').language).toBe('ms');
+  });
+
+  it('records callApi calls and resolves exact-path stubs', async () => {
+    const hass = makeMockHass([], {
+      apiResponses: { calendars: [{ entity_id: 'calendar.a' }] },
+    });
+    await expect(hass.callApi?.('GET', 'calendars')).resolves.toEqual([
+      { entity_id: 'calendar.a' },
+    ]);
+    expect(hass.apiCalls).toEqual([{ method: 'GET', path: 'calendars' }]);
+  });
+
+  it('falls back to prefix-matched stubs for parameterised paths', async () => {
+    const hass = makeMockHass([], { apiResponses: { 'calendars/calendar.a': [] } });
+    await expect(hass.callApi?.('GET', 'calendars/calendar.a?start=x&end=y')).resolves.toEqual([]);
+  });
+
+  it('rejects loudly when no stub matches', async () => {
+    const hass = makeMockHass();
+    await expect(hass.callApi?.('GET', 'history')).rejects.toThrow('no apiResponses stub');
+    await expect(hass.callWS?.({ type: 'todo/item/list' })).rejects.toThrow('no wsResponses stub');
+  });
+
+  it('records callWS messages and resolves stubs by type', async () => {
+    const hass = makeMockHass([], { wsResponses: { 'todo/item/list': { items: [] } } });
+    await expect(
+      hass.callWS?.({ type: 'todo/item/list', entity_id: 'todo.a' }),
+    ).resolves.toEqual({ items: [] });
+    expect(hass.wsCalls).toEqual([{ type: 'todo/item/list', entity_id: 'todo.a' }]);
+  });
+});
