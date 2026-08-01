@@ -69,7 +69,7 @@ Calendar/tasks source: Google Calendar + Google Tasks on Subang Jaya and Tung Ch
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Background (radial center → edge) | `#FBF8F1` → `#ECE5D6` | `#262019` → `#100D0A` |
+| Background (`bg/canvas`: base + glow center → vignetted edge) | `#F4F0E8` base, glow `#FFFDF4` | `#161310` base, glow `#2E261A` |
 | Card surface | `#FDFBF6` + soft warm shadow | `rgba(255,250,240,.055)` + 1px `rgba(237,230,216,.10)` border + blur (glass) |
 | Ink | `#2B2620` | `#EDE6D8` |
 | Muted | `#8C8578` | `#8A8172` |
@@ -148,7 +148,7 @@ Room header (name, temp/humidity/AQI micro-stats) then sections in fixed priorit
 
 **Foundations:** color variables (light+dark collections), type styles (Latin/TC/SC), spacing/radius/effect tokens, icon set, radial background specs, scrim recipes, imagery rules.
 
-**Structure:** home header (3 breakpoint variants), room header, nav pills / bottom bar, section eyebrow + "All X →" link, iPad idle clock face, language card.
+**Structure:** home header (3 breakpoint variants), room header, nav pills / bottom bar, section eyebrow + "All X →" link, iPad idle clock face, language card, `bg/canvas` background component (variable-bound base + blurred glow ellipse + neutral edge vignette; every screen frame instantiates it full-bleed as its bottom layer, so backgrounds retheme with `ql/color` mode).
 
 **Cards:** room card (S/M/L), climate card (variants: AC / purifier / dehumidifier / fan / exhaust), light card (brightness + glow), cover card (curtain/shade), media card (collapsed bar / full player / grouping row), camera card (glance/full), sensor tile (AQI/temp/humidity/UV/rain), energy cards (live strip / per-phase ring / history chart), schedule card (agenda/day/week/month states), tasks card, car card, vacuum card (docked/cleaning/returning, battery, room-clean shortcuts), presence row, door/motion row, network-flow toggle row, device cutout card.
 
