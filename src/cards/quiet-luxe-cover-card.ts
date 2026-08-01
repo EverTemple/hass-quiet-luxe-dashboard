@@ -68,7 +68,8 @@ export class QuietLuxeCoverCard extends QlBaseCard {
       }
       .ops button {
         flex: 1;
-        min-height: 44px;
+        min-height: var(--ql-touch-min, 56px);
+        min-width: var(--ql-touch-min, 56px);
         border-radius: var(--ql-radius-thumb, 12px);
         border: 1px solid var(--ql-surface-border, #e4dccb);
         background: var(--ql-surface-card, #fdfbf6);
