@@ -7,6 +7,7 @@ export const en = {
   'greeting.morning': 'Good morning',
   'greeting.afternoon': 'Good afternoon',
   'greeting.evening': 'Good evening',
+  'room.lights_on': 'Lights on',
   'section.rooms': 'Rooms',
   'section.climate': 'Climate',
   'section.music': 'Music',

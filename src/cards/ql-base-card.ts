@@ -1,4 +1,10 @@
-import { css, LitElement, type CSSResult } from 'lit';
+import {
+  css,
+  LitElement,
+  type CSSResult,
+  type CSSResultGroup,
+  type PropertyDeclarations,
+} from 'lit';
 import type { HassEntity, HomeAssistant } from '../types/home-assistant';
 import { resolveLocale } from '../i18n/resolve';
 import type { Locale } from '../i18n/types';
@@ -14,7 +20,7 @@ export type EntityAvailability = 'available' | 'unavailable' | 'missing';
  *   light-mode literals as fallbacks so cards degrade sanely without the theme.
  */
 export abstract class QlBaseCard extends LitElement {
-  static override properties = {
+  static override properties: PropertyDeclarations = {
     hass: { attribute: false },
   };
 
@@ -63,5 +69,5 @@ export abstract class QlBaseCard extends LitElement {
     }
   `;
 
-  static override styles: CSSResult = QlBaseCard.qlCardStyles;
+  static override styles: CSSResultGroup = QlBaseCard.qlCardStyles;
 }

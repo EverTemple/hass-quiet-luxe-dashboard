@@ -9,6 +9,7 @@ export const ms: TranslationTable = {
   'greeting.morning': 'Selamat pagi',
   'greeting.afternoon': 'Selamat tengah hari',
   'greeting.evening': 'Selamat petang',
+  'room.lights_on': 'Lampu hidup',
   'section.rooms': 'Bilik',
   'section.climate': 'Iklim',
   'section.music': 'Muzik',
