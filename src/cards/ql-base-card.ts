@@ -1,5 +1,13 @@
-import { css, LitElement, type CSSResult } from 'lit';
+import {
+  css,
+  LitElement,
+  type CSSResult,
+  type CSSResultGroup,
+  type PropertyDeclarations,
+} from 'lit';
 import type { HassEntity, HomeAssistant } from '../types/home-assistant';
+import { resolveLocale } from '../i18n/resolve';
+import type { Locale } from '../i18n/types';
 
 export type EntityAvailability = 'available' | 'unavailable' | 'missing';
 
@@ -12,7 +20,7 @@ export type EntityAvailability = 'available' | 'unavailable' | 'missing';
  *   light-mode literals as fallbacks so cards degrade sanely without the theme.
  */
 export abstract class QlBaseCard extends LitElement {
-  static override properties = {
+  static override properties: PropertyDeclarations = {
     hass: { attribute: false },
   };
 
@@ -21,6 +29,11 @@ export abstract class QlBaseCard extends LitElement {
   /** Public wrapper so tests and the strategy can query availability. */
   availabilityOf(entityId: string): EntityAvailability {
     return this.availability(entityId);
+  }
+
+  /** Session locale per spec §10: HA user profile language → hass.language → en. */
+  locale(): Locale {
+    return resolveLocale([this.hass?.locale?.language, this.hass?.language]);
   }
 
   protected entity(entityId: string): HassEntity | undefined {
@@ -56,5 +69,5 @@ export abstract class QlBaseCard extends LitElement {
     }
   `;
 
-  static override styles: CSSResult = QlBaseCard.qlCardStyles;
+  static override styles: CSSResultGroup = QlBaseCard.qlCardStyles;
 }

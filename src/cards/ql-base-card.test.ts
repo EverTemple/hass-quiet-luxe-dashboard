@@ -65,3 +65,19 @@ describe('QlBaseCard availability', () => {
     card.remove();
   });
 });
+
+describe('QlBaseCard locale', () => {
+  it('resolves the hass locale through resolveLocale (zh-TW → zh-Hant)', () => {
+    const card = new QlTestCard();
+    card.hass = { ...makeHass({}), language: 'en', locale: { language: 'zh-TW' } };
+    expect(card.locale()).toBe('zh-Hant');
+  });
+
+  it('falls back to hass.language, then en', () => {
+    const card = new QlTestCard();
+    card.hass = { ...makeHass({}), language: 'ms', locale: undefined };
+    expect(card.locale()).toBe('ms');
+    card.hass = undefined;
+    expect(card.locale()).toBe('en');
+  });
+});
