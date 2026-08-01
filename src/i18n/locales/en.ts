@@ -36,6 +36,8 @@ export const en = {
   'media.previous': 'Previous',
   'media.volume': 'Volume',
   'media.join': 'Join group',
+  'camera.live': 'LIVE',
+  'camera.snapshot_unavailable': 'Snapshot unavailable',
 } as const;
 
 export type TranslationKey = keyof typeof en;

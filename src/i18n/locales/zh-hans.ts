@@ -38,4 +38,6 @@ export const zhHans: TranslationTable = {
   'media.previous': '上一首',
   'media.volume': '音量',
   'media.join': '加入群组',
+  'camera.live': '直播',
+  'camera.snapshot_unavailable': '无法获取画面',
 };

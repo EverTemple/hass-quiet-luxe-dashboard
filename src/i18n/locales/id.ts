@@ -38,4 +38,6 @@ export const id: TranslationTable = {
   'media.previous': 'Sebelumnya',
   'media.volume': 'Volume',
   'media.join': 'Gabung grup',
+  'camera.live': 'LANGSUNG',
+  'camera.snapshot_unavailable': 'Cuplikan tidak tersedia',
 };

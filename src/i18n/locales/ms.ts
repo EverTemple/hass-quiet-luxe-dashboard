@@ -38,4 +38,6 @@ export const ms: TranslationTable = {
   'media.previous': 'Sebelumnya',
   'media.volume': 'Kelantangan',
   'media.join': 'Sertai kumpulan',
+  'camera.live': 'LANGSUNG',
+  'camera.snapshot_unavailable': 'Petikan tidak tersedia',
 };
