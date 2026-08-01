@@ -132,13 +132,13 @@ Each created `.ts` gets a colocated `.test.ts`.
 - Modify: `src/testing/mock-hass.ts`
 - Test: `src/testing/mock-hass.test.ts` (extend)
 
-- [ ] **Step 1: Create the execution branch**
+- [x] **Step 1: Create the execution branch**
 
 ```bash
 git checkout main && git pull && git checkout -b feat/card-library-extended
 ```
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 Append to `src/testing/mock-hass.test.ts`:
 
@@ -179,12 +179,12 @@ describe('makeMockHass api/ws spies', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `npx vitest run src/testing/mock-hass.test.ts`
 Expected: FAIL — `hass.apiCalls`/`callApi` undefined; the language-string test passes (it exercises existing behavior).
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Replace `src/types/home-assistant.ts` with:
 
@@ -360,12 +360,12 @@ export function makeMockHass(
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/testing/mock-hass.test.ts` then `npm run typecheck`
 Expected: PASS (12 tests); typecheck clean (Plan 3a call sites unaffected by the union second param).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/types/home-assistant.ts src/testing/mock-hass.ts src/testing/mock-hass.test.ts
@@ -390,7 +390,7 @@ EOF
 - Modify: `src/elements/ql-segmented.ts`
 - Test: `src/elements/ql-segmented.test.ts` (extend)
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `src/elements/ql-segmented.test.ts`:
 
@@ -444,12 +444,12 @@ describe('ql-segmented disabled options', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/elements/ql-segmented.test.ts`
 Expected: FAIL — `disabled`/`hint` unknown on `QlSegmentOption` (type error) and no disabled attribute rendered.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/elements/ql-segmented.ts`:
 
@@ -544,12 +544,12 @@ export interface QlSegmentOption {
     }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/elements/ql-segmented.test.ts`
 Expected: PASS (8 tests — 5 existing + 3 new).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-segmented.ts src/elements/ql-segmented.test.ts
@@ -574,7 +574,7 @@ EOF
 - Modify: `src/i18n/locales/en.ts`, `zh-hant.ts`, `zh-hans.ts`, `ms.ts`, `id.ts`
 - Test: `src/cards/quiet-luxe-media-card.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-media-card.test.ts`:
 
@@ -743,12 +743,12 @@ describe('quiet-luxe-media-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-media-card.test.ts`
 Expected: FAIL — module resolve error for `./quiet-luxe-media-card`.
 
-- [ ] **Step 3: Add the media.* i18n keys (all five locales)**
+- [x] **Step 3: Add the media.* i18n keys (all five locales)**
 
 Add to `src/i18n/locales/en.ts` before `} as const;`:
 
@@ -810,7 +810,7 @@ Add to `src/i18n/locales/id.ts`:
   'media.join': 'Gabung grup',
 ```
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `src/cards/quiet-luxe-media-card.ts`:
 
@@ -1161,12 +1161,12 @@ registerCard('quiet-luxe-media-card', QuietLuxeMediaCard, {
 
 Note: the group-row `checked` state comes from the leader's `group_members`, so a real HA state push re-syncs the toggle; no `live()` needed here because the toggle is not intercepted.
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-media-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (8 media tests + i18n parity); typecheck clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-media-card.ts src/cards/quiet-luxe-media-card.test.ts src/i18n/locales
@@ -1191,7 +1191,7 @@ EOF
 - Modify: `src/i18n/locales/*.ts` (×5)
 - Test: `src/cards/quiet-luxe-camera-card.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-camera-card.test.ts`:
 
@@ -1301,12 +1301,12 @@ describe('quiet-luxe-camera-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-camera-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the camera.* i18n keys (all five locales)**
+- [x] **Step 3: Add the camera.* i18n keys (all five locales)**
 
 `en.ts`:
 
@@ -1343,7 +1343,7 @@ Expected: FAIL — module resolve error.
   'camera.snapshot_unavailable': 'Cuplikan tidak tersedia',
 ```
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `src/cards/quiet-luxe-camera-card.ts`:
 
@@ -1554,12 +1554,12 @@ registerCard('quiet-luxe-camera-card', QuietLuxeCameraCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-camera-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (7 camera tests + parity); typecheck clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-camera-card.ts src/cards/quiet-luxe-camera-card.test.ts src/i18n/locales
@@ -1583,7 +1583,7 @@ EOF
 - Create: `src/cards/energy-format.ts`
 - Test: `src/cards/energy-format.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/energy-format.test.ts`:
 
@@ -1629,12 +1629,12 @@ describe('ringDasharray', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/energy-format.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/cards/energy-format.ts`:
 
@@ -1668,12 +1668,12 @@ export function ringDasharray(watts: number, maxWatts: number, radius: number): 
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/cards/energy-format.test.ts`
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/cards/energy-format.ts src/cards/energy-format.test.ts
@@ -1697,7 +1697,7 @@ EOF
 - Modify: `src/i18n/locales/*.ts` (×5)
 - Test: `src/cards/quiet-luxe-energy-card.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-energy-card.test.ts`:
 
@@ -1788,16 +1788,16 @@ describe('quiet-luxe-energy-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-energy-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the energy.today key (all five locales)**
+- [x] **Step 3: Add the energy.today key (all five locales)**
 
 `en.ts`: `'energy.today': 'Today',` · `zh-hant.ts`: `'energy.today': '今日',` · `zh-hans.ts`: `'energy.today': '今日',` · `ms.ts`: `'energy.today': 'Hari ini',` · `id.ts`: `'energy.today': 'Hari ini',`
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `src/cards/quiet-luxe-energy-card.ts`:
 
@@ -1992,12 +1992,12 @@ registerCard('quiet-luxe-energy-card', QuietLuxeEnergyCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-energy-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (5 energy tests + parity); typecheck clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-energy-card.ts src/cards/quiet-luxe-energy-card.test.ts src/i18n/locales
@@ -2022,7 +2022,7 @@ EOF
 
 API contracts (verified 2026-08-01, plan D5): REST `GET calendars/<entity_id>?start=<iso>&end=<iso>` returns events whose `start`/`end` carry `dateTime` (timed) or `date` (all-day); WS `{ type: 'todo/item/list', entity_id }` returns `{ items }` with `uid`/`summary`/`status`/`due`; `todo.update_item` takes `{ entity_id, item: <uid>, status }`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/schedule-data.test.ts`:
 
@@ -2165,12 +2165,12 @@ describe('constants', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/schedule-data.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/cards/schedule-data.ts`:
 
@@ -2289,12 +2289,12 @@ export function isDueSoon(due: string | undefined, now: Date = new Date()): bool
 
 Note: `formatAgendaTime` references `schedule.all_day`, which is added in Task 8 — implement Tasks 7 and 8 Steps 3 together if running strictly sequentially, or add the `schedule.*` keys now and skip that step in Task 8. **Preferred order: add the `schedule.*` key block (Task 8 Step 3) during this task's Step 3, then Task 8 skips it.** The commit below includes the locale files either way.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/schedule-data.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (9 tests + parity); typecheck clean (requires the `schedule.*` keys from Task 8 Step 3 — see note above).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/cards/schedule-data.ts src/cards/schedule-data.test.ts src/i18n/locales
@@ -2319,7 +2319,7 @@ EOF
 - Modify: `src/i18n/locales/*.ts` (×5 — skip if already added in Task 7 Step 3)
 - Test: `src/cards/quiet-luxe-schedule-card.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-schedule-card.test.ts`:
 
@@ -2447,12 +2447,12 @@ describe('quiet-luxe-schedule-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-schedule-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the schedule.* keys (all five locales) — SKIP if done in Task 7**
+- [x] **Step 3: Add the schedule.* keys (all five locales) — SKIP if done in Task 7**
 
 `en.ts`:
 
@@ -2514,7 +2514,7 @@ Expected: FAIL — module resolve error.
   'schedule.all_day': 'Sepanjang hari',
 ```
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `src/cards/quiet-luxe-schedule-card.ts`:
 
@@ -2765,12 +2765,12 @@ registerCard('quiet-luxe-schedule-card', QuietLuxeScheduleCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-schedule-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (6 schedule tests + parity); typecheck clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-schedule-card.ts src/cards/quiet-luxe-schedule-card.test.ts src/i18n/locales
@@ -2796,7 +2796,7 @@ EOF
 - Modify: `src/i18n/locales/*.ts` (×5)
 - Test: `src/cards/quiet-luxe-tasks-card.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-tasks-card.test.ts`:
 
@@ -2907,12 +2907,12 @@ describe('quiet-luxe-tasks-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-tasks-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the tasks.* keys (all five locales)**
+- [x] **Step 3: Add the tasks.* keys (all five locales)**
 
 `en.ts`: `'tasks.open': 'open',` and `'tasks.all_done': 'All done',`
 `zh-hant.ts`: `'tasks.open': '項未完成',` and `'tasks.all_done': '全部完成',`
@@ -2922,7 +2922,7 @@ Expected: FAIL — module resolve error.
 
 (The footer is composed as `` `${count} ${t('tasks.open')}` `` — count-prefix order holds across all five locales.)
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `src/cards/quiet-luxe-tasks-card.ts`:
 
@@ -3127,12 +3127,12 @@ registerCard('quiet-luxe-tasks-card', QuietLuxeTasksCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-tasks-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (6 tasks tests + parity); typecheck clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-tasks-card.ts src/cards/quiet-luxe-tasks-card.test.ts src/i18n/locales
@@ -3158,7 +3158,7 @@ EOF
 
 Semantics note: for a `binary_sensor` with `device_class: lock`, HA defines `on` = **unlocked/open**, `off` = **locked** (stable HA binary_sensor contract).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/cards/car-silhouettes.test.ts`:
 
@@ -3326,12 +3326,12 @@ describe('quiet-luxe-car-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/cards/car-silhouettes.test.ts src/cards/quiet-luxe-car-card.test.ts`
 Expected: FAIL — module resolve errors.
 
-- [ ] **Step 3: Add the car.* and common.battery keys (all five locales)**
+- [x] **Step 3: Add the car.* and common.battery keys (all five locales)**
 
 `en.ts`:
 
@@ -3393,7 +3393,7 @@ Expected: FAIL — module resolve errors.
   'car.location': 'Lokasi',
 ```
 
-- [ ] **Step 4: Implement the silhouettes module**
+- [x] **Step 4: Implement the silhouettes module**
 
 Create `src/cards/car-silhouettes.ts`:
 
@@ -3437,7 +3437,7 @@ export const CAR_WHEELS: Readonly<Record<CarBrand, ReadonlyArray<CarWheel>>> = {
 };
 ```
 
-- [ ] **Step 5: Implement the card**
+- [x] **Step 5: Implement the card**
 
 Create `src/cards/quiet-luxe-car-card.ts`:
 
@@ -3706,12 +3706,12 @@ registerCard('quiet-luxe-car-card', QuietLuxeCarCard, {
 });
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/car-silhouettes.test.ts src/cards/quiet-luxe-car-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (2 + 7 + parity); typecheck clean.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/cards/car-silhouettes.ts src/cards/car-silhouettes.test.ts src/cards/quiet-luxe-car-card.ts src/cards/quiet-luxe-car-card.test.ts src/i18n/locales
@@ -3736,7 +3736,7 @@ EOF
 - Modify: `src/i18n/locales/*.ts` (×5)
 - Test: `src/cards/quiet-luxe-vacuum-card.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-vacuum-card.test.ts`:
 
@@ -3853,12 +3853,12 @@ describe('quiet-luxe-vacuum-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-vacuum-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the vacuum.* keys (all five locales)**
+- [x] **Step 3: Add the vacuum.* keys (all five locales)**
 
 `en.ts`:
 
@@ -3915,7 +3915,7 @@ Expected: FAIL — module resolve error.
   'vacuum.rooms': 'Ruangan',
 ```
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `src/cards/quiet-luxe-vacuum-card.ts`:
 
@@ -4116,12 +4116,12 @@ registerCard('quiet-luxe-vacuum-card', QuietLuxeVacuumCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-vacuum-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (5 vacuum tests + parity); typecheck clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-vacuum-card.ts src/cards/quiet-luxe-vacuum-card.test.ts src/i18n/locales
@@ -4148,7 +4148,7 @@ EOF
 
 Both rows follow plan D6: `QlBaseCard` subclasses registered via `customElements.define` only (no picker entry).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/cards/ql-row-presence.test.ts`:
 
@@ -4333,12 +4333,12 @@ describe('ql-row-door-motion', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/cards/ql-row-presence.test.ts src/cards/ql-row-door-motion.test.ts`
 Expected: FAIL — module resolve errors.
 
-- [ ] **Step 3: Add the presence/door/motion keys (all five locales)**
+- [x] **Step 3: Add the presence/door/motion keys (all five locales)**
 
 `en.ts`:
 
@@ -4400,7 +4400,7 @@ Expected: FAIL — module resolve errors.
   'motion.toggle_label': 'Deteksi gerakan',
 ```
 
-- [ ] **Step 4: Implement ql-row-presence**
+- [x] **Step 4: Implement ql-row-presence**
 
 Create `src/cards/ql-row-presence.ts`:
 
@@ -4534,7 +4534,7 @@ export class QlRowPresence extends QlBaseCard {
 customElements.define('ql-row-presence', QlRowPresence);
 ```
 
-- [ ] **Step 5: Implement ql-row-door-motion**
+- [x] **Step 5: Implement ql-row-door-motion**
 
 Create `src/cards/ql-row-door-motion.ts`:
 
@@ -4683,12 +4683,12 @@ export class QlRowDoorMotion extends QlBaseCard {
 customElements.define('ql-row-door-motion', QlRowDoorMotion);
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/ql-row-presence.test.ts src/cards/ql-row-door-motion.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (4 + 5 + parity); typecheck clean.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/cards/ql-row-presence.ts src/cards/ql-row-presence.test.ts src/cards/ql-row-door-motion.ts src/cards/ql-row-door-motion.test.ts src/i18n/locales
@@ -4714,7 +4714,7 @@ EOF
 - Modify: `src/i18n/locales/*.ts` (×5)
 - Test: `src/cards/ql-row-network-flow.test.ts`, `src/cards/quiet-luxe-device-cutout-card.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/cards/ql-row-network-flow.test.ts`:
 
@@ -4888,12 +4888,12 @@ describe('quiet-luxe-device-cutout-card', () => {
 
 (The zh-Hans assertion uses the existing Plan 3a `common.unavailable` value `不可用` — verified against `src/i18n/locales/zh-hans.ts`.)
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/cards/ql-row-network-flow.test.ts src/cards/quiet-luxe-device-cutout-card.test.ts`
 Expected: FAIL — module resolve errors.
 
-- [ ] **Step 3: Add the flow key (all five locales)**
+- [x] **Step 3: Add the flow key (all five locales)**
 
 `en.ts`: `'flow.confirm_hint': 'Tap twice to apply',`
 `zh-hant.ts`: `'flow.confirm_hint': '點兩次以生效',`
@@ -4901,7 +4901,7 @@ Expected: FAIL — module resolve errors.
 `ms.ts`: `'flow.confirm_hint': 'Ketik dua kali untuk melaksana',`
 `id.ts`: `'flow.confirm_hint': 'Ketuk dua kali untuk menerapkan',`
 
-- [ ] **Step 4: Implement ql-row-network-flow**
+- [x] **Step 4: Implement ql-row-network-flow**
 
 Create `src/cards/ql-row-network-flow.ts`:
 
@@ -5057,7 +5057,7 @@ export class QlRowNetworkFlow extends QlBaseCard {
 customElements.define('ql-row-network-flow', QlRowNetworkFlow);
 ```
 
-- [ ] **Step 5: Implement quiet-luxe-device-cutout-card**
+- [x] **Step 5: Implement quiet-luxe-device-cutout-card**
 
 Create `src/cards/quiet-luxe-device-cutout-card.ts`:
 
@@ -5186,12 +5186,12 @@ registerCard('quiet-luxe-device-cutout-card', QuietLuxeDeviceCutoutCard, {
 });
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/ql-row-network-flow.test.ts src/cards/quiet-luxe-device-cutout-card.test.ts src/i18n/i18n.test.ts` then `npm run typecheck`
 Expected: PASS (5 + 3 + parity); typecheck clean.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/cards/ql-row-network-flow.ts src/cards/ql-row-network-flow.test.ts src/cards/quiet-luxe-device-cutout-card.ts src/cards/quiet-luxe-device-cutout-card.test.ts src/i18n/locales
@@ -5218,7 +5218,7 @@ EOF
 
 No new i18n keys: tile endonyms and their English glosses are locale-invariant by design (documented exemption in the plan header). The switching mechanism is plan D2 — the `hass-language-select` DOM event with a bare language-code detail, verified 2026-08-01 against the HA frontend `dev` branch; the frontend persists the choice to browser storage and the user profile.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-language-card.test.ts`:
 
@@ -5298,12 +5298,12 @@ describe('quiet-luxe-language-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-language-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/cards/quiet-luxe-language-card.ts`:
 
@@ -5456,12 +5456,12 @@ registerCard('quiet-luxe-language-card', QuietLuxeLanguageCard, {
 });
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-language-card.test.ts` then `npm run typecheck`
 Expected: PASS (4 tests); typecheck clean.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-language-card.ts src/cards/quiet-luxe-language-card.test.ts
@@ -5485,7 +5485,7 @@ EOF
 - Create: `src/elements/ql-idle-clock.ts`
 - Test: `src/elements/ql-idle-clock.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-idle-clock.test.ts`:
 
@@ -5531,12 +5531,12 @@ describe('ql-idle-clock', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-idle-clock.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/elements/ql-idle-clock.ts`:
 
@@ -5617,12 +5617,12 @@ export class QlIdleClock extends LitElement {
 customElements.define('ql-idle-clock', QlIdleClock);
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/elements/ql-idle-clock.test.ts`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-idle-clock.ts src/elements/ql-idle-clock.test.ts
@@ -5646,7 +5646,7 @@ EOF
 
 No unit test — visual QA surface (same rationale as Plan 3a Task 19); verification is typecheck + manual browser check. `buildPane` runs once per mode, so additions appear in both light and dark automatically.
 
-- [ ] **Step 1: Extend the mock hass**
+- [x] **Step 1: Extend the mock hass**
 
 In `dev/main.ts`, replace the `const hass = makeMockHass([...]);` block with:
 
@@ -5746,7 +5746,7 @@ const hass = makeMockHass(
 );
 ```
 
-- [ ] **Step 2: Append the new sections**
+- [x] **Step 2: Append the new sections**
 
 In `buildPane`, after the existing `section('Sensors', …)` argument (still inside `content.append(…)`), add:
 
@@ -5915,11 +5915,11 @@ In `buildPane`, after the existing `section('Sensors', …)` argument (still ins
     ]),
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `npm run typecheck` (clean), then `npm run dev` and open the printed URL. Check both panes: media player/bar/group rows, cameras (front door photo + unavailable gate muted), energy strip + three rings, schedule agenda + tasks, three car silhouettes, vacuum chips, all four rows, language tiles (selected = English in the `en` harness), idle clock block. Confirm no console errors except the intentional schedule/tasks stubs resolving.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add dev/main.ts
@@ -5943,7 +5943,7 @@ EOF
 - Modify: `src/index.ts`
 - Modify: `src/index.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 In `src/index.test.ts`, replace the `ELEMENT_TAGS` and `CARD_TAGS` arrays with:
 
@@ -6017,12 +6017,12 @@ Append inside the existing `describe('bundle entry', …)` block:
   });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/index.test.ts`
 Expected: FAIL — new tags unregistered, new exports undefined.
 
-- [ ] **Step 3: Extend `src/index.ts`**
+- [x] **Step 3: Extend `src/index.ts`**
 
 Add after the existing side-effect imports:
 
@@ -6115,12 +6115,12 @@ export {
 } from './cards/quiet-luxe-language-card';
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/index.test.ts` then `npm test`
 Expected: all PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/index.ts src/index.test.ts
@@ -6141,7 +6141,7 @@ EOF
 
 **Files:** none created — verification gate (mirrors Plan 3a Task 20).
 
-- [ ] **Step 1: Run the full quality gate**
+- [x] **Step 1: Run the full quality gate**
 
 ```bash
 npm run lint && npm run typecheck && npm test && npm run build
@@ -6149,7 +6149,7 @@ npm run lint && npm run typecheck && npm test && npm run build
 
 Expected: all clean; every suite green; build succeeds.
 
-- [ ] **Step 2: Assert the single-bundle invariant still holds**
+- [x] **Step 2: Assert the single-bundle invariant still holds**
 
 ```bash
 ls dist
@@ -6162,7 +6162,7 @@ wc -c dist/quiet-luxe.js
 
 Expected: `dist` contains exactly `quiet-luxe.js` and `fonts/`; fonts populated; media-card registration and the language event present (count ≥ 1 each); `mock-context` count 0 (mock-hass NOT bundled). Record the byte size and note the delta vs the `main` baseline (rebuild `main` if needed) in the final report — flag anything beyond a ~25% growth for discussion (no dependency was added, so growth should be modest). If `dist` contains anything from `dev/`, the build config regressed — stop and fix before committing anything.
 
-- [ ] **Step 3: Report**
+- [x] **Step 3: Report**
 
 Summarize per the delegated-workstream format (objective, status, files, findings, validation, risks — including the bundle-size note) and stop. Branch integration (merge/PR) is a user decision via superpowers:finishing-a-development-branch — do not merge unprompted.
 

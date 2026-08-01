@@ -99,7 +99,7 @@ Repo mode is **solo** (user-owned, greenfield). Each task ends in a commit; comm
 - Modify: `.gitignore`
 - Test: `src/smoke.test.ts` (temporary, deleted in Task 2)
 
-- [ ] **Step 1: Create `package.json`**
+- [x] **Step 1: Create `package.json`**
 
 ```json
 {
@@ -142,7 +142,7 @@ Repo mode is **solo** (user-owned, greenfield). Each task ends in a commit; comm
 
 Note: `scripts/build-fonts.mjs` does not exist until Task 5 — that is fine; `npm run build` is first exercised in Task 9. Font packages are installed now so `npm ci` stays stable across tasks. If npm reports that a pinned major does not exist (versions were verified 2026-08-01 and may have moved), STOP and re-verify on npmjs.com rather than guessing.
 
-- [ ] **Step 2: Create `tsconfig.json`**
+- [x] **Step 2: Create `tsconfig.json`**
 
 ```json
 {
@@ -167,7 +167,7 @@ Note: `scripts/build-fonts.mjs` does not exist until Task 5 — that is fine; `n
 
 Decision: **no decorators** anywhere in this package — Lit properties are declared via `static properties` (see Task 7). This avoids the experimental-decorator/standard-decorator split entirely under TS 6. `useDefineForClassFields: false` is required by Lit's `static properties` pattern so class fields don't shadow reactive accessors.
 
-- [ ] **Step 3: Create `vite.config.ts` and `vitest.config.ts`**
+- [x] **Step 3: Create `vite.config.ts` and `vitest.config.ts`**
 
 `vite.config.ts`:
 
@@ -206,7 +206,7 @@ export default defineConfig({
 
 Everything (including Lit) is bundled — no externals; HA loads one file. `emptyOutDir: true` is safe because `build-fonts.mjs` runs after `vite build` in the `build` script.
 
-- [ ] **Step 4: Create `eslint.config.js`**
+- [x] **Step 4: Create `eslint.config.js`**
 
 ```js
 import eslint from '@eslint/js';
@@ -228,7 +228,7 @@ export default tseslint.config(
 
 If ESLint v10 has changed the `tseslint.config` helper signature (typescript-eslint v8 predates ESLint 10), check <https://typescript-eslint.io/getting-started> and use the documented flat-config form — do not downgrade ESLint below 10 (v9 EOL is 2026-08-06).
 
-- [ ] **Step 5: Update `.gitignore`**
+- [x] **Step 5: Update `.gitignore`**
 
 Read the existing `.gitignore` first (`cat .gitignore`), keep its contents, and ensure these lines exist (append any that are missing):
 
@@ -239,7 +239,7 @@ dist/
 
 `dist/` is ignored during development; the release workflow (Task 11) force-adds it on tagged release commits because HACS plugins serve committed `dist/` content and cannot use `zip_release` (integrations-only).
 
-- [ ] **Step 6: Install and run the toolchain smoke test**
+- [x] **Step 6: Install and run the toolchain smoke test**
 
 Create `src/smoke.test.ts`:
 
@@ -266,7 +266,7 @@ npm run typecheck
 
 Expected: `npm install` completes without ERESOLVE errors; `test` reports `1 passed`; `lint` and `typecheck` exit 0 with no output errors.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add package.json package-lock.json tsconfig.json vite.config.ts vitest.config.ts eslint.config.js .gitignore src/smoke.test.ts
@@ -291,7 +291,7 @@ EOF
 - Test: `src/tokens/palette.test.ts`
 - Delete: `src/smoke.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/tokens/palette.test.ts`:
 
@@ -358,12 +358,12 @@ describe('dimension tokens', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/tokens/palette.test.ts`
 Expected: FAIL — "Failed to resolve import ./palette".
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 `src/tokens/types.ts`:
 
@@ -456,12 +456,12 @@ export const DIMENSIONS: DimensionTokens = {
 export const SHADOW_CARD_LIGHT = '0 1px 6px rgba(80, 65, 40, 0.08)';
 ```
 
-- [ ] **Step 4: Run tests to verify they pass; delete the smoke test**
+- [x] **Step 4: Run tests to verify they pass; delete the smoke test**
 
 Run: `rm src/smoke.test.ts && npm run test && npm run typecheck && npm run lint`
 Expected: 4 tests pass; typecheck and lint clean.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/tokens/types.ts src/tokens/palette.ts src/tokens/palette.test.ts
@@ -485,7 +485,7 @@ EOF
 - Create: `src/tokens/css.ts`
 - Test: `src/tokens/css.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/tokens/css.test.ts`:
 
@@ -531,12 +531,12 @@ describe('cssVariableBlock', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/tokens/css.test.ts`
 Expected: FAIL — "Failed to resolve import ./css".
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 `src/tokens/css.ts`:
 
@@ -568,12 +568,12 @@ export function cssVariableBlock(mode: ThemeMode): string {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npm run test && npm run typecheck && npm run lint`
 Expected: all tests pass (palette + css), no type or lint errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/tokens/css.ts src/tokens/css.test.ts
@@ -598,7 +598,7 @@ EOF
 
 The theme uses only standard HA theme variables plus `ql-*` passthrough keys (HA exposes every theme key as a CSS variable `--<key>`, which is how cards receive `--ql-*` without card-mod). No card-mod anywhere.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/theme/theme-sync.test.ts`:
 
@@ -667,12 +667,12 @@ describe('themes/quiet-luxe.yaml', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/theme/theme-sync.test.ts`
 Expected: FAIL — ENOENT reading `themes/quiet-luxe.yaml`.
 
-- [ ] **Step 3: Write `themes/quiet-luxe.yaml`**
+- [x] **Step 3: Write `themes/quiet-luxe.yaml`**
 
 ```yaml
 # Quiet Luxe — Home Assistant theme (generated values are LOCKED to src/tokens/palette.ts;
@@ -772,12 +772,12 @@ quiet-luxe:
       ql-glow-lamp-outer: "#C98F3E"
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npm run test && npm run typecheck && npm run lint`
 Expected: all pass, including all theme-sync assertions.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add themes/quiet-luxe.yaml src/theme/theme-sync.test.ts
@@ -802,7 +802,7 @@ EOF
 - Create: `scripts/build-fonts.mjs`, `src/fonts/load-fonts.ts`
 - Test: `src/fonts/load-fonts.test.ts`
 
-- [ ] **Step 1: Write the failing test for the runtime loader**
+- [x] **Step 1: Write the failing test for the runtime loader**
 
 `src/fonts/load-fonts.test.ts`:
 
@@ -838,12 +838,12 @@ describe('injectFontStylesheet', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/fonts/load-fonts.test.ts`
 Expected: FAIL — "Failed to resolve import ./load-fonts".
 
-- [ ] **Step 3: Implement the runtime loader**
+- [x] **Step 3: Implement the runtime loader**
 
 `src/fonts/load-fonts.ts`:
 
@@ -867,12 +867,12 @@ export function injectFontStylesheet(doc: Document, moduleUrl: string): void {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/fonts/load-fonts.test.ts`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Implement the build-time copy script**
+- [x] **Step 5: Implement the build-time copy script**
 
 `scripts/build-fonts.mjs`:
 
@@ -927,12 +927,12 @@ console.log(`build-fonts: wrote ${imports.length} @imports to dist/fonts/fonts.c
 
 The `@fontsource` per-weight CSS references `./files/...` relatively, so copying each family's `files/` directory beside its CSS preserves working URLs. CJK packages ship unicode-range slices; all slices for a weight are copied, but browsers download only the slices they render.
 
-- [ ] **Step 6: Verify the script against real packages**
+- [x] **Step 6: Verify the script against real packages**
 
 Run: `node scripts/build-fonts.mjs && ls dist/fonts && head -n 10 dist/fonts/fonts.css && ls dist/fonts/marcellus/files | head`
 Expected: exits 0 printing `build-fonts: wrote 10 @imports...`; `dist/fonts` lists the 6 family directories + `fonts.css`; `fonts.css` starts with `@import url("./marcellus/400.css");`; marcellus files listing shows `marcellus-*-400-normal.woff2` entries. If a fontsource package uses a different file layout than `<weight>.css` + `files/`, STOP and inspect `node_modules/@fontsource/<family>/` — adjust the script to the actual layout, do not skip files silently.
 
-- [ ] **Step 7: Run full suite and commit**
+- [x] **Step 7: Run full suite and commit**
 
 Run: `npm run test && npm run lint && npm run typecheck`
 Expected: all pass.
@@ -961,7 +961,7 @@ EOF
 
 Starter key set only (common strings + section titles); Plans 3–4 extend it. Non-English strings below are working drafts — flag them for user review at plan completion, do not silently change them.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/i18n/i18n.test.ts`:
 
@@ -1029,12 +1029,12 @@ describe('t', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/i18n/i18n.test.ts`
 Expected: FAIL — unresolved imports for `./locales/en` etc.
 
-- [ ] **Step 3: Write types and the English reference table**
+- [x] **Step 3: Write types and the English reference table**
 
 `src/i18n/types.ts`:
 
@@ -1067,7 +1067,7 @@ export type TranslationKey = keyof typeof en;
 export type TranslationTable = Readonly<Record<TranslationKey, string>>;
 ```
 
-- [ ] **Step 4: Write the four other locale tables**
+- [x] **Step 4: Write the four other locale tables**
 
 `src/i18n/locales/zh-hant.ts`:
 
@@ -1153,7 +1153,7 @@ export const id: TranslationTable = {
 };
 ```
 
-- [ ] **Step 5: Write the resolver and translator**
+- [x] **Step 5: Write the resolver and translator**
 
 `src/i18n/resolve.ts`:
 
@@ -1228,12 +1228,12 @@ export function t(locale: Locale, key: TranslationKey): string {
 
 (No runtime en-fallback branch inside `t` — key completeness is enforced at compile time by `TranslationTable` and at runtime by the parity test; the en fallback in the resolution chain lives in `resolveLocale`. A missing key is a build failure, not a silent fallback.)
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npm run test && npm run typecheck && npm run lint`
 Expected: all i18n tests pass (parity, aliases, chain, lookups); typecheck proves table completeness.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/i18n
@@ -1257,7 +1257,7 @@ EOF
 - Create: `src/types/home-assistant.ts`, `src/cards/ql-base-card.ts`
 - Test: `src/cards/ql-base-card.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/cards/ql-base-card.test.ts`:
 
@@ -1333,12 +1333,12 @@ describe('QlBaseCard availability', () => {
 
 Note: the test calls a public `availabilityOf` wrapper (below) so the protected helper stays protected in real cards.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/ql-base-card.test.ts`
 Expected: FAIL — unresolved import `./ql-base-card`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 `src/types/home-assistant.ts`:
 
@@ -1431,12 +1431,12 @@ export abstract class QlBaseCard extends LitElement {
 
 Subclasses that add styles compose them: `static override styles = [QlBaseCard.qlCardStyles, css\`...\`]` (Plan 3 relies on this).
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npm run test && npm run typecheck && npm run lint`
 Expected: all pass, including the shadow-DOM render assertion under happy-dom. If happy-dom fails on Lit rendering internals, check the vitest+lit+happy-dom combination and, only if genuinely broken, swap the test environment for `jsdom` (add `jsdom` dev dep, change `vitest.config.ts` environment) — document the swap in the commit body.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/types/home-assistant.ts src/cards/ql-base-card.ts src/cards/ql-base-card.test.ts
@@ -1462,7 +1462,7 @@ EOF
 
 Implements the Figma `bg/canvas` composition in CSS: solid base + soft glow ellipse centered at 50% / 15% + edge vignette reaching full alpha at ~130% radius. The glow uses a wide radial gradient (no `filter: blur` — a full-viewport blur layer is GPU-hostile on the always-on iPads; the gradient's soft falloff is the blur).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/elements/ql-canvas.test.ts`:
 
@@ -1495,12 +1495,12 @@ describe('ql-canvas', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-canvas.test.ts`
 Expected: FAIL — unresolved import `./ql-canvas`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 `src/elements/ql-canvas.ts`:
 
@@ -1558,16 +1558,16 @@ export class QlCanvas extends LitElement {
 customElements.define('ql-canvas', QlCanvas);
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npm run test && npm run typecheck && npm run lint`
 Expected: all pass. (`QlCanvas.styles.toString()` returns the css template text in a non-browser context; if the exact-string assertions are brittle against Lit's CSSResult formatting, assert on `QlCanvas.styles.cssText` instead — same expectations.)
 
-- [ ] **Step 5: Visual spot-check (manual, no commit gate)**
+- [x] **Step 5: Visual spot-check (manual, no commit gate)**
 
 Create nothing in the repo: open a scratch HTML file in the scratchpad that loads the built bundle later in Task 9's verification; the authoritative visual QA against Figma happens in Plan 3's card harness. This step is a reminder, not an action.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/elements/ql-canvas.ts src/elements/ql-canvas.test.ts
@@ -1589,7 +1589,7 @@ EOF
 **Files:**
 - Create: `src/index.ts`, `hacs.json`, `README.md`
 
-- [ ] **Step 1: Write `src/index.ts`**
+- [x] **Step 1: Write `src/index.ts`**
 
 ```ts
 import pkg from '../package.json';
@@ -1616,7 +1616,7 @@ console.info(
 
 (The version banner is the one sanctioned console line — it is the standard HACS-plugin convention for verifying the loaded version. `resolveJsonModule` makes the `package.json` import typed; Vite inlines only the used field.)
 
-- [ ] **Step 2: Write `hacs.json`**
+- [x] **Step 2: Write `hacs.json`**
 
 ```json
 {
@@ -1629,7 +1629,7 @@ console.info(
 
 The `homeassistant` floor is UNCONFIRMED (spec §13: instance HA versions unverified) — revisit in Plan 5 when the three instances are reachable. `filename` frees the JS name from the repo name (`home_assistant_dashboard_redesign`).
 
-- [ ] **Step 3: Write `README.md`**
+- [x] **Step 3: Write `README.md`**
 
 ```markdown
 # Quiet Luxe
@@ -1666,12 +1666,12 @@ your HA instance — no external font CDN is contacted at runtime.
 - Plans: `docs/superpowers/plans/`
 ```
 
-- [ ] **Step 4: Build and verify the artifact shape**
+- [x] **Step 4: Build and verify the artifact shape**
 
 Run: `npm run build && ls dist && ls dist/*.js | wc -l && head -c 300 dist/quiet-luxe.js`
 Expected: build succeeds; `dist` contains exactly `quiet-luxe.js` and `fonts/`; the JS file count is `1` (single bundle, Lit inlined, no chunks); the head shows minified ES module code. If Vite emits extra chunks, fix `rollupOptions.output.inlineDynamicImports` / imports until one file remains — do not ship multi-chunk.
 
-- [ ] **Step 5: Verify tests still pass and commit**
+- [x] **Step 5: Verify tests still pass and commit**
 
 Run: `npm run test && npm run typecheck && npm run lint`
 Expected: all pass.
@@ -1697,7 +1697,7 @@ EOF
 **Files:**
 - Create: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: Write the workflow**
+- [x] **Step 1: Write the workflow**
 
 `.github/workflows/ci.yml`:
 
@@ -1730,12 +1730,12 @@ jobs:
           [ "$(find dist -maxdepth 1 -name '*.js' | wc -l)" -eq 1 ]
 ```
 
-- [ ] **Step 2: Validate the workflow locally**
+- [x] **Step 2: Validate the workflow locally**
 
 Run: `npx --yes yaml-lint .github/workflows/ci.yml 2>/dev/null || python3 -c "import yaml,sys; yaml.safe_load(open('.github/workflows/ci.yml')); print('yaml ok')"`
 Expected: `yaml ok` (or yaml-lint pass). Then run the same commands the workflow runs, in order (`npm ci && npm run lint && npm run typecheck && npm run test && npm run build`), and confirm all exit 0 — CI must never be the first place the pipeline runs.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add .github/workflows/ci.yml
@@ -1759,7 +1759,7 @@ EOF
 
 HACS constraint recap (verified against hacs.xyz publish docs 2026-08-01): plugins cannot use `zip_release` (integrations-only), and a plugin needing non-JS files must serve them from `dist/`. Therefore releases work by **committing the built `dist/` on a tagged release commit** (force-added past `.gitignore`), then creating a GitHub release from that tag. HACS offers users the tagged versions.
 
-- [ ] **Step 1: Write the workflow**
+- [x] **Step 1: Write the workflow**
 
 `.github/workflows/release.yml`:
 
@@ -1811,12 +1811,12 @@ jobs:
         run: gh release create "v${{ inputs.version }}" --title "v${{ inputs.version }}" --generate-notes
 ```
 
-- [ ] **Step 2: Validate YAML**
+- [x] **Step 2: Validate YAML**
 
 Run: `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml')); print('yaml ok')"`
 Expected: `yaml ok`. (The workflow itself is exercised in Plan 5 when the repo is pushed to GitHub and the first release is cut; do not attempt a release now.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add .github/workflows/release.yml
@@ -1838,7 +1838,7 @@ EOF
 **Files:**
 - Modify: `.ai/current-plan.md` (create if absent)
 
-- [ ] **Step 1: Full clean-room verification**
+- [x] **Step 1: Full clean-room verification**
 
 Run:
 
@@ -1848,7 +1848,7 @@ rm -rf node_modules dist && npm ci && npm run lint && npm run typecheck && npm r
 
 Expected: every command exits 0 from a cold start; final listing shows `quiet-luxe.js` and `fonts/`. Report actual test count and bundle size (`du -h dist/quiet-luxe.js`).
 
-- [ ] **Step 2: Definition-of-done sweep**
+- [x] **Step 2: Definition-of-done sweep**
 
 Confirm, with evidence (command output, not assertion):
 1. All tests pass (`npm run test` output).
@@ -1857,7 +1857,7 @@ Confirm, with evidence (command output, not assertion):
 4. Every commit follows the convention with body bullets and the two footer lines.
 5. Deferred items recorded (see risks below) in `.ai/current-plan.md`: current state = foundation complete, next = Plan 3 card library; open items = translation review, HA version floor UNCONFIRMED, first release deferred to Plan 5.
 
-- [ ] **Step 3: Commit the plan-state update**
+- [x] **Step 3: Commit the plan-state update**
 
 ```bash
 git add .ai/current-plan.md

@@ -110,13 +110,13 @@ Each created `.ts` gets a colocated `.test.ts`.
 - Create: `src/strategy/types.test.ts`
 - Create: `src/strategy/config.test.ts`
 
-- [ ] **Step 1: Create the execution branch**
+- [x] **Step 1: Create the execution branch**
 
 ```bash
 git checkout main && git pull && git checkout -b feat/dashboard-strategy
 ```
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 `src/strategy/types.test.ts`:
 
@@ -285,12 +285,12 @@ describe('viewUrl', () => {
 });
 ```
 
-- [ ] **Step 3: Run the tests to verify they fail**
+- [x] **Step 3: Run the tests to verify they fail**
 
 Run: `npx vitest run src/strategy/types.test.ts src/strategy/config.test.ts`
 Expected: FAIL — cannot resolve `./types` / `./config`.
 
-- [ ] **Step 4: Implement `src/strategy/types.ts`**
+- [x] **Step 4: Implement `src/strategy/types.ts`**
 
 ```ts
 /**
@@ -351,7 +351,7 @@ export function isSection(
 
 (`StrategyContext` is added to this file in Task 4, once `RegistryIndex` exists.)
 
-- [ ] **Step 5: Implement `src/strategy/config.ts`**
+- [x] **Step 5: Implement `src/strategy/config.ts`**
 
 ```ts
 const CAR_FLAGS = ['bmw', 'audi', 'liauto', 'none'] as const;
@@ -673,17 +673,17 @@ export function validateHomeConfig(raw: unknown): HomeConfig {
 }
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/types.test.ts src/strategy/config.test.ts`
 Expected: PASS (all tests).
 
-- [ ] **Step 7: Lint + typecheck**
+- [x] **Step 7: Lint + typecheck**
 
 Run: `npm run lint && npm run typecheck`
 Expected: clean.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/strategy/types.ts src/strategy/types.test.ts src/strategy/config.ts src/strategy/config.test.ts
@@ -708,7 +708,7 @@ EOF
 - Create: `src/strategy/reference-homes.ts`
 - Create: `src/strategy/reference-homes.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/reference-homes.test.ts`:
 
@@ -773,12 +773,12 @@ describe('reference home configs (spec §2 matrix)', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/strategy/reference-homes.test.ts`
 Expected: FAIL — cannot resolve `./reference-homes`.
 
-- [ ] **Step 3: Implement `src/strategy/reference-homes.ts`**
+- [x] **Step 3: Implement `src/strategy/reference-homes.ts`**
 
 ```ts
 import { validateHomeConfig, type HomeConfig } from './config';
@@ -855,12 +855,12 @@ export const XIAMEN_CONFIG: HomeConfig = validateHomeConfig({
 });
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `npx vitest run src/strategy/reference-homes.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Lint + typecheck, then commit**
+- [x] **Step 5: Lint + typecheck, then commit**
 
 Run: `npm run lint && npm run typecheck` — expected clean.
 
@@ -887,7 +887,7 @@ EOF
 - Create: `src/strategy/registry.ts`
 - Create: `src/strategy/registry.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/registry.test.ts`:
 
@@ -945,12 +945,12 @@ describe('fetchRegistrySnapshot', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `npx vitest run src/strategy/registry.test.ts`
 Expected: FAIL — cannot resolve `./registry`.
 
-- [ ] **Step 3: Implement `src/strategy/registry.ts`** (fetch half; the index half lands in Task 4)
+- [x] **Step 3: Implement `src/strategy/registry.ts`** (fetch half; the index half lands in Task 4)
 
 ```ts
 import type { HassEntity, HomeAssistant } from '../types/home-assistant';
@@ -1070,12 +1070,12 @@ export async function fetchRegistrySnapshot(hass: HomeAssistant): Promise<Regist
 
 (The `HassEntity` import is used by `buildRegistryIndex` in Task 4; if the linter flags it as unused at this step, add it in Task 4 instead.)
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `npx vitest run src/strategy/registry.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Lint + typecheck, then commit**
+- [x] **Step 5: Lint + typecheck, then commit**
 
 Run: `npm run lint && npm run typecheck` — expected clean (remove the unused `HassEntity` import if flagged; it returns in Task 4).
 
@@ -1105,7 +1105,7 @@ EOF
 - Create: `src/testing/mock-registry.ts`
 - Modify: `src/strategy/registry.test.ts` (append index tests)
 
-- [ ] **Step 1: Write the failing tests** — append to `src/strategy/registry.test.ts`:
+- [x] **Step 1: Write the failing tests** — append to `src/strategy/registry.test.ts`:
 
 ```ts
 import { makeEntity } from '../testing/mock-hass';
@@ -1202,12 +1202,12 @@ describe('referenceHome fixtures', () => {
 
 Note: `camera.front_gate` sorts before `camera.porch` alphabetically, so the first assertion holds without label ordering.
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/registry.test.ts`
 Expected: FAIL — `buildRegistryIndex` and `../testing/mock-registry` do not exist.
 
-- [ ] **Step 3: Append `RegistryIndex` + `buildRegistryIndex` to `src/strategy/registry.ts`**
+- [x] **Step 3: Append `RegistryIndex` + `buildRegistryIndex` to `src/strategy/registry.ts`**
 
 ```ts
 export interface RegistryIndex {
@@ -1303,7 +1303,7 @@ export function buildRegistryIndex(
 }
 ```
 
-- [ ] **Step 4: Replace `src/strategy/types.ts` with the version that adds `StrategyContext`** (full file — Task 1 content plus the imports and the trailing interface):
+- [x] **Step 4: Replace `src/strategy/types.ts` with the version that adds `StrategyContext`** (full file — Task 1 content plus the imports and the trailing interface):
 
 ```ts
 import type { HassEntity } from '../types/home-assistant';
@@ -1378,7 +1378,7 @@ export interface StrategyContext {
 }
 ```
 
-- [ ] **Step 5: Create `src/testing/mock-registry.ts`**
+- [x] **Step 5: Create `src/testing/mock-registry.ts`**
 
 ```ts
 import type { HassEntity } from '../types/home-assistant';
@@ -1596,12 +1596,12 @@ export function referenceHome(name: ReferenceHomeName): ReferenceHome {
 }
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/registry.test.ts src/strategy/types.test.ts src/strategy/config.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Lint + typecheck, then commit**
+- [x] **Step 7: Lint + typecheck, then commit**
 
 Run: `npm run lint && npm run typecheck` — expected clean.
 
@@ -1633,7 +1633,7 @@ EOF
 
 No new i18n keys (`section.rooms` already exists from Plan 3a).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/sections/rooms.test.ts`:
 
@@ -1736,12 +1736,12 @@ describe('roomCardFor / roomsSection', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/sections/rooms.test.ts`
 Expected: FAIL — modules do not exist.
 
-- [ ] **Step 3: Implement `src/strategy/sections/heading.ts`**
+- [x] **Step 3: Implement `src/strategy/sections/heading.ts`**
 
 ```ts
 import type { TranslationKey } from '../../i18n/locales/en';
@@ -1779,7 +1779,7 @@ export function sectionOf(
 }
 ```
 
-- [ ] **Step 4: Implement `src/strategy/sections/rooms.ts`**
+- [x] **Step 4: Implement `src/strategy/sections/rooms.ts`**
 
 ```ts
 import { DEFAULT_PHOTO_BASE, viewUrl, type HomeConfig } from '../config';
@@ -1853,12 +1853,12 @@ export function roomsSection(ctx: StrategyContext): LovelaceSectionConfig | null
 }
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/sections/rooms.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Lint + typecheck, then commit**
+- [x] **Step 6: Lint + typecheck, then commit**
 
 Run: `npm run lint && npm run typecheck` — expected clean.
 
@@ -1888,7 +1888,7 @@ EOF
 - Create: `src/strategy/sections/presence.test.ts`
 - Modify: `src/i18n/locales/en.ts`, `zh-hant.ts`, `zh-hans.ts`, `ms.ts`, `id.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `src/strategy/sections/climate.test.ts`:
 
@@ -1999,12 +1999,12 @@ describe('presenceSection', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/sections/climate.test.ts src/strategy/sections/presence.test.ts`
 Expected: FAIL — modules do not exist (and the `section.presence` key does not exist).
 
-- [ ] **Step 3: Add the i18n key** — one row in each locale file (before `} as const;` in `en.ts`; matching position in the other four):
+- [x] **Step 3: Add the i18n key** — one row in each locale file (before `} as const;` in `en.ts`; matching position in the other four):
 
 ```
 en.ts:       'section.presence': 'Presence',
@@ -2014,7 +2014,7 @@ ms.ts:       'section.presence': 'Kehadiran',
 id.ts:       'section.presence': 'Kehadiran',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/sections/climate.ts`**
+- [x] **Step 4: Implement `src/strategy/sections/climate.ts`**
 
 ```ts
 import { viewUrl } from '../config';
@@ -2072,7 +2072,7 @@ export function climateSection(
 }
 ```
 
-- [ ] **Step 5: Implement `src/strategy/sections/presence.ts`**
+- [x] **Step 5: Implement `src/strategy/sections/presence.ts`**
 
 ```ts
 import type { LovelaceSectionConfig, StrategyContext } from '../types';
@@ -2089,12 +2089,12 @@ export function presenceSection(ctx: StrategyContext): LovelaceSectionConfig | n
 }
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/sections/climate.test.ts src/strategy/sections/presence.test.ts src/i18n/i18n.test.ts`
 Expected: PASS (including the locale-parity test).
 
-- [ ] **Step 7: Lint + typecheck, then commit**
+- [x] **Step 7: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/sections/climate.ts src/strategy/sections/climate.test.ts src/strategy/sections/presence.ts src/strategy/sections/presence.test.ts src/i18n/locales
@@ -2123,7 +2123,7 @@ EOF
 - Create: `src/strategy/sections/sensors.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `src/strategy/sections/security.test.ts`:
 
@@ -2299,12 +2299,12 @@ describe('sensorTiles / sensorsSection', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/sections/security.test.ts src/strategy/sections/sensors.test.ts`
 Expected: FAIL — modules and keys missing.
 
-- [ ] **Step 3: Add the i18n keys** (all five locale files):
+- [x] **Step 3: Add the i18n keys** (all five locale files):
 
 ```
 en.ts:       'section.sensors': 'Air & sensors',
@@ -2319,7 +2319,7 @@ id.ts:       'section.sensors': 'Udara & sensor',
              'section.doors': 'Pintu & gerakan',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/sections/security.ts`**
+- [x] **Step 4: Implement `src/strategy/sections/security.ts`**
 
 ```ts
 import { LABEL_PRIMARY_CAMERA } from '../registry';
@@ -2400,7 +2400,7 @@ export function securityViewSections(ctx: StrategyContext): ReadonlyArray<Lovela
 }
 ```
 
-- [ ] **Step 5: Implement `src/strategy/sections/sensors.ts`**
+- [x] **Step 5: Implement `src/strategy/sections/sensors.ts`**
 
 ```ts
 import type { SensorMetric } from '../../cards/sensor-format';
@@ -2432,12 +2432,12 @@ export function sensorsSection(ctx: StrategyContext, areaId: string): LovelaceSe
 }
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/sections/security.test.ts src/strategy/sections/sensors.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Lint + typecheck, then commit**
+- [x] **Step 7: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/sections/security.ts src/strategy/sections/security.test.ts src/strategy/sections/sensors.ts src/strategy/sections/sensors.test.ts src/i18n/locales
@@ -2465,7 +2465,7 @@ EOF
 - Create: `src/strategy/sections/schedule.ts` + `schedule.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `src/strategy/sections/media.test.ts`:
 
@@ -2655,12 +2655,12 @@ describe('scheduleSection', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/sections/media.test.ts src/strategy/sections/energy.test.ts src/strategy/sections/schedule.test.ts`
 Expected: FAIL — modules and keys missing.
 
-- [ ] **Step 3: Add the i18n keys** (all five locale files):
+- [x] **Step 3: Add the i18n keys** (all five locale files):
 
 ```
 en.ts:       'section.speakers': 'Speakers',
@@ -2680,7 +2680,7 @@ id.ts:       'section.speakers': 'Speaker',
              'energy.history': 'Riwayat',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/sections/media.ts`**
+- [x] **Step 4: Implement `src/strategy/sections/media.ts`**
 
 ```ts
 import { viewUrl } from '../config';
@@ -2747,7 +2747,7 @@ export function mediaViewSections(ctx: StrategyContext): ReadonlyArray<LovelaceS
 }
 ```
 
-- [ ] **Step 5: Implement `src/strategy/sections/energy.ts`**
+- [x] **Step 5: Implement `src/strategy/sections/energy.ts`**
 
 ```ts
 import { t } from '../../i18n/translate';
@@ -2813,7 +2813,7 @@ export function energyViewSections(ctx: StrategyContext): ReadonlyArray<Lovelace
 }
 ```
 
-- [ ] **Step 6: Implement `src/strategy/sections/schedule.ts`**
+- [x] **Step 6: Implement `src/strategy/sections/schedule.ts`**
 
 ```ts
 import type { LovelaceCardConfig, LovelaceSectionConfig, StrategyContext } from '../types';
@@ -2841,12 +2841,12 @@ export function scheduleSection(ctx: StrategyContext): LovelaceSectionConfig | n
 }
 ```
 
-- [ ] **Step 7: Run the tests to verify they pass**
+- [x] **Step 7: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/sections/media.test.ts src/strategy/sections/energy.test.ts src/strategy/sections/schedule.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 8: Lint + typecheck, then commit**
+- [x] **Step 8: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/sections/media.ts src/strategy/sections/media.test.ts src/strategy/sections/energy.ts src/strategy/sections/energy.test.ts src/strategy/sections/schedule.ts src/strategy/sections/schedule.test.ts src/i18n/locales
@@ -2875,7 +2875,7 @@ EOF
 - Create: `src/strategy/sections/admin.ts` + `admin.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `src/strategy/sections/car.test.ts`:
 
@@ -2988,12 +2988,12 @@ describe('adminSection', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/sections/car.test.ts src/strategy/sections/vacuum.test.ts src/strategy/sections/admin.test.ts`
 Expected: FAIL — modules and keys missing.
 
-- [ ] **Step 3: Add the i18n keys** (all five locale files):
+- [x] **Step 3: Add the i18n keys** (all five locale files):
 
 ```
 en.ts:       'section.car': 'Car',
@@ -3013,7 +3013,7 @@ id.ts:       'section.car': 'Mobil',
              'section.network': 'Jaringan & alur',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/sections/car.ts`**
+- [x] **Step 4: Implement `src/strategy/sections/car.ts`**
 
 ```ts
 import { viewUrl } from '../config';
@@ -3049,7 +3049,7 @@ export function carSection(ctx: StrategyContext): LovelaceSectionConfig | null {
 }
 ```
 
-- [ ] **Step 5: Implement `src/strategy/sections/vacuum.ts`**
+- [x] **Step 5: Implement `src/strategy/sections/vacuum.ts`**
 
 ```ts
 import type { LovelaceSectionConfig, StrategyContext } from '../types';
@@ -3069,7 +3069,7 @@ export function vacuumSection(ctx: StrategyContext): LovelaceSectionConfig | nul
 }
 ```
 
-- [ ] **Step 6: Implement `src/strategy/sections/admin.ts`**
+- [x] **Step 6: Implement `src/strategy/sections/admin.ts`**
 
 ```ts
 import type { LovelaceSectionConfig, StrategyContext } from '../types';
@@ -3090,12 +3090,12 @@ export function adminSection(ctx: StrategyContext): LovelaceSectionConfig | null
 }
 ```
 
-- [ ] **Step 7: Run the tests to verify they pass**
+- [x] **Step 7: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/sections/car.test.ts src/strategy/sections/vacuum.test.ts src/strategy/sections/admin.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 8: Lint + typecheck, then commit**
+- [x] **Step 8: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/sections/car.ts src/strategy/sections/car.test.ts src/strategy/sections/vacuum.ts src/strategy/sections/vacuum.test.ts src/strategy/sections/admin.ts src/strategy/sections/admin.test.ts src/i18n/locales
@@ -3124,7 +3124,7 @@ EOF
 - Modify: `src/index.ts`, `src/index.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/cards/quiet-luxe-header-card.test.ts`:
 
@@ -3252,12 +3252,12 @@ describe('quiet-luxe-header-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/cards/quiet-luxe-header-card.test.ts`
 Expected: FAIL — module does not exist.
 
-- [ ] **Step 3: Add `user` to `src/types/home-assistant.ts`** — inside `interface HomeAssistant`, after the `locale` member:
+- [x] **Step 3: Add `user` to `src/types/home-assistant.ts`** — inside `interface HomeAssistant`, after the `locale` member:
 
 ```ts
   /** Current user; absent in narrow mocks. is_admin drives the RBAC admin tier. */
@@ -3268,7 +3268,7 @@ Expected: FAIL — module does not exist.
   };
 ```
 
-- [ ] **Step 4: Add the `user` option to `src/testing/mock-hass.ts`** — in `MockHassOptions` add:
+- [x] **Step 4: Add the `user` option to `src/testing/mock-hass.ts`** — in `MockHassOptions` add:
 
 ```ts
   /** hass.user double for RBAC/greeting tests. */
@@ -3281,7 +3281,7 @@ and in the object returned by `makeMockHass`, after `locale: { language },` add:
     user: opts.user,
 ```
 
-- [ ] **Step 5: Add the i18n keys** (all five locale files):
+- [x] **Step 5: Add the i18n keys** (all five locale files):
 
 ```
 en.ts:       'header.nobody_home': 'Nobody home',
@@ -3296,7 +3296,7 @@ id.ts:       'header.nobody_home': 'Tidak ada orang di rumah',
              'header.home_suffix': 'di rumah',
 ```
 
-- [ ] **Step 6: Implement `src/cards/quiet-luxe-header-card.ts`**
+- [x] **Step 6: Implement `src/cards/quiet-luxe-header-card.ts`**
 
 ```ts
 import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
@@ -3480,7 +3480,7 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
 customElements.define('quiet-luxe-header-card', QuietLuxeHeaderCard);
 ```
 
-- [ ] **Step 7: Wire into the bundle** — in `src/index.ts` add after the language-card import:
+- [x] **Step 7: Wire into the bundle** — in `src/index.ts` add after the language-card import:
 
 ```ts
 import './cards/quiet-luxe-header-card';
@@ -3507,12 +3507,12 @@ it('defines the header card without listing it in the picker', () => {
 });
 ```
 
-- [ ] **Step 8: Run the tests to verify they pass**
+- [x] **Step 8: Run the tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-header-card.test.ts src/index.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 9: Lint + typecheck, then commit**
+- [x] **Step 9: Lint + typecheck, then commit**
 
 ```bash
 git add src/types/home-assistant.ts src/testing/mock-hass.ts src/cards/quiet-luxe-header-card.ts src/cards/quiet-luxe-header-card.test.ts src/index.ts src/index.test.ts src/i18n/locales
@@ -3539,7 +3539,7 @@ EOF
 - Create: `src/strategy/views/home.ts` + `home.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/views/home.test.ts`:
 
@@ -3625,12 +3625,12 @@ describe('homeView', () => {
 
 Note on `presence_entities` order: the registry index sorts alphabetically, so `person.mei` precedes `person.steven`.
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/views/home.test.ts`
 Expected: FAIL — module and `view.home` key missing.
 
-- [ ] **Step 3: Add the i18n key** (all five locale files):
+- [x] **Step 3: Add the i18n key** (all five locale files):
 
 ```
 en.ts:       'view.home': 'Home',
@@ -3640,7 +3640,7 @@ ms.ts:       'view.home': 'Utama',
 id.ts:       'view.home': 'Beranda',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/views/home.ts`**
+- [x] **Step 4: Implement `src/strategy/views/home.ts`**
 
 ```ts
 import { t } from '../../i18n/translate';
@@ -3710,12 +3710,12 @@ export function homeView(ctx: StrategyContext): LovelaceViewConfig {
 }
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/views/home.test.ts src/i18n/i18n.test.ts`
 Expected: PASS. If the heading-order assertion fails, fix the *builder order in `homeView`* (the assertion encodes spec Decision 10), not the test.
 
-- [ ] **Step 6: Lint + typecheck, then commit**
+- [x] **Step 6: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/views/home.ts src/strategy/views/home.test.ts src/i18n/locales
@@ -3740,7 +3740,7 @@ EOF
 - Create: `src/strategy/views/room.ts` + `room.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/views/room.test.ts`:
 
@@ -3824,12 +3824,12 @@ describe('roomViews', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/views/room.test.ts`
 Expected: FAIL — module and keys missing.
 
-- [ ] **Step 3: Add the i18n keys** (all five locale files):
+- [x] **Step 3: Add the i18n keys** (all five locale files):
 
 ```
 en.ts:       'section.lights': 'Lights',
@@ -3849,7 +3849,7 @@ id.ts:       'section.lights': 'Lampu',
              'section.switches': 'Sakelar',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/views/room.ts`**
+- [x] **Step 4: Implement `src/strategy/views/room.ts`**
 
 ```ts
 import { viewUrl } from '../config';
@@ -3948,12 +3948,12 @@ export function roomViews(ctx: StrategyContext): ReadonlyArray<LovelaceViewConfi
 }
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/views/room.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Lint + typecheck, then commit**
+- [x] **Step 6: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/views/room.ts src/strategy/views/room.test.ts src/i18n/locales
@@ -3979,7 +3979,7 @@ EOF
 - Create: `src/strategy/views/domain.ts` + `domain.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/views/domain.test.ts`:
 
@@ -4050,12 +4050,12 @@ describe('domain views', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/views/domain.test.ts`
 Expected: FAIL — module and keys missing.
 
-- [ ] **Step 3: Add the i18n keys** (all five locale files):
+- [x] **Step 3: Add the i18n keys** (all five locale files):
 
 ```
 en.ts:       'view.media': 'Media',
@@ -4095,7 +4095,7 @@ id.ts:       'view.media': 'Media',
              'view.language': 'Bahasa',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/views/domain.ts`**
+- [x] **Step 4: Implement `src/strategy/views/domain.ts`**
 
 ```ts
 import type { TranslationKey } from '../../i18n/locales/en';
@@ -4180,12 +4180,12 @@ export function languageView(ctx: StrategyContext): LovelaceViewConfig {
 }
 ```
 
-- [ ] **Step 5: Run the tests to verify they pass**
+- [x] **Step 5: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/views/domain.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Lint + typecheck, then commit**
+- [x] **Step 6: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/views/domain.ts src/strategy/views/domain.test.ts src/i18n/locales
@@ -4212,7 +4212,7 @@ EOF
 **Files:**
 - Create: `src/strategy/rbac.ts` + `rbac.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/rbac.test.ts`:
 
@@ -4282,12 +4282,12 @@ describe('viewsForTier', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/rbac.test.ts`
 Expected: FAIL — module does not exist.
 
-- [ ] **Step 3: Implement `src/strategy/rbac.ts`**
+- [x] **Step 3: Implement `src/strategy/rbac.ts`**
 
 ```ts
 import type { HomeAssistant } from '../types/home-assistant';
@@ -4334,12 +4334,12 @@ export function viewsForTier(
 
 Tier differences beyond view paths live in the builders via `ctx.tier` (already tested): guest loses the greeting (Task 11) and motion toggles (Task 7); family keeps motion toggles; admin-only sections (car glance, admin flows) check the tier themselves.
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/rbac.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Lint + typecheck, then commit**
+- [x] **Step 5: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/rbac.ts src/strategy/rbac.test.ts
@@ -4366,7 +4366,7 @@ EOF
 - Modify: `src/index.ts`, `src/index.test.ts`
 - Modify: all five locale files
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/strategy/quiet-luxe-strategy.test.ts`:
 
@@ -4475,12 +4475,12 @@ describe('QuietLuxeStrategy.generate', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure**
+- [x] **Step 2: Run to verify failure**
 
 Run: `npx vitest run src/strategy/quiet-luxe-strategy.test.ts`
 Expected: FAIL — module and keys missing.
 
-- [ ] **Step 3: Add the i18n keys** (all five locale files):
+- [x] **Step 3: Add the i18n keys** (all five locale files):
 
 ```
 en.ts:       'strategy.error.title': 'Dashboard failed to generate',
@@ -4495,7 +4495,7 @@ id.ts:       'strategy.error.title': 'Dasbor gagal dibuat',
              'strategy.error.body': 'Periksa konsol peramban untuk detail.',
 ```
 
-- [ ] **Step 4: Implement `src/strategy/quiet-luxe-strategy.ts`**
+- [x] **Step 4: Implement `src/strategy/quiet-luxe-strategy.ts`**
 
 ```ts
 import { resolveLocale } from '../i18n/resolve';
@@ -4624,7 +4624,7 @@ window.customStrategies.push({
 });
 ```
 
-- [ ] **Step 5: Wire into the bundle** — in `src/index.ts` add after the header-card import:
+- [x] **Step 5: Wire into the bundle** — in `src/index.ts` add after the header-card import:
 
 ```ts
 import './strategy/quiet-luxe-strategy';
@@ -4669,12 +4669,12 @@ it('registers the dashboard strategy element and metadata', () => {
 });
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 Run: `npx vitest run src/strategy/quiet-luxe-strategy.test.ts src/index.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 7: Lint + typecheck, then commit**
+- [x] **Step 7: Lint + typecheck, then commit**
 
 ```bash
 git add src/strategy/quiet-luxe-strategy.ts src/strategy/quiet-luxe-strategy.test.ts src/index.ts src/index.test.ts src/i18n/locales
@@ -4701,7 +4701,7 @@ EOF
 - Modify: `dev/main.ts`
 - Modify: `README.md`
 
-- [ ] **Step 1: Add the strategy inspector to `dev/main.ts`** — append to the existing import block:
+- [x] **Step 1: Add the strategy inspector to `dev/main.ts`** — append to the existing import block:
 
 ```ts
 import { QuietLuxeStrategy } from '../src/strategy/quiet-luxe-strategy';
@@ -4763,14 +4763,14 @@ async function buildStrategyPane(): Promise<HTMLElement> {
 void buildStrategyPane().then((pane) => document.body.append(pane));
 ```
 
-- [ ] **Step 2: Verify the harness compiles and renders**
+- [x] **Step 2: Verify the harness compiles and renders**
 
 Run: `npm run typecheck && npm run lint`
 Expected: clean.
 Run: `npm run dev`, open the printed URL, scroll below the dark pane.
 Expected: "Strategy output — reference homes" with three expandable homes; Subang shows 11 views (incl. `energy`), Xiamen shows no `energy` view, no Schedule section, a Vacuum section, and `brand: "liauto"` inside the car view JSON. Stop the dev server.
 
-- [ ] **Step 3: Update `README.md`** — replace the line
+- [x] **Step 3: Update `README.md`** — replace the line
 
 ```
 4. (From Plan 4) Create a dashboard with `strategy: custom:quiet-luxe` and your
@@ -4854,7 +4854,7 @@ A malformed `home:` block renders a single diagnostic card (error detail for
 admins only) and logs `[quiet-luxe]` errors to the browser console.
 ````
 
-- [ ] **Step 4: Full suite, then commit**
+- [x] **Step 4: Full suite, then commit**
 
 Run: `npm test && npm run lint && npm run typecheck`
 Expected: all pass.
@@ -4880,7 +4880,7 @@ EOF
 **Files:**
 - Create: `src/strategy/reference-dashboards.test.ts`
 
-- [ ] **Step 1: Write the reference-home matrix test**
+- [x] **Step 1: Write the reference-home matrix test**
 
 `src/strategy/reference-dashboards.test.ts`:
 
@@ -5000,12 +5000,12 @@ describe('reference-home dashboards (spec §2 matrix)', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify red → green**
+- [x] **Step 2: Run to verify red → green**
 
 Run: `npx vitest run src/strategy/reference-dashboards.test.ts`
 Expected: first run PASSES the matrix assertions and WRITES `src/strategy/__snapshots__/reference-dashboards.test.ts.snap`. Rerun the same command: PASS with snapshots stable. If any matrix assertion fails, fix the builder — the matrix is spec §2, not negotiable.
 
-- [ ] **Step 3: Full verification gate**
+- [x] **Step 3: Full verification gate**
 
 ```bash
 npm test && npm run lint && npm run typecheck && npm run build
@@ -5014,7 +5014,7 @@ ls dist/quiet-luxe.js
 
 Expected: all green; `dist/quiet-luxe.js` exists as the single bundle (fonts copied beside it by `build-fonts.mjs`). Call out any pre-existing failure not introduced by this plan.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/strategy/reference-dashboards.test.ts src/strategy/__snapshots__
@@ -5032,7 +5032,7 @@ EOF
 )"
 ```
 
-- [ ] **Step 5: Finish the branch**
+- [x] **Step 5: Finish the branch**
 
 Use the superpowers:finishing-a-development-branch skill to choose merge/PR/cleanup for `feat/dashboard-strategy`.
 

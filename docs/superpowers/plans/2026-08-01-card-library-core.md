@@ -93,13 +93,13 @@ Modified: `src/cards/ql-base-card.ts` (adds `locale()`), `src/i18n/locales/*.ts`
 - Create: `src/testing/mock-hass.ts`
 - Test: `src/testing/mock-hass.test.ts`
 
-- [ ] **Step 1: Create the execution branch**
+- [x] **Step 1: Create the execution branch**
 
 ```bash
 cd /Users/evertemple/Documents/Projects/home_assistant_dashboard_redesign && git checkout -b feat/card-library
 ```
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `src/testing/mock-hass.test.ts`:
 
@@ -168,12 +168,12 @@ describe('makeMockHass', () => {
 });
 ```
 
-- [ ] **Step 3: Run test to verify it fails**
+- [x] **Step 3: Run test to verify it fails**
 
 Run: `npx vitest run src/testing/mock-hass.test.ts`
 Expected: FAIL — "Cannot find module './mock-hass'" (or equivalent resolve error).
 
-- [ ] **Step 4: Write the implementation**
+- [x] **Step 4: Write the implementation**
 
 Create `src/testing/mock-hass.ts`:
 
@@ -258,12 +258,12 @@ export function makeMockHass(
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `npx vitest run src/testing/mock-hass.test.ts`
 Expected: PASS (7 tests). Also run `npm run typecheck` — clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/testing/mock-hass.ts src/testing/mock-hass.test.ts
@@ -286,7 +286,7 @@ EOF
 - Modify: `src/cards/ql-base-card.ts`
 - Test: `src/cards/ql-base-card.test.ts` (extend existing)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/cards/ql-base-card.test.ts` (after the existing `describe` block):
 
@@ -308,12 +308,12 @@ describe('QlBaseCard locale', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/ql-base-card.test.ts`
 Expected: FAIL — `card.locale is not a function`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `src/cards/ql-base-card.ts`, add imports after the existing ones:
 
@@ -331,12 +331,12 @@ Add this method to `QlBaseCard`, directly after `availabilityOf`:
   }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/cards/ql-base-card.test.ts`
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/cards/ql-base-card.ts src/cards/ql-base-card.test.ts
@@ -358,7 +358,7 @@ EOF
 - Create: `src/elements/ql-status-dot.ts`, `src/elements/ql-badge.ts`
 - Test: `src/elements/ql-status-dot.test.ts`, `src/elements/ql-badge.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/elements/ql-status-dot.test.ts`:
 
@@ -420,12 +420,12 @@ describe('ql-badge', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/elements/ql-status-dot.test.ts src/elements/ql-badge.test.ts`
 Expected: FAIL — module resolve errors for both.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/elements/ql-status-dot.ts`:
 
@@ -503,12 +503,12 @@ export class QlBadge extends LitElement {
 customElements.define('ql-badge', QlBadge);
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/elements/ql-status-dot.test.ts src/elements/ql-badge.test.ts`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-status-dot.ts src/elements/ql-status-dot.test.ts src/elements/ql-badge.ts src/elements/ql-badge.test.ts
@@ -531,7 +531,7 @@ EOF
 - Create: `src/elements/ql-chip.ts`
 - Test: `src/elements/ql-chip.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-chip.test.ts`:
 
@@ -595,12 +595,12 @@ describe('ql-chip', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-chip.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/elements/ql-chip.ts`:
 
@@ -692,12 +692,12 @@ export class QlChip extends LitElement {
 customElements.define('ql-chip', QlChip);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/elements/ql-chip.test.ts`
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-chip.ts src/elements/ql-chip.test.ts
@@ -720,7 +720,7 @@ EOF
 - Create: `src/elements/ql-toggle.ts`
 - Test: `src/elements/ql-toggle.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-toggle.test.ts`:
 
@@ -786,12 +786,12 @@ describe('ql-toggle', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-toggle.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/elements/ql-toggle.ts`:
 
@@ -890,12 +890,12 @@ export class QlToggle extends LitElement {
 customElements.define('ql-toggle', QlToggle);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/elements/ql-toggle.test.ts`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-toggle.ts src/elements/ql-toggle.test.ts
@@ -918,7 +918,7 @@ EOF
 - Create: `src/elements/ql-slider.ts`
 - Test: `src/elements/ql-slider.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-slider.test.ts`:
 
@@ -1002,12 +1002,12 @@ describe('ql-slider', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-slider.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/elements/ql-slider.ts`:
 
@@ -1146,12 +1146,12 @@ export class QlSlider extends LitElement {
 customElements.define('ql-slider', QlSlider);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/elements/ql-slider.test.ts`
 Expected: PASS (6 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-slider.ts src/elements/ql-slider.test.ts
@@ -1174,7 +1174,7 @@ EOF
 - Create: `src/elements/ql-segmented.ts`
 - Test: `src/elements/ql-segmented.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-segmented.test.ts`:
 
@@ -1252,12 +1252,12 @@ describe('ql-segmented', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-segmented.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/elements/ql-segmented.ts`:
 
@@ -1379,12 +1379,12 @@ export class QlSegmented extends LitElement {
 customElements.define('ql-segmented', QlSegmented);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/elements/ql-segmented.test.ts`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-segmented.ts src/elements/ql-segmented.test.ts
@@ -1407,7 +1407,7 @@ EOF
 - Create: `src/elements/ql-section-eyebrow.ts`
 - Test: `src/elements/ql-section-eyebrow.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-section-eyebrow.test.ts`:
 
@@ -1436,12 +1436,12 @@ describe('ql-section-eyebrow', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-section-eyebrow.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/elements/ql-section-eyebrow.ts`:
 
@@ -1493,12 +1493,12 @@ export class QlSectionEyebrow extends LitElement {
 customElements.define('ql-section-eyebrow', QlSectionEyebrow);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/elements/ql-section-eyebrow.test.ts`
 Expected: PASS (2 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/elements/ql-section-eyebrow.ts src/elements/ql-section-eyebrow.test.ts
@@ -1521,7 +1521,7 @@ EOF
 - Test: `src/elements/ql-header-home.test.ts`
 - Modify: `src/i18n/locales/en.ts`, `zh-hant.ts`, `zh-hans.ts`, `ms.ts`, `id.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-header-home.test.ts`:
 
@@ -1603,12 +1603,12 @@ describe('ql-header-home', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-header-home.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the greeting keys to ALL FIVE locale files**
+- [x] **Step 3: Add the greeting keys to ALL FIVE locale files**
 
 In `src/i18n/locales/en.ts`, add inside the `en` object after `'common.offline': 'Offline',`:
 
@@ -1652,7 +1652,7 @@ In `src/i18n/locales/id.ts`:
 
 Run `npm run typecheck` — must be clean (all five updated) — and `npx vitest run src/i18n/i18n.test.ts` — parity tests PASS.
 
-- [ ] **Step 4: Implement the element**
+- [x] **Step 4: Implement the element**
 
 Create `src/elements/ql-header-home.ts`:
 
@@ -1777,12 +1777,12 @@ export class QlHeaderHome extends LitElement {
 customElements.define('ql-header-home', QlHeaderHome);
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/elements/ql-header-home.test.ts src/i18n/i18n.test.ts`
 Expected: PASS (6 + parity tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/elements/ql-header-home.ts src/elements/ql-header-home.test.ts src/i18n/locales/en.ts src/i18n/locales/zh-hant.ts src/i18n/locales/zh-hans.ts src/i18n/locales/ms.ts src/i18n/locales/id.ts
@@ -1806,7 +1806,7 @@ EOF
 - Test: `src/elements/ql-header-room.test.ts`
 - Modify: all five `src/i18n/locales/*.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/elements/ql-header-room.test.ts`:
 
@@ -1852,12 +1852,12 @@ describe('ql-header-room', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/elements/ql-header-room.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add `common.back` to ALL FIVE locale files**
+- [x] **Step 3: Add `common.back` to ALL FIVE locale files**
 
 After `'common.offline': …,` in each file:
 
@@ -1869,7 +1869,7 @@ After `'common.offline': …,` in each file:
 
 Run `npm run typecheck` — clean.
 
-- [ ] **Step 4: Implement the element**
+- [x] **Step 4: Implement the element**
 
 Create `src/elements/ql-header-room.ts`:
 
@@ -1954,12 +1954,12 @@ export class QlHeaderRoom extends LitElement {
 customElements.define('ql-header-room', QlHeaderRoom);
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/elements/ql-header-room.test.ts src/i18n/i18n.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/elements/ql-header-room.ts src/elements/ql-header-room.test.ts src/i18n/locales/en.ts src/i18n/locales/zh-hant.ts src/i18n/locales/zh-hans.ts src/i18n/locales/ms.ts src/i18n/locales/id.ts
@@ -1981,7 +1981,7 @@ EOF
 - Create: `src/cards/register.ts`, `src/cards/navigate.ts`
 - Test: `src/cards/register.test.ts`, `src/cards/navigate.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/cards/register.test.ts`:
 
@@ -2044,12 +2044,12 @@ describe('navigate', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/cards/register.test.ts src/cards/navigate.test.ts`
 Expected: FAIL — module resolve errors.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/cards/register.ts`:
 
@@ -2095,12 +2095,12 @@ export function navigate(path: string): void {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/register.test.ts src/cards/navigate.test.ts`
 Expected: PASS (3 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/cards/register.ts src/cards/register.test.ts src/cards/navigate.ts src/cards/navigate.test.ts
@@ -2124,7 +2124,7 @@ EOF
 - Test: `src/cards/quiet-luxe-room-card.test.ts`
 - Modify: all five `src/i18n/locales/*.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-room-card.test.ts`:
 
@@ -2275,12 +2275,12 @@ describe('quiet-luxe-room-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-room-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add `room.lights_on` to ALL FIVE locale files**
+- [x] **Step 3: Add `room.lights_on` to ALL FIVE locale files**
 
 After the `greeting.*` block in each file:
 
@@ -2292,7 +2292,7 @@ After the `greeting.*` block in each file:
 
 Run `npm run typecheck` — clean.
 
-- [ ] **Step 4: Implement the card**
+- [x] **Step 4: Implement the card**
 
 Create `src/cards/quiet-luxe-room-card.ts`:
 
@@ -2564,12 +2564,12 @@ registerCard('quiet-luxe-room-card', QuietLuxeRoomCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-room-card.test.ts src/i18n/i18n.test.ts`
 Expected: PASS (10 + parity tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-room-card.ts src/cards/quiet-luxe-room-card.test.ts src/i18n/locales/en.ts src/i18n/locales/zh-hant.ts src/i18n/locales/zh-hans.ts src/i18n/locales/ms.ts src/i18n/locales/id.ts
@@ -2592,7 +2592,7 @@ EOF
 - Create: `src/cards/climate-device-type.ts`
 - Test: `src/cards/climate-device-type.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/climate-device-type.test.ts`:
 
@@ -2634,12 +2634,12 @@ describe('climateActivity', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/climate-device-type.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/cards/climate-device-type.ts`:
 
@@ -2678,12 +2678,12 @@ export function climateActivity(entity: HassEntity): ClimateActivity {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/cards/climate-device-type.test.ts`
 Expected: PASS (5 tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/cards/climate-device-type.ts src/cards/climate-device-type.test.ts
@@ -2707,7 +2707,7 @@ EOF
 - Test: `src/cards/quiet-luxe-climate-card.test.ts`
 - Modify: all five `src/i18n/locales/*.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-climate-card.test.ts`:
 
@@ -2860,12 +2860,12 @@ describe('quiet-luxe-climate-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-climate-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the four keys to ALL FIVE locale files**
+- [x] **Step 3: Add the four keys to ALL FIVE locale files**
 
 Insert after `'common.back': …,` (common.*) and after `'room.lights_on': …,` (state.*) in each file:
 
@@ -2916,7 +2916,7 @@ Insert after `'common.back': …,` (common.*) and after `'room.lights_on': …,`
 
 Run `npm run typecheck` — clean.
 
-- [ ] **Step 4: Implement the card**
+- [x] **Step 4: Implement the card**
 
 Create `src/cards/quiet-luxe-climate-card.ts`:
 
@@ -3152,12 +3152,12 @@ registerCard('quiet-luxe-climate-card', QuietLuxeClimateCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-climate-card.test.ts src/i18n/i18n.test.ts`
 Expected: PASS (8 + parity tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-climate-card.ts src/cards/quiet-luxe-climate-card.test.ts src/i18n/locales/en.ts src/i18n/locales/zh-hant.ts src/i18n/locales/zh-hans.ts src/i18n/locales/ms.ts src/i18n/locales/id.ts
@@ -3182,7 +3182,7 @@ EOF
 - Test: `src/cards/quiet-luxe-light-card.test.ts`
 - Modify: all five `src/i18n/locales/*.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-light-card.test.ts`:
 
@@ -3302,12 +3302,12 @@ describe('quiet-luxe-light-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-light-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add `light.brightness` to ALL FIVE locale files**
+- [x] **Step 3: Add `light.brightness` to ALL FIVE locale files**
 
 After `'room.lights_on': …,` in each file:
 
@@ -3319,7 +3319,7 @@ After `'room.lights_on': …,` in each file:
 
 Run `npm run typecheck` — clean.
 
-- [ ] **Step 4: Implement the card**
+- [x] **Step 4: Implement the card**
 
 Create `src/cards/quiet-luxe-light-card.ts`:
 
@@ -3483,12 +3483,12 @@ registerCard('quiet-luxe-light-card', QuietLuxeLightCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-light-card.test.ts src/i18n/i18n.test.ts`
 Expected: PASS (7 + parity tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-light-card.ts src/cards/quiet-luxe-light-card.test.ts src/i18n/locales/en.ts src/i18n/locales/zh-hant.ts src/i18n/locales/zh-hans.ts src/i18n/locales/ms.ts src/i18n/locales/id.ts
@@ -3512,7 +3512,7 @@ EOF
 - Test: `src/cards/quiet-luxe-cover-card.test.ts`
 - Modify: all five `src/i18n/locales/*.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/cards/quiet-luxe-cover-card.test.ts`:
 
@@ -3635,12 +3635,12 @@ describe('quiet-luxe-cover-card', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/cards/quiet-luxe-cover-card.test.ts`
 Expected: FAIL — module resolve error.
 
-- [ ] **Step 3: Add the cover keys to ALL FIVE locale files**
+- [x] **Step 3: Add the cover keys to ALL FIVE locale files**
 
 After `'light.brightness': …,` in each file:
 
@@ -3686,7 +3686,7 @@ After `'light.brightness': …,` in each file:
 
 Run `npm run typecheck` — clean.
 
-- [ ] **Step 4: Implement the card**
+- [x] **Step 4: Implement the card**
 
 Create `src/cards/quiet-luxe-cover-card.ts`:
 
@@ -3859,12 +3859,12 @@ registerCard('quiet-luxe-cover-card', QuietLuxeCoverCard, {
 });
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/quiet-luxe-cover-card.test.ts src/i18n/i18n.test.ts`
 Expected: PASS (6 + parity tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/cards/quiet-luxe-cover-card.ts src/cards/quiet-luxe-cover-card.test.ts src/i18n/locales/en.ts src/i18n/locales/zh-hant.ts src/i18n/locales/zh-hans.ts src/i18n/locales/ms.ts src/i18n/locales/id.ts
@@ -3888,7 +3888,7 @@ EOF
 - Test: `src/cards/sensor-format.test.ts`, `src/cards/quiet-luxe-sensor-tile.test.ts`
 - Modify: all five `src/i18n/locales/*.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `src/cards/sensor-format.test.ts`:
 
@@ -4027,12 +4027,12 @@ describe('quiet-luxe-sensor-tile', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run src/cards/sensor-format.test.ts src/cards/quiet-luxe-sensor-tile.test.ts`
 Expected: FAIL — module resolve errors.
 
-- [ ] **Step 3: Add the sensor keys to ALL FIVE locale files**
+- [x] **Step 3: Add the sensor keys to ALL FIVE locale files**
 
 After the `cover.*` block in each file:
 
@@ -4088,7 +4088,7 @@ After the `cover.*` block in each file:
 
 Run `npm run typecheck` — clean.
 
-- [ ] **Step 4: Implement the pure functions**
+- [x] **Step 4: Implement the pure functions**
 
 Create `src/cards/sensor-format.ts`:
 
@@ -4164,7 +4164,7 @@ export function sensorStatus(metric: SensorMetric, state: string | undefined): Q
 }
 ```
 
-- [ ] **Step 5: Implement the tile**
+- [x] **Step 5: Implement the tile**
 
 Create `src/cards/quiet-luxe-sensor-tile.ts`:
 
@@ -4284,12 +4284,12 @@ registerCard('quiet-luxe-sensor-tile', QuietLuxeSensorTile, {
 });
 ```
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `npx vitest run src/cards/sensor-format.test.ts src/cards/quiet-luxe-sensor-tile.test.ts src/i18n/i18n.test.ts`
 Expected: PASS (7 + 4 + parity tests).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/cards/sensor-format.ts src/cards/sensor-format.test.ts src/cards/quiet-luxe-sensor-tile.ts src/cards/quiet-luxe-sensor-tile.test.ts src/i18n/locales/en.ts src/i18n/locales/zh-hant.ts src/i18n/locales/zh-hans.ts src/i18n/locales/ms.ts src/i18n/locales/id.ts
@@ -4312,7 +4312,7 @@ EOF
 - Modify: `src/index.ts`
 - Test: `src/index.test.ts` (create)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/index.test.ts`:
 
@@ -4378,12 +4378,12 @@ describe('bundle entry', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/index.test.ts`
 Expected: FAIL — `bundle.QlChip` (and the rest) undefined; element tags unregistered.
 
-- [ ] **Step 3: Update `src/index.ts`**
+- [x] **Step 3: Update `src/index.ts`**
 
 Replace the full file with:
 
@@ -4468,12 +4468,12 @@ console.info(
 
 Note: `src/testing/mock-hass.ts` is deliberately NOT exported — it must never ship in the bundle.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/index.test.ts` then `npm test`
 Expected: all PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/index.ts src/index.test.ts
@@ -4498,7 +4498,7 @@ EOF
 
 No unit test — this is a visual QA surface; verification is typecheck + build-exclusion + manual browser check. The vite lib build only follows the `src/index.ts` entry graph, so `dev/` can never reach `dist/` (asserted in Task 20).
 
-- [ ] **Step 1: Create `dev/index.html`**
+- [x] **Step 1: Create `dev/index.html`**
 
 ```html
 <!doctype html>
@@ -4523,7 +4523,7 @@ No unit test — this is a visual QA surface; verification is typecheck + build-
 </html>
 ```
 
-- [ ] **Step 2: Create `dev/main.ts`**
+- [x] **Step 2: Create `dev/main.ts`**
 
 ```ts
 import '../src/index';
@@ -4777,7 +4777,7 @@ document.querySelector('#light')?.append(buildPane('light'));
 document.querySelector('#dark')?.append(buildPane('dark'));
 ```
 
-- [ ] **Step 3: Wire scripts and typecheck coverage**
+- [x] **Step 3: Wire scripts and typecheck coverage**
 
 In `package.json` `scripts`, add after `"build"`:
 
@@ -4791,7 +4791,7 @@ In `tsconfig.json`, change `include` to:
   "include": ["src", "dev", "vite.config.ts", "vitest.config.ts"]
 ```
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Run: `npm run typecheck && npm run lint` — clean.
 Run: `npm run dev`, open `http://localhost:5173/dev/` in a browser. Verify visually, then Ctrl-C:
@@ -4802,7 +4802,7 @@ Run: `npm run dev`, open `http://localhost:5173/dev/` in a browser. Verify visua
 - Confirm flow works on Bath Exhaust (tap power → "Tap again to confirm").
 - Fonts fall back to system serif/sans (bundled fonts are built into `dist/`, not served in dev — expected; note, do not "fix").
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add dev/index.html dev/main.ts package.json tsconfig.json
@@ -4823,7 +4823,7 @@ EOF
 
 **Files:** none created — verification gate.
 
-- [ ] **Step 1: Run the full quality gate**
+- [x] **Step 1: Run the full quality gate**
 
 ```bash
 npm run lint && npm run typecheck && npm test && npm run build
@@ -4831,7 +4831,7 @@ npm run lint && npm run typecheck && npm test && npm run build
 
 Expected: all clean; every suite green; build succeeds.
 
-- [ ] **Step 2: Assert the single-bundle invariant still holds**
+- [x] **Step 2: Assert the single-bundle invariant still holds**
 
 ```bash
 ls dist
@@ -4842,7 +4842,7 @@ grep -c "mock-context" dist/quiet-luxe.js || true
 
 Expected: `dist` contains exactly `quiet-luxe.js` and `fonts/`; fonts dir populated; room-card registration present in the bundle (count ≥ 1); `mock-context` count 0 (mock-hass NOT bundled). If `dist` contains anything from `dev/`, the build config regressed — stop and fix before committing anything.
 
-- [ ] **Step 3: Report**
+- [x] **Step 3: Report**
 
 Summarize per the delegated-workstream format (objective, status, files, findings, validation, risks) and stop. Branch integration (merge/PR) is a user decision via superpowers:finishing-a-development-branch — do not merge unprompted.
 
