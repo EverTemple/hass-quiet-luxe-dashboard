@@ -55,6 +55,12 @@ export const en = {
   'car.range': 'Range',
   'car.fuel': 'Fuel',
   'car.location': 'Location',
+  'vacuum.docked': 'Docked',
+  'vacuum.cleaning': 'Cleaning',
+  'vacuum.returning': 'Returning',
+  'vacuum.paused': 'Paused',
+  'vacuum.error': 'Error',
+  'vacuum.rooms': 'Rooms',
 } as const;
 
 export type TranslationKey = keyof typeof en;

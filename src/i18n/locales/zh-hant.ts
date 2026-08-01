@@ -57,4 +57,10 @@ export const zhHant: TranslationTable = {
   'car.range': '續航',
   'car.fuel': '油量',
   'car.location': '位置',
+  'vacuum.docked': '已回充電座',
+  'vacuum.cleaning': '清掃中',
+  'vacuum.returning': '返回中',
+  'vacuum.paused': '已暫停',
+  'vacuum.error': '錯誤',
+  'vacuum.rooms': '房間',
 };

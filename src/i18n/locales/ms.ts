@@ -57,4 +57,10 @@ export const ms: TranslationTable = {
   'car.range': 'Jarak',
   'car.fuel': 'Bahan api',
   'car.location': 'Lokasi',
+  'vacuum.docked': 'Di dok',
+  'vacuum.cleaning': 'Sedang membersihkan',
+  'vacuum.returning': 'Kembali ke dok',
+  'vacuum.paused': 'Dijeda',
+  'vacuum.error': 'Ralat',
+  'vacuum.rooms': 'Bilik',
 };
