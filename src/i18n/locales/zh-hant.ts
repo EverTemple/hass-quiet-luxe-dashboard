@@ -63,4 +63,11 @@ export const zhHant: TranslationTable = {
   'vacuum.paused': '已暫停',
   'vacuum.error': '錯誤',
   'vacuum.rooms': '房間',
+  'presence.home': '在家',
+  'presence.away': '外出',
+  'door.open': '已開',
+  'door.closed': '已關',
+  'motion.detected': '偵測到動靜',
+  'motion.clear': '無動靜',
+  'motion.toggle_label': '動態偵測',
 };

@@ -61,6 +61,13 @@ export const en = {
   'vacuum.paused': 'Paused',
   'vacuum.error': 'Error',
   'vacuum.rooms': 'Rooms',
+  'presence.home': 'Home',
+  'presence.away': 'Away',
+  'door.open': 'Open',
+  'door.closed': 'Closed',
+  'motion.detected': 'Motion',
+  'motion.clear': 'Clear',
+  'motion.toggle_label': 'Motion detection',
 } as const;
 
 export type TranslationKey = keyof typeof en;

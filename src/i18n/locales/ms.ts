@@ -63,4 +63,11 @@ export const ms: TranslationTable = {
   'vacuum.paused': 'Dijeda',
   'vacuum.error': 'Ralat',
   'vacuum.rooms': 'Bilik',
+  'presence.home': 'Di rumah',
+  'presence.away': 'Keluar',
+  'door.open': 'Terbuka',
+  'door.closed': 'Tertutup',
+  'motion.detected': 'Pergerakan dikesan',
+  'motion.clear': 'Tiada pergerakan',
+  'motion.toggle_label': 'Pengesanan pergerakan',
 };

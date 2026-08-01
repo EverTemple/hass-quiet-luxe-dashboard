@@ -63,4 +63,11 @@ export const zhHans: TranslationTable = {
   'vacuum.paused': '已暂停',
   'vacuum.error': '错误',
   'vacuum.rooms': '房间',
+  'presence.home': '在家',
+  'presence.away': '外出',
+  'door.open': '已开',
+  'door.closed': '已关',
+  'motion.detected': '侦测到动静',
+  'motion.clear': '无动静',
+  'motion.toggle_label': '移动侦测',
 };

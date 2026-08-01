@@ -63,4 +63,11 @@ export const id: TranslationTable = {
   'vacuum.paused': 'Dijeda',
   'vacuum.error': 'Kesalahan',
   'vacuum.rooms': 'Ruangan',
+  'presence.home': 'Di rumah',
+  'presence.away': 'Keluar',
+  'door.open': 'Terbuka',
+  'door.closed': 'Tertutup',
+  'motion.detected': 'Gerakan terdeteksi',
+  'motion.clear': 'Tidak ada gerakan',
+  'motion.toggle_label': 'Deteksi gerakan',
 };
