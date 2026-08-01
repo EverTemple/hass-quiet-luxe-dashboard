@@ -1,24 +1,31 @@
 # Quiet Luxe
 
 Warm, quiet, image-rich Home Assistant dashboard system: theme + custom card
-library + dashboard strategy in one HACS package. Runs the same bundle on all
+library + dashboard strategy in one package. Runs the same bundle on all
 homes from a small per-home config.
 
 Design source of truth: Figma file `vaDrJjhYuziE1lVvNvJqwP`.
 
 ## Install (per instance)
 
-1. HACS → Custom repositories → add this repo as type **Dashboard**.
-2. Install **Quiet Luxe**. HACS downloads the release asset `quiet-luxe.zip`
-   and extracts it (bundle + fonts) to `www/community/quiet-luxe/`. Check
-   Settings → Dashboards → ⋮ → Resources contains
-   `/hacsfiles/quiet-luxe/quiet-luxe.js` (JavaScript module); add it manually
-   if HACS did not register it.
-3. Copy `themes/quiet-luxe.yaml` into your `config/themes/` directory (ensure
+> This repo is private — HACS requires public repos, so installation is
+> manual from the GitHub release asset. If this repo is ever made public,
+> HACS custom-repository install works via `hacs.json` (`zip_release`).
+
+1. Download `quiet-luxe.zip` from the latest GitHub release
+   (`gh release download v0.1.0 -p quiet-luxe.zip` or the Releases page).
+2. Extract it into `/config/www/quiet-luxe/` on the instance (File editor
+   add-on, Samba, or SSH) so that `/config/www/quiet-luxe/quiet-luxe.js`
+   and `/config/www/quiet-luxe/fonts/fonts.css` exist.
+3. Register the resource: Settings → Dashboards → ⋮ (top right) →
+   Resources → Add resource → URL `/local/quiet-luxe/quiet-luxe.js`, type
+   **JavaScript module**.
+4. Copy `themes/quiet-luxe.yaml` into your `config/themes/` directory (ensure
    `frontend: themes: !include_dir_merge_named themes` in `configuration.yaml`),
-   then select the **quiet-luxe** theme in your user profile. Light/dark follow
-   HA's mode.
-4. Create a dashboard (Settings → Dashboards → Add, url path `quiet-luxe`),
+   reload themes, then select the **quiet-luxe** theme in your user profile
+   (or set it instance-wide with the `frontend.set_theme` service:
+   `{"name": "quiet-luxe"}`). Light/dark follow HA's mode.
+5. Create a dashboard (Settings → Dashboards → Add, url path `quiet-luxe`),
    open its raw configuration editor, and paste your per-home strategy config
    (see "Dashboard strategy" below).
 
@@ -30,7 +37,8 @@ your HA instance — no external font CDN is contacted at runtime.
 - `npm install` then `npm run test` / `npm run lint` / `npm run typecheck`
 - `npm run build` → `dist/quiet-luxe.js` + `dist/fonts/`
 - `dist/` is never committed; releases attach `quiet-luxe.zip` (bundle +
-  woff2 fonts) as a GitHub release asset which HACS installs (`zip_release`).
+  woff2 fonts) as a GitHub release asset used for the manual install above
+  (and by HACS `zip_release` if the repo is ever made public).
 
 ## Repository docs
 

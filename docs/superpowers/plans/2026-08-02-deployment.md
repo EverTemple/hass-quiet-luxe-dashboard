@@ -67,30 +67,17 @@ STOP: any failure → fix is out of Plan 5 scope; report which gate failed.
 
 **Files:** none changed (remote operation).
 
-- [ ] **Step 1: USER decision — repo name and public visibility**
+**DONE 2026-08-02.** Outcome differs from the plan below: the user chose a **private** repo, created as `EverTemple/hass-quiet-luxe-dashboard` with `main` pushed. HACS cannot use private custom repositories (verified against the hacs.xyz FAQ, 2026-08-02), so the manual-copy fallback in Step 1 was explicitly chosen: download the release `quiet-luxe.zip` → extract to `/config/www/quiet-luxe/` per instance → register the Lovelace resource `/local/quiet-luxe/quiet-luxe.js` (JavaScript module). Phase B package-install tasks below are amended accordingly; kiosk-mode and apexcharts-card (public community repos) still install via HACS. Topics (old Step 3) skipped — they existed only for HACS validation.
 
-HACS does **not** support private custom repositories, so the repo must be **public**. Confirm with the user: repo name `quiet-luxe` (recommended — it becomes the `/hacsfiles/quiet-luxe/` install path), public. If the user refuses public visibility: STOP — HACS install path is unavailable; the fallback (manual copy of release zips to each instance's `www/community/quiet-luxe/`) must be explicitly chosen by the user before continuing.
+- [x] **Step 1: USER decision — repo name and public visibility** — decided: **private**, name `hass-quiet-luxe-dashboard`; manual install path explicitly chosen (see DONE note above).
 
-- [ ] **Step 2: Create the repo and push main**
+HACS does **not** support private custom repositories, so the repo must be **public**. Confirm with the user: repo name `quiet-luxe` (recommended — it becomes the `/hacsfiles/quiet-luxe/` install path), public. If the user refuses public visibility: STOP — HACS install path is unavailable; the fallback (manual copy of release zips to each instance's `www/`) must be explicitly chosen by the user before continuing.
 
-```bash
-cd /Users/evertemple/Documents/Projects/home_assistant_dashboard_redesign
-gh repo create quiet-luxe --public --source=. --remote=origin --push \
-  --description "Quiet Luxe — warm, image-rich Home Assistant dashboard: theme + card library + strategy in one HACS package"
-```
+- [x] **Step 2: Create the repo and push main** — done: `✓ Created repository EverTemple/hass-quiet-luxe-dashboard` (private), `main` pushed, `origin` set.
 
-Expected: `✓ Created repository <user>/quiet-luxe` and a successful push of `main`.
-STOP: name collision or permission error → report; ask the user for an alternate name (the HACS folder name follows the repo name — record whatever is chosen and use it in every `/hacsfiles/<repo>/` path in Phase B).
+- [x] **Step 3: Add repo topics (HACS validation checks these)** — skipped as n/a: HACS is not used with a private repo.
 
-- [ ] **Step 3: Add repo topics (HACS validation checks these)**
-
-```bash
-gh repo edit --add-topic home-assistant --add-topic hacs --add-topic lovelace --add-topic dashboard
-```
-
-Expected: silent success. Verify: `gh repo view --json repositoryTopics -q '.repositoryTopics[].name'` lists all four.
-
-- [ ] **Step 4: Verify the remote matches local**
+- [x] **Step 4: Verify the remote matches local**
 
 Run: `git ls-remote origin main | awk '{print $1}' && git rev-parse main`
 Expected: the two SHAs are identical.
@@ -247,6 +234,8 @@ git push origin main
 Expected: push succeeds; `git status --porcelain` empty.
 
 ### Task A4: HACS validation workflow
+
+**SUPERSEDED 2026-08-02:** the repo is private (Task A2), HACS is unused, so `.github/workflows/validate.yml` was removed — the hacs/action run and its weekly cron only wasted minutes. Re-add this workflow only if the repo is ever made public and HACS install is re-adopted.
 
 **Files:**
 - Create: `.github/workflows/validate.yml`
@@ -513,14 +502,16 @@ curl -sS -m 15 -X POST -H "Authorization: Bearer $HA_TOKEN" -H "Content-Type: ap
 Expected: a number ≥ 1 (area registry populated).
 STOP: `0` → no areas defined; **USER** must assign areas in Settings → Areas before Task B-SJ-5 is meaningful.
 
-### Task B-SJ-3: Subang Jaya — HACS installs
+### Task B-SJ-3: Subang Jaya — package install (manual) + HACS community cards
+
+*(Amended 2026-08-02: repo is private → Quiet Luxe installs manually from the release zip, not via HACS. kiosk-mode and apexcharts-card are public community repos and still install via HACS.)*
 
 - [ ] **Step 1: Reachability gate** — repeat Task B-SJ-1 Step 2.
 
-- [ ] **Step 2: USER — add the custom repository and install the package**
+- [ ] **Step 2: USER — install the package manually from the release zip**
 
-In the Subang HA UI: HACS → ⋮ (top right) → Custom repositories → Repository: `https://github.com/<user>/quiet-luxe` (the URL from Task A2), Type: **Dashboard** → Add. Then search "Quiet Luxe" → Download → confirm version `v0.1.0`.
-STOP: HACS reports "repository not found / no releases" → re-check Task A5 release exists and repo is public.
+Download the release asset locally: `gh release download v0.1.0 -p quiet-luxe.zip` (repo `EverTemple/hass-quiet-luxe-dashboard`), unzip, and copy the contents to the instance path `/config/www/quiet-luxe/` (File editor add-on, Samba, or SSH) so `/config/www/quiet-luxe/quiet-luxe.js` and `/config/www/quiet-luxe/fonts/fonts.css` exist.
+STOP: release or asset missing → re-check Task A5 release exists.
 
 - [ ] **Step 3: USER — install the community cards for this home**
 
@@ -530,18 +521,18 @@ HACS default store → Download: **kiosk-mode** (shared iPad chrome) and **apexc
 
 ```bash
 source .ai/secrets/subang.env
-for f in quiet-luxe/quiet-luxe.js quiet-luxe/fonts/fonts.css kiosk-mode/kiosk-mode.js apexcharts-card/apexcharts-card.js; do
+for f in local/quiet-luxe/quiet-luxe.js local/quiet-luxe/fonts/fonts.css hacsfiles/kiosk-mode/kiosk-mode.js hacsfiles/apexcharts-card/apexcharts-card.js; do
   printf "%s " "$f"
-  curl -sS -m 15 -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/hacsfiles/$f"
+  curl -sS -m 15 -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/$f"
 done
 ```
 
-Expected: `200` for all four lines (fonts line proves the zip_release extraction worked — this was impossible with committed-dist).
-STOP: `404` on quiet-luxe fonts → zip layout or HACS extraction problem; inspect `www/community/quiet-luxe/` contents with the user before continuing.
+Expected: `200` for all four lines (fonts line proves the zip layout + copy worked — this was impossible with committed-dist).
+STOP: `404` on quiet-luxe fonts → zip layout or copy problem; inspect `/config/www/quiet-luxe/` contents with the user before continuing.
 
-- [ ] **Step 5: USER — verify the dashboard resource**
+- [ ] **Step 5: USER — register the dashboard resource**
 
-Settings → Dashboards → ⋮ → Resources: `/hacsfiles/quiet-luxe/quiet-luxe.js` present as **JavaScript module**. If missing, add it manually with exactly that URL and type.
+Settings → Dashboards → ⋮ → Resources: add `/local/quiet-luxe/quiet-luxe.js` as **JavaScript module** (manual installs are never auto-registered).
 
 ### Task B-SJ-4: Subang Jaya — theme install + set default
 
@@ -817,23 +808,25 @@ STOP: unreachable/401 → log; skip remaining B-TC tasks until reachable.
 - [ ] **Step 2: Version:** `source .ai/secrets/tungchung.env && curl -sS -m 15 -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/api/config" | jq -r '.version, .location_name'` → record in the deployment log `## Instance versions`. STOP if below the tentative floor (USER upgrade required before B-TC-6).
 - [ ] **Step 3: Areas:** `curl -sS -m 15 -X POST -H "Authorization: Bearer $HA_TOKEN" -H "Content-Type: application/json" -d '{"template": "{{ areas() | count }}"}' "$HA_URL/api/template"` → ≥ 1. STOP at 0: USER assigns areas first.
 
-### Task B-TC-3: Tung Chung — HACS installs
+### Task B-TC-3: Tung Chung — package install (manual) + HACS community cards
+
+*(Amended 2026-08-02: private repo → manual Quiet Luxe install; kiosk-mode still via HACS.)*
 
 - [ ] **Step 1: Reachability gate** — repeat Task B-TC-1 Step 2.
-- [ ] **Step 2: USER:** HACS → Custom repositories → `https://github.com/<user>/quiet-luxe`, type Dashboard → Add → install **Quiet Luxe** v0.1.0.
+- [ ] **Step 2: USER:** download `quiet-luxe.zip` from release v0.1.0 (`gh release download v0.1.0 -p quiet-luxe.zip`, repo `EverTemple/hass-quiet-luxe-dashboard`), unzip, copy contents to instance `/config/www/quiet-luxe/`.
 - [ ] **Step 3: USER:** HACS default store → install **kiosk-mode**. (No apexcharts-card — no energy hardware here; spec §2.)
 - [ ] **Step 4: Verify files:**
 
 ```bash
 source .ai/secrets/tungchung.env
-for f in quiet-luxe/quiet-luxe.js quiet-luxe/fonts/fonts.css kiosk-mode/kiosk-mode.js; do
+for f in local/quiet-luxe/quiet-luxe.js local/quiet-luxe/fonts/fonts.css hacsfiles/kiosk-mode/kiosk-mode.js; do
   printf "%s " "$f"
-  curl -sS -m 15 -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/hacsfiles/$f"
+  curl -sS -m 15 -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/$f"
 done
 ```
 
-Expected: three `200`s. STOP on fonts 404 (zip extraction issue — inspect `www/community/quiet-luxe/` with the user).
-- [ ] **Step 5: USER:** Settings → Dashboards → ⋮ → Resources contains `/hacsfiles/quiet-luxe/quiet-luxe.js` (JavaScript module); add manually if absent.
+Expected: three `200`s. STOP on fonts 404 (zip layout or copy issue — inspect `/config/www/quiet-luxe/` with the user).
+- [ ] **Step 5: USER:** Settings → Dashboards → ⋮ → Resources: add `/local/quiet-luxe/quiet-luxe.js` (JavaScript module) — manual installs are never auto-registered.
 
 ### Task B-TC-4: Tung Chung — theme install + set default
 
@@ -985,32 +978,34 @@ STOP: unreachable/401 → log; skip remaining B-XM tasks until reachable.
 - [ ] **Step 3: Areas:** `curl -sS -m 15 -X POST -H "Authorization: Bearer $HA_TOKEN" -H "Content-Type: application/json" -d '{"template": "{{ areas() | count }}"}' "$HA_URL/api/template"` → ≥ 1. STOP at 0: USER assigns areas first.
 - [ ] **Step 4: Weather provider check (China-reachable):** `curl -sS -m 15 -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/api/states" | jq -r '[.[] | select(.entity_id | startswith("weather.")) | {e: .entity_id, s: .state}]'` → at least one weather entity with a real state (not `unavailable`). STOP if unavailable: USER must configure a China-reachable weather integration before header/idle-face weather works.
 
-### Task B-XM-3: Xiamen — HACS installs
+### Task B-XM-3: Xiamen — package install (manual) + HACS community cards
+
+*(Amended 2026-08-02: private repo → manual Quiet Luxe install everywhere — which also sidesteps the HACS-from-China download problem for the package itself. kiosk-mode and dreame-vacuum still via HACS.)*
 
 - [ ] **Step 1: Reachability gate** — repeat Task B-XM-1 Step 2.
-- [ ] **Step 2: USER:** HACS → Custom repositories → `https://github.com/<user>/quiet-luxe`, type Dashboard → install **Quiet Luxe** v0.1.0, plus **kiosk-mode** from the default store. **CN caveat:** HACS downloads from GitHub, which is unreliable from mainland China — retry on failure. Manual fallback if HACS cannot download: `gh release download v0.1.0 -p quiet-luxe.zip` locally, unzip, copy contents to instance `/config/www/community/quiet-luxe/` via file access, and add the resource `/hacsfiles/quiet-luxe/quiet-luxe.js` manually (updates then also become manual for this home — log this outcome).
+- [ ] **Step 2: USER:** download `quiet-luxe.zip` from release v0.1.0 (`gh release download v0.1.0 -p quiet-luxe.zip`, repo `EverTemple/hass-quiet-luxe-dashboard`), unzip, copy contents to instance `/config/www/quiet-luxe/` via file access. Then HACS default store → install **kiosk-mode**. **CN caveat (kiosk-mode only):** HACS downloads from GitHub, which is unreliable from mainland China — retry on failure.
 - [ ] **Step 3: USER — Dreame vacuum integration** (`vacuum: true`, Dreame X30 Pro): HACS → Custom repositories → `https://github.com/Tasshack/dreame-vacuum`, type Integration → install → restart HA → Settings → Devices & services → Add integration → Dreame Vacuum → Xiaomi/Dreame account login (China server region — credentials entered in HA UI only).
 - [ ] **Step 4: Verify files:**
 
 ```bash
 source .ai/secrets/xiamen.env
-for f in quiet-luxe/quiet-luxe.js quiet-luxe/fonts/fonts.css kiosk-mode/kiosk-mode.js; do
+for f in local/quiet-luxe/quiet-luxe.js local/quiet-luxe/fonts/fonts.css hacsfiles/kiosk-mode/kiosk-mode.js; do
   printf "%s " "$f"
-  curl -sS -m 15 -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/hacsfiles/$f"
+  curl -sS -m 15 -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/$f"
 done
 curl -sS -m 15 -H "Authorization: Bearer $HA_TOKEN" "$HA_URL/api/states" | jq -r '[.[] | select(.entity_id | startswith("vacuum.")) | .entity_id]'
 ```
 
 Expected: three `200`s; at least one `vacuum.*` entity.
-STOP: fonts 404 (extraction problem) or no vacuum entity (integration login failed — USER retries).
-- [ ] **Step 5: USER:** Resources list contains `/hacsfiles/quiet-luxe/quiet-luxe.js` (JavaScript module); add manually if absent.
+STOP: fonts 404 (zip layout or copy problem) or no vacuum entity (integration login failed — USER retries).
+- [ ] **Step 5: USER:** Resources list: add `/local/quiet-luxe/quiet-luxe.js` (JavaScript module) — manual installs are never auto-registered.
 
 ### Task B-XM-4: Xiamen — theme install + set default
 
 - [ ] **Step 1: Reachability gate** — repeat Task B-XM-1 Step 2.
 - [ ] **Step 2: USER:** copy `themes/quiet-luxe.yaml` → `/config/themes/quiet-luxe.yaml`; ensure the `frontend: themes:` include line exists in `configuration.yaml`.
 - [ ] **Step 3: Reload:** `source .ai/secrets/xiamen.env && curl -sS -m 15 -X POST -H "Authorization: Bearer $HA_TOKEN" -H "Content-Type: application/json" -d '{}' "$HA_URL/api/services/frontend/reload_themes"` → `[]`. STOP on error (check `/api/error_log`).
-- [ ] **Step 4: Default:** `curl -sS -m 15 -X POST -H "Authorization: Bearer $HA_TOKEN" -H "Content-Type: application/json" -d '{"name": "quiet-luxe"}' "$HA_URL/api/services/frontend/set_theme"` → `[]`; USER confirms in profile. **Font sanity (China rule):** with the dashboard open, browser dev tools → Network → filter `font` → every font request is served from `$HA_URL/hacsfiles/quiet-luxe/fonts/...`; zero requests to any external CDN. STOP if any external font request appears — that violates spec §2 and must be fixed in the bundle, not worked around.
+- [ ] **Step 4: Default:** `curl -sS -m 15 -X POST -H "Authorization: Bearer $HA_TOKEN" -H "Content-Type: application/json" -d '{"name": "quiet-luxe"}' "$HA_URL/api/services/frontend/set_theme"` → `[]`; USER confirms in profile. **Font sanity (China rule):** with the dashboard open, browser dev tools → Network → filter `font` → every font request is served from `$HA_URL/local/quiet-luxe/fonts/...`; zero requests to any external CDN. STOP if any external font request appears — that violates spec §2 and must be fixed in the bundle, not worked around.
 
 ### Task B-XM-5: Xiamen — registry audit + config reconciliation
 
