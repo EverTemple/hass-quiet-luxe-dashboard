@@ -1,8 +1,11 @@
-import { css, html, LitElement, type CSSResult, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } from 'lit';
 
 export interface QlSegmentOption {
   readonly value: string;
   readonly label: string;
+  /** Disabled segments render inert with a hint tooltip (native title). */
+  readonly disabled?: boolean;
+  readonly hint?: string;
 }
 
 /**
@@ -54,15 +57,23 @@ export class QlSegmented extends LitElement {
       color: var(--ql-bg-base, #f4f0e8);
       font-weight: 500;
     }
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
   `;
 
-  private select(value: string): void {
-    if (value === this.value) {
+  private select(option: QlSegmentOption): void {
+    if (option.disabled === true || option.value === this.value) {
       return;
     }
-    this.value = value;
+    this.value = option.value;
     this.dispatchEvent(
-      new CustomEvent('ql-change', { detail: { value }, bubbles: true, composed: true }),
+      new CustomEvent('ql-change', {
+        detail: { value: option.value },
+        bubbles: true,
+        composed: true,
+      }),
     );
     void this.updateComplete.then(() => {
       const selected = this.shadowRoot?.querySelector<HTMLButtonElement>(
@@ -73,22 +84,27 @@ export class QlSegmented extends LitElement {
   }
 
   private onKeydown(event: KeyboardEvent): void {
-    if (this.options.length === 0) {
+    const count = this.options.length;
+    if (count === 0) {
       return;
     }
-    const index = this.options.findIndex((option) => option.value === this.value);
-    let next: number;
+    let direction: 1 | -1;
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-      next = (index + 1) % this.options.length;
+      direction = 1;
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-      next = (index - 1 + this.options.length) % this.options.length;
+      direction = -1;
     } else {
       return;
     }
     event.preventDefault();
-    const option = this.options[next];
-    if (option !== undefined) {
-      this.select(option.value);
+    const start = this.options.findIndex((option) => option.value === this.value);
+    for (let offset = 1; offset <= count; offset += 1) {
+      const index = (((start + direction * offset) % count) + count) % count;
+      const option = this.options[index];
+      if (option !== undefined && option.disabled !== true) {
+        this.select(option);
+        return;
+      }
     }
   }
 
@@ -101,7 +117,9 @@ export class QlSegmented extends LitElement {
               role="radio"
               aria-checked=${String(option.value === this.value)}
               tabindex=${option.value === this.value ? 0 : -1}
-              @click=${(): void => this.select(option.value)}
+              ?disabled=${option.disabled === true}
+              title=${option.hint ?? nothing}
+              @click=${(): void => this.select(option)}
             >
               ${option.label}
             </button>
