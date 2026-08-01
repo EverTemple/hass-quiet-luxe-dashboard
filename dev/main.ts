@@ -465,7 +465,7 @@ function buildPane(mode: ThemeMode): HTMLElement {
       makeCard('quiet-luxe-language-card', { type: 'custom:quiet-luxe-language-card' }),
     ]),
     section('Idle clock', [
-      (() => {
+      ((): HTMLElement => {
         const wrap = document.createElement('div');
         wrap.style.cssText = 'height:320px;border-radius:18px;overflow:hidden;';
         wrap.append(
