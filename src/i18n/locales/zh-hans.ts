@@ -5,6 +5,7 @@ export const zhHans: TranslationTable = {
   'common.off': '关',
   'common.unavailable': '不可用',
   'common.offline': '离线',
+  'common.back': '返回',
   'greeting.morning': '早上好',
   'greeting.afternoon': '下午好',
   'greeting.evening': '晚上好',

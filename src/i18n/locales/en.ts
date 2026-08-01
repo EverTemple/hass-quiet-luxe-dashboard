@@ -3,6 +3,7 @@ export const en = {
   'common.off': 'Off',
   'common.unavailable': 'Unavailable',
   'common.offline': 'Offline',
+  'common.back': 'Back',
   'greeting.morning': 'Good morning',
   'greeting.afternoon': 'Good afternoon',
   'greeting.evening': 'Good evening',

@@ -5,6 +5,7 @@ export const id: TranslationTable = {
   'common.off': 'Mati',
   'common.unavailable': 'Tidak tersedia',
   'common.offline': 'Luring',
+  'common.back': 'Kembali',
   'greeting.morning': 'Selamat pagi',
   'greeting.afternoon': 'Selamat siang',
   'greeting.evening': 'Selamat malam',
