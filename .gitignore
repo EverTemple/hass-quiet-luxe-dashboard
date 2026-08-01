@@ -1,3 +1,5 @@
 .superpowers/
 .ai/
 .DS_Store
+node_modules/
+dist/

@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+      - name: Assert single-bundle artifact
+        run: |
+          test -f dist/quiet-luxe.js
+          test -f dist/fonts/fonts.css
+          [ "$(find dist -maxdepth 1 -name '*.js' | wc -l)" -eq 1 ]
