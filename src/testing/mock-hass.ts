@@ -6,9 +6,28 @@ export interface RecordedServiceCall {
   readonly data?: Record<string, unknown>;
 }
 
-/** HomeAssistant double with a service-call spy. Test/dev-harness use only. */
+export interface RecordedApiCall {
+  readonly method: string;
+  readonly path: string;
+}
+
+export interface MockHassOptions {
+  readonly language?: string;
+  /**
+   * callApi stubs. Lookup: exact path first, then the first key that is a
+   * prefix of the requested path (lets the dev harness stub
+   * `calendars/calendar.family` without hardcoding query timestamps).
+   */
+  readonly apiResponses?: Readonly<Record<string, unknown>>;
+  /** callWS stubs keyed by `message.type`. */
+  readonly wsResponses?: Readonly<Record<string, unknown>>;
+}
+
+/** HomeAssistant double with service/api/ws spies. Test/dev-harness use only. */
 export interface MockHass extends HomeAssistant {
   readonly calls: ReadonlyArray<RecordedServiceCall>;
+  readonly apiCalls: ReadonlyArray<RecordedApiCall>;
+  readonly wsCalls: ReadonlyArray<Record<string, unknown>>;
 }
 
 const ENTITY_DEFAULTS = {
@@ -60,19 +79,55 @@ export function sensorEntity(
   return makeEntity(entityId, state, attributes);
 }
 
+function findApiStub(
+  stubs: Readonly<Record<string, unknown>> | undefined,
+  path: string,
+): unknown {
+  if (stubs === undefined) {
+    return undefined;
+  }
+  if (path in stubs) {
+    return stubs[path];
+  }
+  const prefixKey = Object.keys(stubs).find((key) => path.startsWith(key));
+  return prefixKey === undefined ? undefined : stubs[prefixKey];
+}
+
 export function makeMockHass(
   entities: ReadonlyArray<HassEntity> = [],
-  language = 'en',
+  options: string | MockHassOptions = {},
 ): MockHass {
+  const opts: MockHassOptions = typeof options === 'string' ? { language: options } : options;
+  const language = opts.language ?? 'en';
   const calls: RecordedServiceCall[] = [];
+  const apiCalls: RecordedApiCall[] = [];
+  const wsCalls: Array<Record<string, unknown>> = [];
   return {
     states: Object.fromEntries(entities.map((entity) => [entity.entity_id, entity])),
     language,
     locale: { language },
     calls,
+    apiCalls,
+    wsCalls,
     callService(domain: string, service: string, data?: Record<string, unknown>): Promise<unknown> {
       calls.push({ domain, service, data });
       return Promise.resolve(undefined);
+    },
+    callApi<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string): Promise<T> {
+      apiCalls.push({ method, path });
+      const stub = findApiStub(opts.apiResponses, path);
+      if (stub === undefined) {
+        return Promise.reject(new Error(`mock-hass: no apiResponses stub matches "${path}"`));
+      }
+      return Promise.resolve(stub as T);
+    },
+    callWS<T>(message: { readonly type: string } & Record<string, unknown>): Promise<T> {
+      wsCalls.push(message);
+      const stub = (opts.wsResponses ?? {})[message.type];
+      if (stub === undefined) {
+        return Promise.reject(new Error(`mock-hass: no wsResponses stub for "${message.type}"`));
+      }
+      return Promise.resolve(stub as T);
     },
   };
 }
