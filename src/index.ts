@@ -29,6 +29,7 @@ import './cards/ql-row-network-flow';
 import './cards/quiet-luxe-device-cutout-card';
 import './cards/quiet-luxe-language-card';
 import './cards/quiet-luxe-header-card';
+import './strategy/quiet-luxe-strategy';
 
 export { QlBaseCard, type EntityAvailability } from './cards/ql-base-card';
 export { QlCanvas } from './elements/ql-canvas';
@@ -153,6 +154,31 @@ export {
   variantForWidth,
   type HeaderCardConfig,
 } from './cards/quiet-luxe-header-card';
+export {
+  fallbackDashboard,
+  QuietLuxeStrategy,
+  STRATEGY_ELEMENT_TAG,
+  type QuietLuxeStrategyConfig,
+} from './strategy/quiet-luxe-strategy';
+export {
+  DEFAULT_DASHBOARD_PATH,
+  DEFAULT_PHOTO_BASE,
+  QuietLuxeConfigError,
+  validateHomeConfig,
+  viewUrl,
+  type HomeConfig,
+} from './strategy/config';
+export { SUBANG_CONFIG, TUNGCHUNG_CONFIG, XIAMEN_CONFIG } from './strategy/reference-homes';
+export {
+  buildRegistryIndex,
+  fetchRegistrySnapshot,
+  LABEL_FAVORITE,
+  LABEL_HIDDEN,
+  LABEL_PRIMARY_CAMERA,
+  QuietLuxeRegistryError,
+  type RegistryIndex,
+  type RegistrySnapshot,
+} from './strategy/registry';
 
 injectFontStylesheet(document, import.meta.url);
 

@@ -93,4 +93,6 @@ export const id: TranslationTable = {
   'view.car': 'Mobil',
   'view.admin': 'Admin',
   'view.language': 'Bahasa',
+  'strategy.error.title': 'Dasbor gagal dibuat',
+  'strategy.error.body': 'Periksa konsol peramban untuk detail.',
 };

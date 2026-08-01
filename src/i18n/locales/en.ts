@@ -91,6 +91,8 @@ export const en = {
   'view.car': 'Car',
   'view.admin': 'Admin',
   'view.language': 'Language',
+  'strategy.error.title': 'Dashboard failed to generate',
+  'strategy.error.body': 'Check the browser console for details.',
 } as const;
 
 export type TranslationKey = keyof typeof en;

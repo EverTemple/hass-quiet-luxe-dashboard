@@ -93,4 +93,6 @@ export const zhHant: TranslationTable = {
   'view.car': '車輛',
   'view.admin': '管理',
   'view.language': '語言',
+  'strategy.error.title': '儀表板產生失敗',
+  'strategy.error.body': '請查看瀏覽器主控台了解詳情。',
 };

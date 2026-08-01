@@ -93,4 +93,6 @@ export const ms: TranslationTable = {
   'view.car': 'Kereta',
   'view.admin': 'Pentadbir',
   'view.language': 'Bahasa',
+  'strategy.error.title': 'Papan pemuka gagal dijana',
+  'strategy.error.body': 'Semak konsol pelayar untuk butiran.',
 };

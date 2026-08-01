@@ -77,6 +77,11 @@ describe('bundle entry', () => {
     }
   });
 
+  it('registers the dashboard strategy element and metadata', () => {
+    expect(customElements.get('ll-strategy-dashboard-quiet-luxe')).toBe(bundle.QuietLuxeStrategy);
+    expect(window.customStrategies?.some((entry) => entry.type === 'quiet-luxe')).toBe(true);
+  });
+
   it('defines the header card without listing it in the picker', () => {
     expect(customElements.get('quiet-luxe-header-card')).toBe(bundle.QuietLuxeHeaderCard);
     expect((window.customCards ?? []).some((card) => card.type === 'quiet-luxe-header-card')).toBe(

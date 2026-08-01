@@ -93,4 +93,6 @@ export const zhHans: TranslationTable = {
   'view.car': '车辆',
   'view.admin': '管理',
   'view.language': '语言',
+  'strategy.error.title': '仪表板生成失败',
+  'strategy.error.body': '请查看浏览器控制台了解详情。',
 };
