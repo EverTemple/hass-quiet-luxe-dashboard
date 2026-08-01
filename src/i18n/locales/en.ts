@@ -10,6 +10,7 @@ export const en = {
   'greeting.afternoon': 'Good afternoon',
   'greeting.evening': 'Good evening',
   'room.lights_on': 'Lights on',
+  'light.brightness': 'Brightness',
   'state.active': 'Active',
   'state.idle': 'Idle',
   'section.rooms': 'Rooms',

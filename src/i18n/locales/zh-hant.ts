@@ -12,6 +12,7 @@ export const zhHant: TranslationTable = {
   'greeting.afternoon': '午安',
   'greeting.evening': '晚安',
   'room.lights_on': '燈已開',
+  'light.brightness': '亮度',
   'state.active': '運作中',
   'state.idle': '待機',
   'section.rooms': '房間',

@@ -12,6 +12,7 @@ export const id: TranslationTable = {
   'greeting.afternoon': 'Selamat siang',
   'greeting.evening': 'Selamat malam',
   'room.lights_on': 'Lampu menyala',
+  'light.brightness': 'Kecerahan',
   'state.active': 'Aktif',
   'state.idle': 'Siaga',
   'section.rooms': 'Ruangan',
