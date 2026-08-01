@@ -6,6 +6,7 @@ export const en = {
   'common.back': 'Back',
   'common.power': 'Power',
   'common.tap_confirm': 'Tap again to confirm',
+  'common.battery': 'Battery',
   'greeting.morning': 'Good morning',
   'greeting.afternoon': 'Good afternoon',
   'greeting.evening': 'Good evening',
@@ -48,6 +49,12 @@ export const en = {
   'schedule.all_day': 'All day',
   'tasks.open': 'open',
   'tasks.all_done': 'All done',
+  'car.locked': 'Locked',
+  'car.unlocked': 'Unlocked',
+  'car.precondition': 'Precondition',
+  'car.range': 'Range',
+  'car.fuel': 'Fuel',
+  'car.location': 'Location',
 } as const;
 
 export type TranslationKey = keyof typeof en;

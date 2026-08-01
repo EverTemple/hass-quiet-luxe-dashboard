@@ -8,6 +8,7 @@ export const ms: TranslationTable = {
   'common.back': 'Kembali',
   'common.power': 'Kuasa',
   'common.tap_confirm': 'Ketik sekali lagi untuk mengesahkan',
+  'common.battery': 'Bateri',
   'greeting.morning': 'Selamat pagi',
   'greeting.afternoon': 'Selamat tengah hari',
   'greeting.evening': 'Selamat petang',
@@ -50,4 +51,10 @@ export const ms: TranslationTable = {
   'schedule.all_day': 'Sepanjang hari',
   'tasks.open': 'belum selesai',
   'tasks.all_done': 'Semua selesai',
+  'car.locked': 'Berkunci',
+  'car.unlocked': 'Tidak berkunci',
+  'car.precondition': 'Prapenyaman',
+  'car.range': 'Jarak',
+  'car.fuel': 'Bahan api',
+  'car.location': 'Lokasi',
 };

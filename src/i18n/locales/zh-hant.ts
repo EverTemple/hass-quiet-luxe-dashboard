@@ -8,6 +8,7 @@ export const zhHant: TranslationTable = {
   'common.back': '返回',
   'common.power': '電源',
   'common.tap_confirm': '再點一次以確認',
+  'common.battery': '電量',
   'greeting.morning': '早安',
   'greeting.afternoon': '午安',
   'greeting.evening': '晚安',
@@ -50,4 +51,10 @@ export const zhHant: TranslationTable = {
   'schedule.all_day': '全天',
   'tasks.open': '項未完成',
   'tasks.all_done': '全部完成',
+  'car.locked': '已上鎖',
+  'car.unlocked': '未上鎖',
+  'car.precondition': '預先調溫',
+  'car.range': '續航',
+  'car.fuel': '油量',
+  'car.location': '位置',
 };
