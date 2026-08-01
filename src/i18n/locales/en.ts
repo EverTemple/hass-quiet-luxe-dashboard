@@ -84,6 +84,13 @@ export const en = {
   'section.lights': 'Lights',
   'section.covers': 'Covers',
   'section.switches': 'Switches',
+  'view.media': 'Media',
+  'view.security': 'Security',
+  'view.energy': 'Energy',
+  'view.climates': 'All climates',
+  'view.car': 'Car',
+  'view.admin': 'Admin',
+  'view.language': 'Language',
 } as const;
 
 export type TranslationKey = keyof typeof en;

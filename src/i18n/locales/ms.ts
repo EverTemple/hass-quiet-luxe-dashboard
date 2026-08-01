@@ -86,4 +86,11 @@ export const ms: TranslationTable = {
   'section.lights': 'Lampu',
   'section.covers': 'Langsir',
   'section.switches': 'Suis',
+  'view.media': 'Media',
+  'view.security': 'Keselamatan',
+  'view.energy': 'Tenaga',
+  'view.climates': 'Semua peranti iklim',
+  'view.car': 'Kereta',
+  'view.admin': 'Pentadbir',
+  'view.language': 'Bahasa',
 };

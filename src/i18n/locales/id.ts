@@ -86,4 +86,11 @@ export const id: TranslationTable = {
   'section.lights': 'Lampu',
   'section.covers': 'Tirai',
   'section.switches': 'Sakelar',
+  'view.media': 'Media',
+  'view.security': 'Keamanan',
+  'view.energy': 'Energi',
+  'view.climates': 'Semua perangkat iklim',
+  'view.car': 'Mobil',
+  'view.admin': 'Admin',
+  'view.language': 'Bahasa',
 };

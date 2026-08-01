@@ -86,4 +86,11 @@ export const zhHans: TranslationTable = {
   'section.lights': '灯光',
   'section.covers': '窗帘',
   'section.switches': '开关',
+  'view.media': '媒体',
+  'view.security': '安全',
+  'view.energy': '能源',
+  'view.climates': '全部气候设备',
+  'view.car': '车辆',
+  'view.admin': '管理',
+  'view.language': '语言',
 };

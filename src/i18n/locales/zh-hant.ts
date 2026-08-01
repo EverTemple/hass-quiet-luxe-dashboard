@@ -86,4 +86,11 @@ export const zhHant: TranslationTable = {
   'section.lights': '燈光',
   'section.covers': '窗簾',
   'section.switches': '開關',
+  'view.media': '媒體',
+  'view.security': '安全',
+  'view.energy': '能源',
+  'view.climates': '全部氣候設備',
+  'view.car': '車輛',
+  'view.admin': '管理',
+  'view.language': '語言',
 };
