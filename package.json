@@ -1,0 +1,36 @@
+{
+  "name": "quiet-luxe",
+  "version": "0.1.0",
+  "description": "Quiet Luxe — Home Assistant theme, custom card library, and dashboard strategy (HACS package)",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "build": "vite build && node scripts/build-fonts.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "home-assistant-js-websocket": "^9.6.0",
+    "lit": "^3.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@fontsource/marcellus": "^5.0.0",
+    "@fontsource/noto-sans-sc": "^5.0.0",
+    "@fontsource/noto-sans-tc": "^5.0.0",
+    "@fontsource/noto-serif-sc": "^5.0.0",
+    "@fontsource/noto-serif-tc": "^5.0.0",
+    "@fontsource/outfit": "^5.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "eslint": "^10.0.0",
+    "happy-dom": "^20.0.0",
+    "js-yaml": "^4.1.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.65.0",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0"
+  }
+}
