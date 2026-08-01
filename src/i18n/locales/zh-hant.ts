@@ -82,4 +82,5 @@ export const zhHant: TranslationTable = {
   'section.network': '網絡與流程',
   'header.nobody_home': '無人在家',
   'header.home_suffix': '在家',
+  'view.home': '首頁',
 };

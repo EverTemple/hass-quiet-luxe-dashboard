@@ -80,6 +80,7 @@ export const en = {
   'section.network': 'Network & flows',
   'header.nobody_home': 'Nobody home',
   'header.home_suffix': 'home',
+  'view.home': 'Home',
 } as const;
 
 export type TranslationKey = keyof typeof en;
