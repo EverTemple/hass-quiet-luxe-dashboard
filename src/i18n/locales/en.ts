@@ -39,6 +39,13 @@ export const en = {
   'camera.live': 'LIVE',
   'camera.snapshot_unavailable': 'Snapshot unavailable',
   'energy.today': 'Today',
+  'schedule.agenda': 'Agenda',
+  'schedule.day': 'Day',
+  'schedule.week': 'Week',
+  'schedule.month': 'Month',
+  'schedule.no_events': 'No upcoming events',
+  'schedule.view_soon': 'Coming soon',
+  'schedule.all_day': 'All day',
 } as const;
 
 export type TranslationKey = keyof typeof en;

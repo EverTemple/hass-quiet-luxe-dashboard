@@ -41,4 +41,11 @@ export const zhHans: TranslationTable = {
   'camera.live': '直播',
   'camera.snapshot_unavailable': '无法获取画面',
   'energy.today': '今日',
+  'schedule.agenda': '议程',
+  'schedule.day': '日',
+  'schedule.week': '周',
+  'schedule.month': '月',
+  'schedule.no_events': '没有即将到来的日程',
+  'schedule.view_soon': '即将推出',
+  'schedule.all_day': '全天',
 };

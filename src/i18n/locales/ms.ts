@@ -41,4 +41,11 @@ export const ms: TranslationTable = {
   'camera.live': 'LANGSUNG',
   'camera.snapshot_unavailable': 'Petikan tidak tersedia',
   'energy.today': 'Hari ini',
+  'schedule.agenda': 'Agenda',
+  'schedule.day': 'Hari',
+  'schedule.week': 'Minggu',
+  'schedule.month': 'Bulan',
+  'schedule.no_events': 'Tiada acara akan datang',
+  'schedule.view_soon': 'Akan datang',
+  'schedule.all_day': 'Sepanjang hari',
 };

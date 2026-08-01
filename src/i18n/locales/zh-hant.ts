@@ -41,4 +41,11 @@ export const zhHant: TranslationTable = {
   'camera.live': '直播',
   'camera.snapshot_unavailable': '無法取得畫面',
   'energy.today': '今日',
+  'schedule.agenda': '議程',
+  'schedule.day': '日',
+  'schedule.week': '週',
+  'schedule.month': '月',
+  'schedule.no_events': '沒有即將到來的行程',
+  'schedule.view_soon': '即將推出',
+  'schedule.all_day': '全天',
 };
