@@ -9,6 +9,14 @@ import {
 } from '../src/testing/mock-hass';
 import { cssVariableBlock } from '../src/tokens/css';
 import type { ThemeMode } from '../src/tokens/types';
+import { QuietLuxeStrategy } from '../src/strategy/quiet-luxe-strategy';
+import type { HomeConfig } from '../src/strategy/config';
+import {
+  SUBANG_CONFIG,
+  TUNGCHUNG_CONFIG,
+  XIAMEN_CONFIG,
+} from '../src/strategy/reference-homes';
+import { referenceHome, type ReferenceHomeName } from '../src/testing/mock-registry';
 
 // Remote Unsplash photos are fine here: the harness is local-dev only and never
 // ships in the HACS package (China-reachability rule applies to the bundle).
@@ -485,3 +493,48 @@ function buildPane(mode: ThemeMode): HTMLElement {
 
 document.querySelector('#light')?.append(buildPane('light'));
 document.querySelector('#dark')?.append(buildPane('dark'));
+
+const STRATEGY_HOMES: ReadonlyArray<{
+  readonly key: ReferenceHomeName;
+  readonly home: HomeConfig;
+}> = [
+  { key: 'subang', home: SUBANG_CONFIG },
+  { key: 'tungchung', home: TUNGCHUNG_CONFIG },
+  { key: 'xiamen', home: XIAMEN_CONFIG },
+];
+
+/** JSON tree inspection of generate() output — not a full Lovelace render. */
+async function buildStrategyPane(): Promise<HTMLElement> {
+  const pane = document.createElement('section');
+  pane.id = 'strategy';
+  pane.style.cssText = 'padding:24px;display:flex;flex-direction:column;gap:16px;';
+  pane.append(el('h2', {}, 'Strategy output — reference homes'));
+  for (const { key, home } of STRATEGY_HOMES) {
+    const { snapshot, entities } = referenceHome(key);
+    const mock = makeMockHass(entities, {
+      user: { id: 'dev-admin', name: 'Steven', is_admin: true },
+      wsResponses: {
+        'config/area_registry/list': snapshot.areas,
+        'config/device_registry/list': snapshot.devices,
+        'config/entity_registry/list': snapshot.entities,
+      },
+    });
+    const dashboard = await QuietLuxeStrategy.generate({ type: 'custom:quiet-luxe', home }, mock);
+    const details = document.createElement('details');
+    details.append(el('summary', {}, `${home.name} — ${dashboard.views.length} views`));
+    for (const view of dashboard.views) {
+      const viewDetails = document.createElement('details');
+      viewDetails.style.cssText = 'margin-left:16px;';
+      viewDetails.append(el('summary', {}, `${view.title} (${view.path}, ${view.sections.length} sections)`));
+      const pre = document.createElement('pre');
+      pre.style.cssText = 'font-size:11px;overflow:auto;max-height:400px;';
+      pre.textContent = JSON.stringify(view, null, 2);
+      viewDetails.append(pre);
+      details.append(viewDetails);
+    }
+    pane.append(details);
+  }
+  return pane;
+}
+
+void buildStrategyPane().then((pane) => document.body.append(pane));
