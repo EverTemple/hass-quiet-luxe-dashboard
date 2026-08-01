@@ -1,0 +1,1918 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`reference-home dashboards (spec §2 matrix) > full dashboards match their snapshots > subang 1`] = `
+{
+  "title": "Subang Jaya",
+  "views": [
+    {
+      "icon": "mdi:home-variant-outline",
+      "max_columns": 4,
+      "path": "home",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": "sensor.main_living_aqi",
+              "form": "home",
+              "name": "Subang Jaya",
+              "presence_entities": [
+                "person.mei",
+                "person.steven",
+              ],
+              "show_greeting": true,
+              "type": "custom:quiet-luxe-header-card",
+              "weather_entity": "weather.subang",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Rooms",
+              "type": "heading",
+            },
+            {
+              "aqi_entity": "sensor.main_living_aqi",
+              "chips": [
+                {
+                  "entity": "light.main_living_pendant",
+                },
+                {
+                  "entity": "climate.main_living_ac",
+                },
+                {
+                  "entity": "cover.main_living_shade",
+                },
+                {
+                  "entity": "media_player.living_tv",
+                },
+              ],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/main_living.jpg",
+              "lights_entity": "light.main_living_pendant",
+              "name": "Main Living",
+              "navigation_path": "/quiet-luxe/room-main_living",
+              "temperature_entity": "sensor.main_living_temp",
+              "type": "custom:quiet-luxe-room-card",
+            },
+            {
+              "aqi_entity": undefined,
+              "chips": [],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/side_living.jpg",
+              "lights_entity": undefined,
+              "name": "Side Living",
+              "navigation_path": "/quiet-luxe/room-side_living",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-room-card",
+            },
+            {
+              "aqi_entity": undefined,
+              "chips": [
+                {
+                  "entity": "light.master_lamp",
+                },
+                {
+                  "entity": "climate.master_ac",
+                },
+                {
+                  "entity": "cover.master_curtain",
+                },
+              ],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/master_bedroom.jpg",
+              "lights_entity": "light.master_lamp",
+              "name": "Master Bedroom",
+              "navigation_path": "/quiet-luxe/room-master_bedroom",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-room-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/climates",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "climate.main_living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+            {
+              "entity": "fan.side_living_fan",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+            {
+              "entity": "climate.master_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/media",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.living_sonos",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Cameras",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/security",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "camera.front_gate",
+              "form": "glance",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-camera-card",
+            },
+            {
+              "entity": "camera.porch",
+              "form": "glance",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-camera-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Energy",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/energy",
+              },
+              "type": "heading",
+            },
+            {
+              "form": "strip",
+              "power_entity": "sensor.shelly_3em_total_power",
+              "today_entity": "sensor.shelly_3em_total_energy_today",
+              "type": "custom:quiet-luxe-energy-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Schedule",
+              "type": "heading",
+            },
+            {
+              "calendars": [
+                "calendar.family",
+              ],
+              "days": 7,
+              "todo_entity": "todo.family_tasks",
+              "type": "custom:quiet-luxe-schedule-card",
+            },
+            {
+              "entity": "todo.family_tasks",
+              "type": "custom:quiet-luxe-tasks-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Presence",
+              "type": "heading",
+            },
+            {
+              "entities": [
+                "person.mei",
+                "person.steven",
+              ],
+              "type": "custom:ql-row-presence",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Car",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/car",
+              },
+              "type": "heading",
+            },
+            {
+              "battery_entity": "sensor.bmw_battery",
+              "brand": "bmw",
+              "fuel_entity": undefined,
+              "location_entity": "device_tracker.bmw",
+              "lock_entity": "binary_sensor.bmw_lock",
+              "precondition_entity": undefined,
+              "range_entity": "sensor.bmw_range",
+              "type": "custom:quiet-luxe-car-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Home",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-main_living",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": "sensor.main_living_aqi",
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": "sensor.main_living_humidity",
+              "name": "Main Living",
+              "temperature_entity": "sensor.main_living_temp",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Lights",
+              "type": "heading",
+            },
+            {
+              "entity": "light.main_living_pendant",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-light-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.main_living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Covers",
+              "type": "heading",
+            },
+            {
+              "entity": "cover.main_living_shade",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-cover-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.living_sonos",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Air & sensors",
+              "type": "heading",
+            },
+            {
+              "entity": "sensor.main_living_temp",
+              "grid_options": {
+                "columns": 3,
+                "rows": 1,
+              },
+              "metric": "temp",
+              "type": "custom:quiet-luxe-sensor-tile",
+            },
+            {
+              "entity": "sensor.main_living_humidity",
+              "grid_options": {
+                "columns": 3,
+                "rows": 1,
+              },
+              "metric": "humidity",
+              "type": "custom:quiet-luxe-sensor-tile",
+            },
+            {
+              "entity": "sensor.main_living_aqi",
+              "grid_options": {
+                "columns": 3,
+                "rows": 1,
+              },
+              "metric": "aqi",
+              "type": "custom:quiet-luxe-sensor-tile",
+            },
+            {
+              "entity": "binary_sensor.hall_motion",
+              "kind": "motion",
+              "show_toggle": true,
+              "toggle_entity": "switch.hall_motion_detection",
+              "type": "custom:ql-row-door-motion",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Switches",
+              "type": "heading",
+            },
+            {
+              "entity": "switch.living_fan_rf",
+              "type": "custom:quiet-luxe-device-cutout-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Main Living",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-side_living",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": undefined,
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": undefined,
+              "name": "Side Living",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "fan.side_living_fan",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Side Living",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-master_bedroom",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": undefined,
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": undefined,
+              "name": "Master Bedroom",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Lights",
+              "type": "heading",
+            },
+            {
+              "entity": "light.master_lamp",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-light-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.master_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Covers",
+              "type": "heading",
+            },
+            {
+              "entity": "cover.master_curtain",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-cover-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Master Bedroom",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:music",
+      "max_columns": 3,
+      "path": "media",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.living_sonos",
+              "form": "player",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Speakers",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.kitchen_sonos",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+            {
+              "entity": "media_player.living_tv",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Speaker groups",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.living_sonos",
+              "form": "group-row",
+              "leader": "media_player.living_sonos",
+              "type": "custom:quiet-luxe-media-card",
+            },
+            {
+              "entity": "media_player.kitchen_sonos",
+              "form": "group-row",
+              "leader": "media_player.living_sonos",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Media",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:shield-home-outline",
+      "max_columns": 3,
+      "path": "security",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Cameras",
+              "type": "heading",
+            },
+            {
+              "entity": "camera.front_gate",
+              "form": "full",
+              "type": "custom:quiet-luxe-camera-card",
+            },
+            {
+              "entity": "camera.porch",
+              "form": "full",
+              "type": "custom:quiet-luxe-camera-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Doors & motion",
+              "type": "heading",
+            },
+            {
+              "entity": "binary_sensor.front_door",
+              "kind": "door",
+              "type": "custom:ql-row-door-motion",
+            },
+            {
+              "entity": "binary_sensor.hall_motion",
+              "kind": "motion",
+              "show_toggle": true,
+              "toggle_entity": "switch.hall_motion_detection",
+              "type": "custom:ql-row-door-motion",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Security",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:lightning-bolt-outline",
+      "max_columns": 3,
+      "path": "energy",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Energy",
+              "type": "heading",
+            },
+            {
+              "form": "strip",
+              "power_entity": "sensor.shelly_3em_total_power",
+              "today_entity": "sensor.shelly_3em_total_energy_today",
+              "type": "custom:quiet-luxe-energy-card",
+            },
+            {
+              "form": "ring",
+              "grid_options": {
+                "columns": 4,
+              },
+              "name": "L1",
+              "power_entity": "sensor.shelly_3em_phase_a_power",
+              "type": "custom:quiet-luxe-energy-card",
+            },
+            {
+              "form": "ring",
+              "grid_options": {
+                "columns": 4,
+              },
+              "name": "L2",
+              "power_entity": "sensor.shelly_3em_phase_b_power",
+              "type": "custom:quiet-luxe-energy-card",
+            },
+            {
+              "form": "ring",
+              "grid_options": {
+                "columns": 4,
+              },
+              "name": "L3",
+              "power_entity": "sensor.shelly_3em_phase_c_power",
+              "type": "custom:quiet-luxe-energy-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Energy",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:thermostat",
+      "max_columns": 3,
+      "path": "climates",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Main Living",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.main_living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Side Living",
+              "type": "heading",
+            },
+            {
+              "entity": "fan.side_living_fan",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Master Bedroom",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.master_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "All climates",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:car-outline",
+      "max_columns": 2,
+      "path": "car",
+      "sections": [
+        {
+          "cards": [
+            {
+              "battery_entity": "sensor.bmw_battery",
+              "brand": "bmw",
+              "fuel_entity": undefined,
+              "location_entity": "device_tracker.bmw",
+              "lock_entity": "binary_sensor.bmw_lock",
+              "precondition_entity": undefined,
+              "range_entity": "sensor.bmw_range",
+              "type": "custom:quiet-luxe-car-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Car",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:tune",
+      "max_columns": 2,
+      "path": "admin",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Network & flows",
+              "type": "heading",
+            },
+            {
+              "description": "UniFi guest network",
+              "entity": "switch.nr_guest_wifi",
+              "name": "Guest Wi-Fi",
+              "type": "custom:ql-row-network-flow",
+            },
+            {
+              "description": "pfSense NAT rule",
+              "entity": "switch.nr_plex_forward",
+              "name": "Plex port forward",
+              "type": "custom:ql-row-network-flow",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Admin",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:translate",
+      "max_columns": 2,
+      "path": "language",
+      "sections": [
+        {
+          "cards": [
+            {
+              "type": "custom:quiet-luxe-language-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Language",
+      "type": "sections",
+    },
+  ],
+}
+`;
+
+exports[`reference-home dashboards (spec §2 matrix) > full dashboards match their snapshots > tungchung 1`] = `
+{
+  "title": "Tung Chung",
+  "views": [
+    {
+      "icon": "mdi:home-variant-outline",
+      "max_columns": 4,
+      "path": "home",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": "sensor.living_aqi",
+              "form": "home",
+              "name": "Tung Chung",
+              "presence_entities": [
+                "person.steven",
+              ],
+              "show_greeting": true,
+              "type": "custom:quiet-luxe-header-card",
+              "weather_entity": "weather.tungchung",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Rooms",
+              "type": "heading",
+            },
+            {
+              "aqi_entity": undefined,
+              "chips": [
+                {
+                  "entity": "light.bedroom_lamp",
+                },
+              ],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/bedroom.jpg",
+              "lights_entity": "light.bedroom_lamp",
+              "name": "Bedroom",
+              "navigation_path": "/quiet-luxe/room-bedroom",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-room-card",
+            },
+            {
+              "aqi_entity": "sensor.living_aqi",
+              "chips": [
+                {
+                  "entity": "light.living_ceiling",
+                },
+                {
+                  "entity": "climate.living_ac",
+                },
+                {
+                  "entity": "cover.living_curtain",
+                },
+                {
+                  "entity": "media_player.lg_tv",
+                },
+              ],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/living.jpg",
+              "lights_entity": "light.living_ceiling",
+              "name": "Living Room",
+              "navigation_path": "/quiet-luxe/room-living",
+              "temperature_entity": "sensor.living_temp",
+              "type": "custom:quiet-luxe-room-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/climates",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/media",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.lg_tv",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Cameras",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/security",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "camera.srihome_living",
+              "form": "glance",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-camera-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Schedule",
+              "type": "heading",
+            },
+            {
+              "calendars": [
+                "calendar.family",
+              ],
+              "days": 7,
+              "todo_entity": "todo.family_tasks",
+              "type": "custom:quiet-luxe-schedule-card",
+            },
+            {
+              "entity": "todo.family_tasks",
+              "type": "custom:quiet-luxe-tasks-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Presence",
+              "type": "heading",
+            },
+            {
+              "entities": [
+                "person.steven",
+              ],
+              "type": "custom:ql-row-presence",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Car",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/car",
+              },
+              "type": "heading",
+            },
+            {
+              "battery_entity": "sensor.audi_battery",
+              "brand": "audi",
+              "fuel_entity": undefined,
+              "location_entity": undefined,
+              "lock_entity": undefined,
+              "precondition_entity": undefined,
+              "range_entity": "sensor.audi_range",
+              "type": "custom:quiet-luxe-car-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Home",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-bedroom",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": undefined,
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": undefined,
+              "name": "Bedroom",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Lights",
+              "type": "heading",
+            },
+            {
+              "entity": "light.bedroom_lamp",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-light-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Switches",
+              "type": "heading",
+            },
+            {
+              "entity": "switch.bedroom_fan_rf",
+              "type": "custom:quiet-luxe-device-cutout-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Bedroom",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-living",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": "sensor.living_aqi",
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": undefined,
+              "name": "Living Room",
+              "temperature_entity": "sensor.living_temp",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Lights",
+              "type": "heading",
+            },
+            {
+              "entity": "light.living_ceiling",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-light-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Covers",
+              "type": "heading",
+            },
+            {
+              "entity": "cover.living_curtain",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-cover-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.lg_tv",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Air & sensors",
+              "type": "heading",
+            },
+            {
+              "entity": "sensor.living_temp",
+              "grid_options": {
+                "columns": 3,
+                "rows": 1,
+              },
+              "metric": "temp",
+              "type": "custom:quiet-luxe-sensor-tile",
+            },
+            {
+              "entity": "sensor.living_aqi",
+              "grid_options": {
+                "columns": 3,
+                "rows": 1,
+              },
+              "metric": "aqi",
+              "type": "custom:quiet-luxe-sensor-tile",
+            },
+            {
+              "entity": "binary_sensor.living_motion",
+              "kind": "motion",
+              "show_toggle": true,
+              "toggle_entity": "switch.living_motion_detection",
+              "type": "custom:ql-row-door-motion",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Living Room",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:music",
+      "max_columns": 3,
+      "path": "media",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.lg_tv",
+              "form": "player",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Media",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:shield-home-outline",
+      "max_columns": 3,
+      "path": "security",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Cameras",
+              "type": "heading",
+            },
+            {
+              "entity": "camera.srihome_living",
+              "form": "full",
+              "type": "custom:quiet-luxe-camera-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Doors & motion",
+              "type": "heading",
+            },
+            {
+              "entity": "binary_sensor.entry_door",
+              "kind": "door",
+              "type": "custom:ql-row-door-motion",
+            },
+            {
+              "entity": "binary_sensor.living_motion",
+              "kind": "motion",
+              "show_toggle": true,
+              "toggle_entity": "switch.living_motion_detection",
+              "type": "custom:ql-row-door-motion",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Security",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:thermostat",
+      "max_columns": 3,
+      "path": "climates",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Living Room",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "All climates",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:car-outline",
+      "max_columns": 2,
+      "path": "car",
+      "sections": [
+        {
+          "cards": [
+            {
+              "battery_entity": "sensor.audi_battery",
+              "brand": "audi",
+              "fuel_entity": undefined,
+              "location_entity": undefined,
+              "lock_entity": undefined,
+              "precondition_entity": undefined,
+              "range_entity": "sensor.audi_range",
+              "type": "custom:quiet-luxe-car-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Car",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:tune",
+      "max_columns": 2,
+      "path": "admin",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Network & flows",
+              "type": "heading",
+            },
+            {
+              "description": "UniFi port",
+              "entity": "switch.nr_cam_uplink",
+              "name": "Camera uplink",
+              "type": "custom:ql-row-network-flow",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Admin",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:translate",
+      "max_columns": 2,
+      "path": "language",
+      "sections": [
+        {
+          "cards": [
+            {
+              "type": "custom:quiet-luxe-language-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Language",
+      "type": "sections",
+    },
+  ],
+}
+`;
+
+exports[`reference-home dashboards (spec §2 matrix) > full dashboards match their snapshots > xiamen 1`] = `
+{
+  "title": "Xiamen",
+  "views": [
+    {
+      "icon": "mdi:home-variant-outline",
+      "max_columns": 4,
+      "path": "home",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": "sensor.living_aqi",
+              "form": "home",
+              "name": "Xiamen",
+              "presence_entities": [
+                "person.steven",
+              ],
+              "show_greeting": true,
+              "type": "custom:quiet-luxe-header-card",
+              "weather_entity": "weather.xiamen",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Rooms",
+              "type": "heading",
+            },
+            {
+              "aqi_entity": undefined,
+              "chips": [
+                {
+                  "entity": "climate.bedroom_ac",
+                },
+              ],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/bedroom.jpg",
+              "lights_entity": undefined,
+              "name": "Bedroom",
+              "navigation_path": "/quiet-luxe/room-bedroom",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-room-card",
+            },
+            {
+              "aqi_entity": "sensor.living_aqi",
+              "chips": [
+                {
+                  "entity": "light.living_ceiling",
+                },
+                {
+                  "entity": "climate.living_ac",
+                },
+                {
+                  "entity": "cover.living_curtain",
+                },
+                {
+                  "entity": "media_player.tcl_tv",
+                },
+              ],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/living.jpg",
+              "lights_entity": "light.living_ceiling",
+              "name": "Living Room",
+              "navigation_path": "/quiet-luxe/room-living",
+              "temperature_entity": "sensor.living_temp",
+              "type": "custom:quiet-luxe-room-card",
+            },
+            {
+              "aqi_entity": undefined,
+              "chips": [
+                {
+                  "entity": "light.storage_light",
+                },
+              ],
+              "grid_options": {
+                "columns": 6,
+              },
+              "image": "/local/quiet-luxe/rooms/storage.jpg",
+              "lights_entity": "light.storage_light",
+              "name": "Storage",
+              "navigation_path": "/quiet-luxe/room-storage",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-room-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/climates",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+            {
+              "entity": "climate.bedroom_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/media",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.tcl_tv",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Cameras",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/security",
+              },
+              "type": "heading",
+            },
+            {
+              "entity": "camera.dahua_living",
+              "form": "glance",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-camera-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Presence",
+              "type": "heading",
+            },
+            {
+              "entities": [
+                "person.steven",
+              ],
+              "type": "custom:ql-row-presence",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Vacuum",
+              "type": "heading",
+            },
+            {
+              "entity": "vacuum.dreame_x30",
+              "type": "custom:quiet-luxe-vacuum-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Car",
+              "tap_action": {
+                "action": "navigate",
+                "navigation_path": "/quiet-luxe/car",
+              },
+              "type": "heading",
+            },
+            {
+              "battery_entity": "sensor.liauto_battery",
+              "brand": "liauto",
+              "fuel_entity": "sensor.liauto_fuel",
+              "location_entity": undefined,
+              "lock_entity": undefined,
+              "precondition_entity": undefined,
+              "range_entity": "sensor.liauto_range",
+              "type": "custom:quiet-luxe-car-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Home",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-bedroom",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": undefined,
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": undefined,
+              "name": "Bedroom",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.bedroom_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Bedroom",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-living",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": "sensor.living_aqi",
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": undefined,
+              "name": "Living Room",
+              "temperature_entity": "sensor.living_temp",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Lights",
+              "type": "heading",
+            },
+            {
+              "entity": "light.living_ceiling",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-light-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Covers",
+              "type": "heading",
+            },
+            {
+              "entity": "cover.living_curtain",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-cover-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.tcl_tv",
+              "form": "bar",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Air & sensors",
+              "type": "heading",
+            },
+            {
+              "entity": "sensor.living_temp",
+              "grid_options": {
+                "columns": 3,
+                "rows": 1,
+              },
+              "metric": "temp",
+              "type": "custom:quiet-luxe-sensor-tile",
+            },
+            {
+              "entity": "sensor.living_aqi",
+              "grid_options": {
+                "columns": 3,
+                "rows": 1,
+              },
+              "metric": "aqi",
+              "type": "custom:quiet-luxe-sensor-tile",
+            },
+            {
+              "entity": "binary_sensor.entry_motion",
+              "kind": "motion",
+              "show_toggle": true,
+              "toggle_entity": "switch.entry_motion_detection",
+              "type": "custom:ql-row-door-motion",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Living Room",
+      "type": "sections",
+    },
+    {
+      "max_columns": 2,
+      "path": "room-storage",
+      "sections": [
+        {
+          "cards": [
+            {
+              "aqi_entity": undefined,
+              "back_path": "/quiet-luxe/home",
+              "form": "room",
+              "humidity_entity": undefined,
+              "name": "Storage",
+              "temperature_entity": undefined,
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 2,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Lights",
+              "type": "heading",
+            },
+            {
+              "entity": "light.storage_light",
+              "grid_options": {
+                "columns": 6,
+              },
+              "type": "custom:quiet-luxe-light-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "subview": true,
+      "title": "Storage",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:music",
+      "max_columns": 3,
+      "path": "media",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Music",
+              "type": "heading",
+            },
+            {
+              "entity": "media_player.tcl_tv",
+              "form": "player",
+              "type": "custom:quiet-luxe-media-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Media",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:shield-home-outline",
+      "max_columns": 3,
+      "path": "security",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Cameras",
+              "type": "heading",
+            },
+            {
+              "entity": "camera.dahua_living",
+              "form": "full",
+              "type": "custom:quiet-luxe-camera-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Doors & motion",
+              "type": "heading",
+            },
+            {
+              "entity": "binary_sensor.entry_door",
+              "kind": "door",
+              "type": "custom:ql-row-door-motion",
+            },
+            {
+              "entity": "binary_sensor.entry_motion",
+              "kind": "motion",
+              "show_toggle": true,
+              "toggle_entity": "switch.entry_motion_detection",
+              "type": "custom:ql-row-door-motion",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Security",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:thermostat",
+      "max_columns": 3,
+      "path": "climates",
+      "sections": [
+        {
+          "cards": [
+            {
+              "heading": "Bedroom",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.bedroom_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Living Room",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 4,
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "All climates",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:car-outline",
+      "max_columns": 2,
+      "path": "car",
+      "sections": [
+        {
+          "cards": [
+            {
+              "battery_entity": "sensor.liauto_battery",
+              "brand": "liauto",
+              "fuel_entity": "sensor.liauto_fuel",
+              "location_entity": undefined,
+              "lock_entity": undefined,
+              "precondition_entity": undefined,
+              "range_entity": "sensor.liauto_range",
+              "type": "custom:quiet-luxe-car-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Car",
+      "type": "sections",
+    },
+    {
+      "icon": "mdi:translate",
+      "max_columns": 2,
+      "path": "language",
+      "sections": [
+        {
+          "cards": [
+            {
+              "type": "custom:quiet-luxe-language-card",
+            },
+          ],
+          "type": "grid",
+        },
+      ],
+      "title": "Language",
+      "type": "sections",
+    },
+  ],
+}
+`;
