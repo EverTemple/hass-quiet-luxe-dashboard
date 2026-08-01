@@ -41,7 +41,7 @@ Inline copy from spec §4 — use these exact values; do not invent new ones.
 
 **Effect styles:** `shadow/card-light` (0 1 6 rgba(80,65,40,.08)); `glass/card-dark` (1px inside border `surface/border` + background blur 24); `glow/light-on` (drop shadow 0 0 18 rgba(224,178,99,.45)).
 
-**Gradient styles (paint styles):** `scrim/top` (linear 180°, rgba(8,6,4,.62) → transparent, stops 0%/45%); `scrim/bottom` (linear 0°, rgba(8,6,4,.82) → transparent, stops 0%/50%); `bg/radial-light` (radial at 50% 18%, `bg/glow-center` → `bg/base`); `bg/radial-dark` (radial at 50% 12%, `bg/glow-center` → `bg/base`).
+**Gradient styles (paint styles):** `scrim/top` (linear 180°, rgba(8,6,4,.62) → transparent, stops 0%/45%); `scrim/bottom` (linear 0°, rgba(8,6,4,.82) → transparent, stops 0%/50%); `bg/radial-light` (radial at 50% 18%, `#FBF8F1` → `#ECE5D6`, radius 100% of frame); `bg/radial-dark` (radial at 50% 15%, `#262019` → `#100D0A`, radius 100% of frame). *(Strengthened 2026-08-01 after user feedback — original `bg/glow-center` → `bg/base` stops were imperceptible.)*
 
 **Text styles** (Latin set; duplicate as `…/tc` with Noto Serif TC light / Noto Sans TC, `…/sc` with Noto Serif SC / Noto Sans SC):
 

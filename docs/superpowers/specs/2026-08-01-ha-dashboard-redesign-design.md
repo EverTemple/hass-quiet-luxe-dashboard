@@ -69,7 +69,7 @@ Calendar/tasks source: Google Calendar + Google Tasks on Subang Jaya and Tung Ch
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Background (radial center → edge) | warm luminous ivory → `#F4F0E8` | faint warm glow → `#161310` |
+| Background (radial center → edge) | `#FBF8F1` → `#ECE5D6` | `#262019` → `#100D0A` |
 | Card surface | `#FDFBF6` + soft warm shadow | `rgba(255,250,240,.055)` + 1px `rgba(237,230,216,.10)` border + blur (glass) |
 | Ink | `#2B2620` | `#EDE6D8` |
 | Muted | `#8C8578` | `#8A8172` |
