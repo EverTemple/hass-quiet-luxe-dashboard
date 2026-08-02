@@ -31,10 +31,21 @@ export interface EntityEntry {
   readonly name: string | null;
 }
 
+/**
+ * A row of HA's label registry. The user types a `name`; HA derives `label_id`
+ * from it by slugifying ("ql-hidden" → "ql_hidden"). Every other registry row
+ * stores label_ids, never names, so the registry is what connects the two.
+ */
+export interface LabelEntry {
+  readonly label_id: string;
+  readonly name: string;
+}
+
 export interface RegistrySnapshot {
   readonly areas: ReadonlyArray<AreaEntry>;
   readonly devices: ReadonlyArray<DeviceEntry>;
   readonly entities: ReadonlyArray<EntityEntry>;
+  readonly labels: ReadonlyArray<LabelEntry>;
 }
 
 export class QuietLuxeRegistryError extends Error {
@@ -71,9 +82,36 @@ interface RawEntityEntry {
   readonly name?: string | null;
 }
 
+interface RawLabelEntry {
+  readonly label_id: string;
+  readonly name?: string | null;
+}
+
 /**
- * Reads the three HA registries over WebSocket — the documented custom-strategy
- * data path (developers.home-assistant.io custom-strategy, verified 2026-08-01).
+ * The label registry arrived with HA 2024.4; older cores reject the command and
+ * have no labels at all. Degrading to "no labels defined" keeps the dashboard
+ * generating there, and the warning keeps the degrade visible.
+ */
+async function fetchLabels(
+  callWS: NonNullable<HomeAssistant['callWS']>,
+): Promise<ReadonlyArray<LabelEntry>> {
+  try {
+    const labels = await callWS<ReadonlyArray<RawLabelEntry>>({
+      type: 'config/label_registry/list',
+    });
+    return labels.map((label) => ({
+      label_id: label.label_id,
+      name: label.name ?? label.label_id,
+    }));
+  } catch (error) {
+    console.warn('[quiet-luxe] label registry unavailable; ql-* labels ignored', error);
+    return [];
+  }
+}
+
+/**
+ * Reads the HA registries over WebSocket — the documented custom-strategy data
+ * path (developers.home-assistant.io custom-strategy, verified 2026-08-01).
  */
 export async function fetchRegistrySnapshot(hass: HomeAssistant): Promise<RegistrySnapshot> {
   const callWS = hass.callWS;
@@ -81,12 +119,14 @@ export async function fetchRegistrySnapshot(hass: HomeAssistant): Promise<Regist
     throw new QuietLuxeRegistryError('hass.callWS is unavailable');
   }
   try {
-    const [areas, devices, entities] = await Promise.all([
+    const [areas, devices, entities, labels] = await Promise.all([
       callWS<ReadonlyArray<RawAreaEntry>>({ type: 'config/area_registry/list' }),
       callWS<ReadonlyArray<RawDeviceEntry>>({ type: 'config/device_registry/list' }),
       callWS<ReadonlyArray<RawEntityEntry>>({ type: 'config/entity_registry/list' }),
+      fetchLabels(callWS),
     ]);
     return {
+      labels,
       areas: areas.map((area) => ({
         area_id: area.area_id,
         name: area.name,
@@ -140,6 +180,52 @@ export interface RegistryIndex {
 const EMPTY: ReadonlyArray<string> = [];
 
 /**
+ * Case- and separator-insensitive form of a label token. HA slugifies a label's
+ * name into its id ("ql-hidden" → "ql_hidden"), so the two spellings have to
+ * collapse onto one key before anything can be compared.
+ */
+function canonicalLabel(value: string): string {
+  return value.trim().toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+/** Tests one registry row's label_ids against a label named in our code. */
+export interface LabelMatcher {
+  matches(labels: ReadonlyArray<string>, wanted: string): boolean;
+}
+
+/**
+ * Resolves a label *name* used in code (`ql-hidden`) to the *label_ids* HA
+ * actually stamps on registry rows. Two layers, deliberately:
+ *
+ * 1. The label registry maps name → label_id, so renaming a label, or HA
+ *    disambiguating an id (`ql_hidden_2`), still resolves to the right rows.
+ * 2. A canonical-form comparison, so a label whose id or name the user spelled
+ *    with hyphens, underscores, or mixed case matches what they intended even
+ *    when the registry is unavailable.
+ */
+export function buildLabelMatcher(labels: ReadonlyArray<LabelEntry>): LabelMatcher {
+  const idsByCanonical = new Map<string, Set<string>>();
+  for (const label of labels) {
+    for (const key of [canonicalLabel(label.name), canonicalLabel(label.label_id)]) {
+      const ids = idsByCanonical.get(key) ?? new Set<string>();
+      ids.add(label.label_id);
+      idsByCanonical.set(key, ids);
+    }
+  }
+  const noIds: ReadonlySet<string> = new Set<string>();
+  return {
+    matches: (rowLabels, wanted): boolean => {
+      if (rowLabels.length === 0) {
+        return false;
+      }
+      const key = canonicalLabel(wanted);
+      const resolved = idsByCanonical.get(key) ?? noIds;
+      return rowLabels.some((label) => resolved.has(label) || canonicalLabel(label) === key);
+    },
+  };
+}
+
+/**
  * Pure index over a registry snapshot. Visibility rules (spec §8):
  * hidden_by/disabled_by set, entity_category set (config/diagnostic), or the
  * ql-hidden label → excluded everywhere. ql-favorite sorts first per bucket.
@@ -150,15 +236,16 @@ export function buildRegistryIndex(
 ): RegistryIndex {
   const areaById = new Map(snapshot.areas.map((area) => [area.area_id, area]));
   const deviceById = new Map(snapshot.devices.map((device) => [device.id, device]));
+  const labelMatcher = buildLabelMatcher(snapshot.labels);
   const favoriteRank = (entity: EntityEntry): number =>
-    entity.labels.includes(LABEL_FAVORITE) ? 0 : 1;
+    labelMatcher.matches(entity.labels, LABEL_FAVORITE) ? 0 : 1;
   const visible = snapshot.entities
     .filter(
       (entity) =>
         entity.hidden_by === null &&
         entity.disabled_by === null &&
         entity.entity_category === null &&
-        !entity.labels.includes(LABEL_HIDDEN),
+        !labelMatcher.matches(entity.labels, LABEL_HIDDEN),
     )
     .sort(
       (a, b) => favoriteRank(a) - favoriteRank(b) || a.entity_id.localeCompare(b.entity_id),
@@ -216,7 +303,10 @@ export function buildRegistryIndex(
     inAreaAll: (areaId) => byArea.get(areaId) ?? EMPTY,
     inArea: (areaId, domain, deviceClass) => matching(byArea.get(areaId) ?? EMPTY, domain, deviceClass),
     all: (domain, deviceClass) => matching(ordered, domain, deviceClass),
-    hasLabel: (entityId, label) => entityById.get(entityId)?.labels.includes(label) ?? false,
+    hasLabel: (entityId, label): boolean => {
+      const entity = entityById.get(entityId);
+      return entity !== undefined && labelMatcher.matches(entity.labels, label);
+    },
     platformOf: (entityId) => entityById.get(entityId)?.platform,
     siblings: (entityId): ReadonlyArray<string> => {
       const deviceId = entityById.get(entityId)?.device_id ?? null;

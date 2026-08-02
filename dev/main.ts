@@ -518,6 +518,7 @@ async function buildStrategyPane(): Promise<HTMLElement> {
         'config/area_registry/list': snapshot.areas,
         'config/device_registry/list': snapshot.devices,
         'config/entity_registry/list': snapshot.entities,
+        'config/label_registry/list': snapshot.labels,
       },
     });
     const dashboard = await QuietLuxeStrategy.generate({ type: 'custom:quiet-luxe', home }, mock);

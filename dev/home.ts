@@ -58,6 +58,7 @@ async function main(): Promise<void> {
       'config/area_registry/list': snapshot.areas,
       'config/device_registry/list': snapshot.devices,
       'config/entity_registry/list': snapshot.entities,
+      'config/label_registry/list': snapshot.labels,
       'todo/item/list': {
         items: [
           { uid: 'a1', summary: 'Buy milk', status: 'needs_action', due: '2026-08-03' },

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { makeEntity } from '../../testing/mock-hass';
-import { makeContext, mockArea, mockDevice, mockRegEntity } from '../../testing/mock-registry';
+import {
+  labelId,
+  makeContext,
+  mockArea,
+  mockDevice,
+  mockLabel,
+  mockRegEntity,
+} from '../../testing/mock-registry';
 import {
   cameraWallCards,
   doorMotionRows,
@@ -13,9 +20,13 @@ import {
 const snapshot = {
   areas: [mockArea('living', 'Living Room')],
   devices: [mockDevice('dev-motion', 'living')],
+  labels: [mockLabel('ql-primary-camera')],
   entities: [
     mockRegEntity('camera.back', {}),
-    mockRegEntity('camera.front', { labels: ['ql-primary-camera'], device_id: 'dev-motion' }),
+    mockRegEntity('camera.front', {
+      labels: [labelId('ql-primary-camera')],
+      device_id: 'dev-motion',
+    }),
     mockRegEntity('camera.side', {}),
     mockRegEntity('binary_sensor.front_door', {}),
     mockRegEntity('binary_sensor.hall_motion', { device_id: 'dev-motion' }),

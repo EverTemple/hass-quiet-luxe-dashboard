@@ -44,12 +44,13 @@ const registry = await new Promise((resolve, reject) => {
       return;
     }
     if (message.type === 'auth_ok') {
-      const [areas, devices, entities] = await Promise.all([
+      const [areas, devices, entities, labels] = await Promise.all([
         send({ type: 'config/area_registry/list' }),
         send({ type: 'config/device_registry/list' }),
         send({ type: 'config/entity_registry/list' }),
+        send({ type: 'config/label_registry/list' }),
       ]);
-      resolve({ areas, devices, entities });
+      resolve({ areas, devices, entities, labels });
       return;
     }
     if (message.type === 'result') {
@@ -68,5 +69,5 @@ writeFileSync(
   `${JSON.stringify({ fetched_at: new Date().toISOString(), registry, states }, null, 2)}\n`,
 );
 console.log(
-  `fetch-live-snapshot: ${registry.areas.length} areas, ${registry.entities.length} registry entries, ${states.length} states -> ${outPath}`,
+  `fetch-live-snapshot: ${registry.areas.length} areas, ${registry.entities.length} registry entries, ${registry.labels.length} labels, ${states.length} states -> ${outPath}`,
 );

@@ -6,6 +6,7 @@ import {
   type AreaEntry,
   type DeviceEntry,
   type EntityEntry,
+  type LabelEntry,
   type RegistrySnapshot,
 } from '../strategy/registry';
 import type { StrategyContext, Tier } from '../strategy/types';
@@ -38,6 +39,29 @@ export function mockRegEntity(entityId: string, extra: Partial<EntityEntry> = {}
   };
 }
 
+/**
+ * A label as HA stores it: the user types the name, HA slugifies it into the
+ * id that every other registry row then carries. Fixtures must go through this
+ * so they never repeat the bug where code compared against the display name.
+ */
+export function mockLabel(name: string, labelId?: string): LabelEntry {
+  return { label_id: labelId ?? name.trim().toLowerCase().replace(/[\s-]+/g, '_'), name };
+}
+
+/** The id an entity/device/area row would carry for a label of this name. */
+export function labelId(name: string): string {
+  return mockLabel(name).label_id;
+}
+
+/** Snapshot literal for tests; `labels` defaults to "instance defines none". */
+export type MockSnapshot = Omit<RegistrySnapshot, 'labels'> & {
+  readonly labels?: ReadonlyArray<LabelEntry>;
+};
+
+export function mockSnapshot(snapshot: MockSnapshot): RegistrySnapshot {
+  return { ...snapshot, labels: snapshot.labels ?? [] };
+}
+
 export interface MockContextOptions {
   /**
    * Raw home config merged over { name: 'Test Home' } and validated. The
@@ -45,7 +69,7 @@ export interface MockContextOptions {
    * not assignable to Record<string, unknown> under strict TS).
    */
   readonly home?: Record<string, unknown> | HomeConfig;
-  readonly snapshot?: RegistrySnapshot;
+  readonly snapshot?: MockSnapshot;
   readonly entities?: ReadonlyArray<HassEntity>;
   readonly locale?: Locale;
   readonly tier?: Tier;
@@ -54,7 +78,7 @@ export interface MockContextOptions {
 }
 
 export function makeContext(options: MockContextOptions = {}): StrategyContext {
-  const snapshot = options.snapshot ?? { areas: [], devices: [], entities: [] };
+  const snapshot = mockSnapshot(options.snapshot ?? { areas: [], devices: [], entities: [] });
   const states = Object.fromEntries(
     (options.entities ?? []).map((entity) => [entity.entity_id, entity]),
   );
@@ -85,25 +109,32 @@ interface Row {
   readonly area?: string;
   readonly device?: string;
   readonly platform?: string;
+  /** Label *names*; stored on the row as the label_ids HA would derive. */
   readonly labels?: ReadonlyArray<string>;
   readonly attributes?: Record<string, unknown>;
 }
 
+/**
+ * Rows name their labels, and the fixture derives both the row's label_ids and
+ * the label registry from those names — exactly the split a real instance has.
+ */
 function build(
   areas: ReadonlyArray<AreaEntry>,
   devices: ReadonlyArray<DeviceEntry>,
   rows: ReadonlyArray<Row>,
 ): ReferenceHome {
+  const names = [...new Set(rows.flatMap((row) => row.labels ?? []))];
   return {
     snapshot: {
       areas,
       devices,
+      labels: names.map((name) => mockLabel(name)),
       entities: rows.map((row) =>
         mockRegEntity(row.id, {
           area_id: row.area ?? null,
           device_id: row.device ?? null,
           platform: row.platform ?? 'test',
-          labels: row.labels ?? [],
+          labels: (row.labels ?? []).map((name) => labelId(name)),
         }),
       ),
     },
@@ -169,6 +200,18 @@ const TUNGCHUNG: ReferenceHome = build(
     { id: 'sensor.living_aqi', state: '35', area: 'living', attributes: { device_class: 'aqi' } },
     { id: 'media_player.lg_tv', state: 'off', area: 'living', platform: 'webostv', attributes: { device_class: 'tv' } },
     { id: 'camera.srihome_living', state: 'idle', platform: 'generic' },
+    /* The live Tung Chung instance labels its duplicate profile streams and the
+       chattering per-cell motion sensors ql-hidden; both must stay off every
+       view. */
+    { id: 'camera.living_room_profile_000', state: 'idle', platform: 'generic', labels: ['ql-hidden'] },
+    {
+      id: 'binary_sensor.living_room_cell_motion_detection_2',
+      state: 'off',
+      area: 'living',
+      device: 'dev-living-motion',
+      labels: ['ql-hidden'],
+      attributes: { device_class: 'motion' },
+    },
     { id: 'person.steven', state: 'home', attributes: { friendly_name: 'Steven' } },
     { id: 'calendar.family', state: 'off', platform: 'google_calendar' },
     { id: 'todo.family_tasks', state: '1', platform: 'google_tasks' },

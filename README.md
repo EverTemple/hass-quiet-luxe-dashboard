@@ -173,7 +173,10 @@ strategy:
 Conventions the strategy reads from HA itself: areas = rooms; entities bucket
 per area by domain and device class; labels refine — `ql-favorite` (sort
 first), `ql-hidden` (never rendered), `ql-primary-camera` (leads camera
-sections). Room photos resolve override → area picture →
+sections). Create those in Settings → Areas & Labels; HA slugifies the name you
+type into the id it stores (`ql-hidden` → `ql_hidden`), and the strategy
+resolves through the label registry, so either spelling — and later renames —
+keep working. Room photos resolve override → area picture →
 `<photo_base>/<area_id>.jpg` when the home sets `photo_base`. With none of
 those, the room card draws its own warm fallback instead of pointing at a file
 that may not exist.

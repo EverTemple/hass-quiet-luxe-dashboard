@@ -264,12 +264,15 @@ export {
 } from './strategy/config';
 export { SUBANG_CONFIG, TUNGCHUNG_CONFIG, XIAMEN_CONFIG } from './strategy/reference-homes';
 export {
+  buildLabelMatcher,
   buildRegistryIndex,
   fetchRegistrySnapshot,
   LABEL_FAVORITE,
   LABEL_HIDDEN,
   LABEL_PRIMARY_CAMERA,
   QuietLuxeRegistryError,
+  type LabelEntry,
+  type LabelMatcher,
   type RegistryIndex,
   type RegistrySnapshot,
 } from './strategy/registry';
