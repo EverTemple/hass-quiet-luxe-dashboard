@@ -107,4 +107,21 @@ describe('quiet-luxe-vacuum-card', () => {
     expect(card.shadowRoot?.textContent).toContain('Unavailable');
     card.remove();
   });
+
+  it('the identity region opens HA’s more-info dialog without firing a room clean', async () => {
+    const hass = makeMockHass([vacuumEntity()]);
+    const card = await mount(ROOMS_CONFIG, hass);
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['vacuum.robot']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    expect(hass.calls).toEqual([]);
+    card.remove();
+  });
 });

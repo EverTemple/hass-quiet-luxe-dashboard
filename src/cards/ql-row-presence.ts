@@ -51,10 +51,13 @@ export class QlRowPresence extends QlBaseCard {
         gap: var(--ql-space-l, 16px);
         padding: var(--ql-space-m, 12px) var(--ql-space-l, 16px);
       }
+      /* One button per person, each stamped with its own entity id, so the
+         single shared handler opens the right person's dialog. */
       .person {
         display: inline-flex;
         align-items: center;
         gap: var(--ql-space-s, 8px);
+        width: auto;
       }
       .avatar,
       .initial {
@@ -108,7 +111,13 @@ export class QlRowPresence extends QlBaseCard {
           const name = this.personName(entityId);
           const picture = entity?.attributes.entity_picture as string | undefined;
           return html`
-            <span class="person ${home ? '' : 'away'}">
+            <button
+              class="ql-info person ${home ? '' : 'away'}"
+              type="button"
+              data-ql-info=${entityId}
+              aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+              @click=${this.onMoreInfo}
+            >
               ${picture !== undefined
                 ? html`<img class="avatar" src=${picture} alt=${name} />`
                 : html`<span class="initial" aria-hidden="true"
@@ -116,7 +125,7 @@ export class QlRowPresence extends QlBaseCard {
                   >`}
               <span class="name ql-clamp-1">${name}</span>
               <span class="state">${stateText}</span>
-            </span>
+            </button>
           `;
         })}
       </div>

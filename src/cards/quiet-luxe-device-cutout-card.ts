@@ -64,6 +64,7 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
     QlBaseCard.qlCardStyles,
     css`
       .eyebrow {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
@@ -105,7 +106,15 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
     const showImage = config.image !== undefined && !this.imageFailed;
     return html`
       <div class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}">
-        <p class="eyebrow ql-clamp-2">${name}</p>
+        <button
+          class="ql-info"
+          type="button"
+          data-ql-info=${config.entity}
+          aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+          @click=${this.onMoreInfo}
+        >
+          <span class="eyebrow ql-clamp-2">${name}</span>
+        </button>
         ${showImage
           ? html`<img class="cutout" src=${config.image} alt="" @error=${this.onImageError} />`
           : nothing}

@@ -65,4 +65,22 @@ describe('ql-row-presence', () => {
     expect(row.shadowRoot?.textContent).toContain('Offline');
     row.remove();
   });
+
+  it('each person row opens more-info for that person, not the first one', async () => {
+    const row = await mount({ entities: ['person.steven', 'person.mei'] }, makeMockHass(people()));
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    const persons = [...(row.shadowRoot?.querySelectorAll<HTMLButtonElement>('.ql-info') ?? [])];
+    expect(persons).toHaveLength(2);
+    persons[1]?.click();
+    persons[0]?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['person.mei', 'person.steven']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    row.remove();
+  });
 });

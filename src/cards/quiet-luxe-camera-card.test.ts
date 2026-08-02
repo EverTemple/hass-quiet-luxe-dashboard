@@ -95,6 +95,24 @@ describe('quiet-luxe-camera-card', () => {
     card.remove();
   });
 
+  it('the camera name opens HA’s more-info dialog for the camera', async () => {
+    const card = await mount(
+      { entity: 'camera.front_door', form: 'full' },
+      makeMockHass([cameraEntity()]),
+    );
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['camera.front_door']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    card.remove();
+  });
+
   it('clears its timer on disconnect', async () => {
     const card = await mount({ entity: 'camera.front_door' }, makeMockHass([cameraEntity()]));
     card.remove();

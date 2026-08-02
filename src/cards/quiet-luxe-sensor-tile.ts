@@ -68,6 +68,13 @@ export class QuietLuxeSensorTile extends QlBaseCard {
         gap: var(--ql-space-xs, 4px);
         padding: var(--ql-space-m, 12px);
       }
+      /* The tile is nothing but its identity region, so the info button takes
+         over the card's own column rhythm rather than nesting a second one. */
+      .ql-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ql-space-xs, 4px);
+      }
       .top {
         display: flex;
         align-items: center;
@@ -75,6 +82,7 @@ export class QuietLuxeSensorTile extends QlBaseCard {
         gap: var(--ql-space-s, 8px);
       }
       .eyebrow {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
@@ -82,6 +90,7 @@ export class QuietLuxeSensorTile extends QlBaseCard {
         text-transform: uppercase;
       }
       .value {
+        display: block;
         margin: 0;
         font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
       }
@@ -95,14 +104,23 @@ export class QuietLuxeSensorTile extends QlBaseCard {
     const { entity: entityId, metric } = this.config;
     const available = this.availability(entityId) === 'available';
     const state = available ? this.entity(entityId)?.state : undefined;
-    const label = this.config.name ?? t(this.locale(), METRIC_LABEL_KEY[metric]);
+    const locale = this.locale();
+    const label = this.config.name ?? t(locale, METRIC_LABEL_KEY[metric]);
     return html`
       <div class="ql-card ${available ? '' : 'ql-unavailable'}">
-        <div class="top">
-          <p class="eyebrow ql-clamp-1">${label}</p>
-          <ql-status-dot .status=${sensorStatus(metric, state)}></ql-status-dot>
-        </div>
-        <p class="value">${formatSensorValue(metric, state)}</p>
+        <button
+          class="ql-info"
+          type="button"
+          data-ql-info=${entityId}
+          aria-label=${`${label} — ${t(locale, 'common.show_details')}`}
+          @click=${this.onMoreInfo}
+        >
+          <span class="top">
+            <span class="eyebrow ql-clamp-1">${label}</span>
+            <ql-status-dot .status=${sensorStatus(metric, state)}></ql-status-dot>
+          </span>
+          <span class="value">${formatSensorValue(metric, state)}</span>
+        </button>
       </div>
     `;
   }

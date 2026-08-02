@@ -114,3 +114,135 @@ describe('quiet-luxe-cover-card', () => {
     expect(missing.shadowRoot?.querySelector('.value')?.textContent?.trim()).toBe('—');
   });
 });
+
+/* Live Dooya M1 curtain motor from the Tung Chung instance (HA 2026.7.1). */
+const DOOYA = makeEntity('cover.dooya_m1_fe9b_curtain', 'open', {
+  current_position: 83,
+  device_class: 'curtain',
+  friendly_name: '窗帘 Curtain',
+  supported_features: 15,
+});
+
+/* A venetian blind: the same four features plus the four tilt features. */
+const BLIND = makeEntity('cover.blind', 'open', {
+  current_position: 100,
+  current_cover_tilt_position: 40,
+  device_class: 'blind',
+  supported_features: 255,
+});
+
+describe('quiet-luxe-cover-card more-info', () => {
+  it('opens HA’s dialog from the identity region, escaping the shadow root', async () => {
+    const card = await mount({ entity: 'cover.dooya_m1_fe9b_curtain' }, makeMockHass([DOOYA]));
+    const seen: string[] = [];
+    document.body.addEventListener('hass-more-info', (event) => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    });
+
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+
+    expect(seen).toEqual(['cover.dooya_m1_fe9b_curtain']);
+  });
+
+  it('does not move the cover when the identity region is tapped', async () => {
+    const hass = makeMockHass([DOOYA]);
+    const card = await mount({ entity: 'cover.dooya_m1_fe9b_curtain' }, hass);
+
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+
+    expect(hass.calls).toEqual([]);
+  });
+});
+
+describe('quiet-luxe-cover-card position', () => {
+  it('drives the live Dooya to a position', async () => {
+    const hass = makeMockHass([DOOYA]);
+    const card = await mount({ entity: 'cover.dooya_m1_fe9b_curtain' }, hass);
+
+    expect(card.shadowRoot?.querySelector('.value')?.textContent?.trim()).toBe('83%');
+    card.shadowRoot
+      ?.querySelector<QlSlider>('ql-slider')
+      ?.dispatchEvent(
+        new CustomEvent('ql-change', { detail: { value: 50 }, bubbles: true, composed: true }),
+      );
+
+    expect(hass.calls).toEqual([
+      {
+        domain: 'cover',
+        service: 'set_cover_position',
+        data: { entity_id: 'cover.dooya_m1_fe9b_curtain', position: 50 },
+      },
+    ]);
+  });
+});
+
+describe('quiet-luxe-cover-card tilt', () => {
+  it('adds no tilt control to the live Dooya curtains, which do not tilt', async () => {
+    const card = await mount({ entity: 'cover.dooya_m1_fe9b_curtain' }, makeMockHass([DOOYA]));
+    expect(card.shadowRoot?.querySelector('.ql-controls')).toBeNull();
+    expect(card.shadowRoot?.querySelectorAll('.ops')).toHaveLength(1);
+  });
+
+  it('adds a tilt slider for a cover that reports a tilt position', async () => {
+    const hass = makeMockHass([BLIND]);
+    const card = await mount({ entity: 'cover.blind' }, hass);
+
+    expect(
+      [...(card.shadowRoot?.querySelectorAll('.ql-control-label') ?? [])].map((n) =>
+        n.textContent?.trim(),
+      ),
+    ).toEqual(['Tilt']);
+
+    const tilt = [...(card.shadowRoot?.querySelectorAll<QlSlider>('ql-slider') ?? [])][1];
+    expect(tilt?.value).toBe(40);
+    tilt?.dispatchEvent(
+      new CustomEvent('ql-change', { detail: { value: 70 }, bubbles: true, composed: true }),
+    );
+
+    expect(hass.calls).toEqual([
+      {
+        domain: 'cover',
+        service: 'set_cover_tilt_position',
+        data: { entity_id: 'cover.blind', tilt_position: 70 },
+      },
+    ]);
+  });
+
+  it('adds a tilt open/close row for a cover that can swing its slats', async () => {
+    const hass = makeMockHass([BLIND]);
+    const card = await mount({ entity: 'cover.blind' }, hass);
+    const rows = card.shadowRoot?.querySelectorAll('.ops');
+
+    expect(rows).toHaveLength(2);
+    const tiltButtons = [...(rows?.[1]?.querySelectorAll('button') ?? [])];
+    expect(tiltButtons.map((b) => b.textContent?.trim().replace(/\s+/g, ' '))).toEqual([
+      'Tilt Open',
+      'Tilt Close',
+    ]);
+
+    tiltButtons[0]?.click();
+    tiltButtons[1]?.click();
+
+    expect(hass.calls).toEqual([
+      { domain: 'cover', service: 'open_cover_tilt', data: { entity_id: 'cover.blind' } },
+      { domain: 'cover', service: 'close_cover_tilt', data: { entity_id: 'cover.blind' } },
+    ]);
+  });
+
+  it('omits the tilt open/close row for a cover that can only set a tilt value', async () => {
+    const valueOnly = makeEntity('cover.a', 'open', {
+      current_cover_tilt_position: 20,
+      supported_features: 15 | 128,
+    });
+    const card = await mount({ entity: 'cover.a' }, makeMockHass([valueOnly]));
+
+    expect(card.shadowRoot?.querySelectorAll('.ops')).toHaveLength(1);
+    expect(card.shadowRoot?.querySelector('.ql-controls')).not.toBeNull();
+  });
+
+  it('draws no tilt control for a cover that is not answering', async () => {
+    const offline = makeEntity('cover.blind', 'unavailable', BLIND.attributes);
+    const card = await mount({ entity: 'cover.blind' }, makeMockHass([offline]));
+    expect(card.shadowRoot?.querySelector('.ql-controls')).toBeNull();
+  });
+});

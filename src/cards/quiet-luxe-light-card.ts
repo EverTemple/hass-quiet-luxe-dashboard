@@ -75,6 +75,7 @@ export class QuietLuxeLightCard extends QlBaseCard {
         box-shadow: 0 0 18px rgba(224, 178, 99, 0.45);
       }
       .value {
+        display: block;
         margin: var(--ql-space-s, 8px) 0;
         font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
       }
@@ -137,7 +138,15 @@ export class QuietLuxeLightCard extends QlBaseCard {
           <span class="bulb ${on ? 'on' : ''}"></span>
           <span class="eyebrow ql-clamp-2">${label}</span>
         </button>
-        <p class="value">${available ? `${pct}%` : t(this.locale(), 'common.unavailable')}</p>
+        <button
+          class="ql-info"
+          type="button"
+          data-ql-info=${entityId}
+          aria-label=${`${label} — ${t(this.locale(), 'common.show_details')}`}
+          @click=${this.onMoreInfo}
+        >
+          <span class="value">${available ? `${pct}%` : t(this.locale(), 'common.unavailable')}</span>
+        </button>
         <ql-slider
           .value=${pct}
           .label=${t(this.locale(), 'light.brightness')}

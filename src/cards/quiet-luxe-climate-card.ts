@@ -5,9 +5,11 @@ import {
   detectClimateDeviceType,
   type ClimateDeviceType,
 } from './climate-device-type';
+import { controlServiceCall, deviceControls, type ControlId } from './device-controls';
 import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { renderControls } from './render-controls';
 
 export interface ClimateCardConfig {
   readonly type: string;
@@ -69,6 +71,7 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     QlBaseCard.qlCardStyles,
     css`
       .eyebrow {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
@@ -76,6 +79,7 @@ export class QuietLuxeClimateCard extends QlBaseCard {
         text-transform: uppercase;
       }
       .value {
+        display: block;
         margin: var(--ql-space-s, 8px) 0 0;
         font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
         letter-spacing: 0.01em;
@@ -127,6 +131,22 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     window.clearTimeout(this.disarmTimer);
     this.armed = false;
     this.callToggle();
+  }
+
+  /**
+   * One inline control moved. The payload is built from the entity's own
+   * state, so a control the device cannot actually take is never sent.
+   */
+  private onControl(id: ControlId, value: string | number | boolean): void {
+    const entityId = this.config?.entity;
+    if (entityId === undefined || this.hass === undefined) {
+      return;
+    }
+    const call = controlServiceCall(entityId, id, value, this.entity(entityId));
+    if (call === undefined) {
+      return;
+    }
+    void this.hass.callService(call.domain, call.service, call.data);
   }
 
   private callToggle(): void {
@@ -196,6 +216,7 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     }
     const entityId = this.config.entity;
     const availability = this.availability(entityId);
+    const locale = this.locale();
     const label = this.nameOf(entityId, this.config.name);
     const status = this.statusLine();
     return html`
@@ -203,19 +224,33 @@ export class QuietLuxeClimateCard extends QlBaseCard {
         class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}"
         data-device=${this.deviceType()}
       >
-        <p class="eyebrow ql-clamp-2">${label}</p>
-        <p class="value">${this.valueText()}</p>
+        <button
+          class="ql-info"
+          type="button"
+          data-ql-info=${entityId}
+          aria-label=${`${label} — ${t(locale, 'common.show_details')}`}
+          @click=${this.onMoreInfo}
+        >
+          <span class="eyebrow ql-clamp-2">${label}</span>
+          <span class="value">${this.valueText()}</span>
+        </button>
         <div class="row">
           <p class="status ${status.cls}">${status.text}</p>
           <button
             class="power"
-            aria-label=${t(this.locale(), 'common.power')}
+            aria-label=${t(locale, 'common.power')}
             ?disabled=${availability !== 'available'}
             @click=${this.onPowerTap}
           >
             ⏻
           </button>
         </div>
+        ${renderControls(
+          deviceControls(this.entity(entityId)),
+          locale,
+          availability !== 'available',
+          (id, value) => this.onControl(id, value),
+        )}
       </div>
     `;
   }

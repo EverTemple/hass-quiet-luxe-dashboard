@@ -159,4 +159,40 @@ describe('quiet-luxe-media-card', () => {
     expect(card.shadowRoot?.querySelector<HTMLButtonElement>('button.play')?.disabled).toBe(true);
     card.remove();
   });
+
+  it('player track lines open HA’s more-info dialog for the player', async () => {
+    const card = await mount({ entity: 'media_player.living' }, makeMockHass([playingSonos()]));
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['media_player.living']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    card.remove();
+  });
+
+  it('group-row name opens more-info for the speaker, not the leader', async () => {
+    const hass = makeMockHass([
+      playingSonos(),
+      makeEntity('media_player.kitchen', 'playing', { friendly_name: 'Kitchen Sonos' }),
+    ]);
+    const row = await mount(
+      { entity: 'media_player.kitchen', form: 'group-row', leader: 'media_player.living' },
+      hass,
+    );
+    const seen: string[] = [];
+    const record = (event: Event): void => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    row.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen).toEqual(['media_player.kitchen']);
+    expect(hass.calls).toEqual([]);
+    row.remove();
+  });
 });

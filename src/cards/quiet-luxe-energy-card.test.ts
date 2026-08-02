@@ -81,4 +81,40 @@ describe('quiet-luxe-energy-card', () => {
     expect(card.shadowRoot?.textContent).toContain('—');
     card.remove();
   });
+
+  it('the strip reading opens HA’s more-info dialog for the power entity', async () => {
+    const hass = makeMockHass([
+      sensorEntity('sensor.power_total', '1236'),
+      sensorEntity('sensor.energy_today', '8.61'),
+    ]);
+    const card = await mount(
+      { power_entity: 'sensor.power_total', today_entity: 'sensor.energy_today' },
+      hass,
+    );
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['sensor.power_total']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    card.remove();
+  });
+
+  it('the ring reading opens more-info for its own phase entity', async () => {
+    const hass = makeMockHass([sensorEntity('sensor.phase_l1', '2300')]);
+    const card = await mount({ form: 'ring', power_entity: 'sensor.phase_l1', name: 'L1' }, hass);
+    const seen: string[] = [];
+    const record = (event: Event): void => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen).toEqual(['sensor.phase_l1']);
+    card.remove();
+  });
 });

@@ -102,4 +102,34 @@ describe('ql-row-door-motion', () => {
     expect(row.shadowRoot?.querySelector('ql-status-dot')?.getAttribute('status')).toBe('neutral');
     row.remove();
   });
+
+  it('the name and state open more-info for the sensor, leaving the toggle alone', async () => {
+    const hass = makeMockHass([
+      makeEntity('binary_sensor.hall_motion', 'on', {
+        friendly_name: 'Hall Motion',
+        device_class: 'motion',
+      }),
+      makeEntity('switch.hall_motion_detection', 'on'),
+    ]);
+    const row = await mount(
+      {
+        entity: 'binary_sensor.hall_motion',
+        toggle_entity: 'switch.hall_motion_detection',
+        show_toggle: true,
+      },
+      hass,
+    );
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    row.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['binary_sensor.hall_motion']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    expect(hass.calls).toEqual([]);
+    row.remove();
+  });
 });

@@ -18,22 +18,29 @@ export class QlSegmented extends LitElement {
     options: { attribute: false },
     value: { type: String },
     label: { type: String },
+    size: { type: String, reflect: true },
   };
 
   declare options: ReadonlyArray<QlSegmentOption>;
   declare value: string;
   declare label: string;
+  /** `touch` meets the 56px target every on-card device control needs. */
+  declare size: 'compact' | 'touch';
 
   constructor() {
     super();
     this.options = [];
     this.value = '';
     this.label = '';
+    this.size = 'compact';
   }
 
   static override styles: CSSResult = css`
     .group {
       display: inline-flex;
+      /* The border and inner padding must come out of the declared width, or
+         a full-width group sits 6px wider than the card that holds it. */
+      box-sizing: border-box;
       gap: 2px;
       padding: 2px;
       border-radius: var(--ql-radius-chip, 999px);
@@ -57,9 +64,37 @@ export class QlSegmented extends LitElement {
       color: var(--ql-bg-base, #f4f0e8);
       font-weight: 500;
     }
+    button:focus-visible {
+      outline: 2px solid var(--ql-accent-champagne, #b08d57);
+      outline-offset: 2px;
+    }
     button:disabled {
       opacity: 0.45;
       cursor: default;
+    }
+    /* On-card device controls are thumb targets, not chips. A device with
+       more modes than fit one line wraps onto the next: an AC with six hvac
+       modes shows all six. Nothing scrolls, so no option can hide off-edge —
+       the group softens to a rounded rect once it is more than one row tall. */
+    :host([size='touch']) .group {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100%;
+      border-radius: var(--ql-radius-thumb, 12px);
+      gap: 4px;
+    }
+    :host([size='touch']) button {
+      flex: 1 1 auto;
+      min-height: var(--ql-touch-min, 56px);
+      min-width: 0;
+      padding: 0 var(--ql-space-m, 12px);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button {
+        transition: none;
+      }
     }
   `;
 

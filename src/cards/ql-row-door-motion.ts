@@ -97,13 +97,25 @@ export class QlRowDoorMotion extends QlBaseCard {
         gap: var(--ql-space-m, 12px);
         padding: var(--ql-space-m, 12px) var(--ql-space-l, 16px);
       }
+      /* Name and state travel together as the row's identity region; the
+         detection toggle beside them keeps its own gesture. */
+      .line {
+        display: flex;
+        align-items: center;
+        gap: var(--ql-space-m, 12px);
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+      }
       .name {
+        display: block;
         margin: 0;
         flex: 1 1 auto;
         min-width: 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
       }
       .state {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
@@ -126,8 +138,16 @@ export class QlRowDoorMotion extends QlBaseCard {
     return html`
       <div class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}">
         <ql-status-dot status=${info.dot}></ql-status-dot>
-        <p class="name ql-clamp-2">${name}</p>
-        <p class="state">${info.text}</p>
+        <button
+          class="ql-info line"
+          type="button"
+          data-ql-info=${config.entity}
+          aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+          @click=${this.onMoreInfo}
+        >
+          <span class="name ql-clamp-2">${name}</span>
+          <span class="state">${info.text}</span>
+        </button>
         ${showToggle
           ? html`
               <ql-toggle

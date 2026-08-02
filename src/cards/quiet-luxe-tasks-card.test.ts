@@ -101,4 +101,39 @@ describe('quiet-luxe-tasks-card', () => {
     expect(card.shadowRoot?.querySelectorAll("input[type='checkbox']")).toHaveLength(0);
     card.remove();
   });
+
+  it('the list name opens HA’s more-info dialog without touching an item', async () => {
+    const hass = makeMockHass([todoEntity()], WS_STUB);
+    const card = await mount({ entity: 'todo.family' }, hass);
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['todo.family']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    expect(hass.calls).toEqual([]);
+    card.remove();
+  });
+
+  it('keeps the more-info region on the unavailable branch', async () => {
+    const card = await mount(
+      { entity: 'todo.family' },
+      makeMockHass([makeEntity('todo.family', 'unavailable')], WS_STUB),
+    );
+    const seen: string[] = [];
+    const record = (event: Event): void => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    const info = card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info');
+    expect(info?.disabled).toBe(false);
+    info?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen).toEqual(['todo.family']);
+    card.remove();
+  });
 });

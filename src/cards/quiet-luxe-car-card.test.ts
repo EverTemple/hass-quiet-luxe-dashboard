@@ -134,4 +134,45 @@ describe('quiet-luxe-car-card', () => {
     expect(minimal.shadowRoot?.querySelector('ql-toggle')).toBeNull();
     minimal.remove();
   });
+
+  it('the car name opens more-info for the most representative entity', async () => {
+    const card = await mount(FULL_CONFIG, makeMockHass(carEntities()));
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['sensor.car_battery']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    card.remove();
+  });
+
+  it('falls back down the entity preference order', async () => {
+    const lockOnly = await mount(
+      { brand: 'audi', lock_entity: 'binary_sensor.car_lock' },
+      makeMockHass(carEntities()),
+    );
+    const seen: string[] = [];
+    const record = (event: Event): void => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    lockOnly.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen).toEqual(['binary_sensor.car_lock']);
+    lockOnly.remove();
+  });
+
+  it('renders the name as plain text when no usable entity is configured', async () => {
+    const card = await mount(
+      { brand: 'bmw', name: 'Garage Car', precondition_entity: 'switch.car_precondition' },
+      makeMockHass(carEntities()),
+    );
+    expect(card.shadowRoot?.querySelector('.ql-info')).toBeNull();
+    expect(card.shadowRoot?.querySelector('.eyebrow')?.textContent?.trim()).toBe('Garage Car');
+    card.remove();
+  });
 });

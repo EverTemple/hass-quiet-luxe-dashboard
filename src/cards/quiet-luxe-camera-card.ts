@@ -145,9 +145,12 @@ export class QuietLuxeCameraCard extends QlBaseCard {
         margin-top: var(--ql-space-s, 8px);
         padding: 0 var(--ql-space-xs, 4px);
       }
+      /* The frame is the card's reading; the name beneath it carries the
+         more-info tap. An explicit auto width keeps the base pill from claiming
+         the whole meta row and pushing the LIVE badge off the end. */
       .name {
-        margin: 0;
         min-width: 0;
+        width: auto;
         font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
         overflow: hidden;
         text-overflow: ellipsis;
@@ -186,7 +189,15 @@ export class QuietLuxeCameraCard extends QlBaseCard {
             : html`<p class="fallback">${fallbackText}</p>`}
         </div>
         <div class="meta">
-          <p class="name ql-clamp-2">${name}</p>
+          <button
+            class="ql-info name"
+            type="button"
+            data-ql-info=${config.entity}
+            aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+            @click=${this.onMoreInfo}
+          >
+            <span class="ql-clamp-2">${name}</span>
+          </button>
           ${this.form() === 'full' && showImage
             ? html`<span class="live"
                 ><ql-status-dot status="alert"></ql-status-dot>${t(locale, 'camera.live')}</span

@@ -98,6 +98,22 @@ export class QuietLuxeCarCard extends QlBaseCard {
     return Number.isFinite(value) ? `${Math.round(value)} ${unit}` : '—';
   }
 
+  /**
+   * The car is several entities wearing one name, so the identity region opens
+   * whichever of them best represents the vehicle. A car configured with only
+   * a precondition switch or a location sensor has no such entity, and renders
+   * its name as plain text rather than a button that opens nothing.
+   */
+  private infoEntity(): string | undefined {
+    const config = this.config;
+    return [
+      config?.battery_entity,
+      config?.fuel_entity,
+      config?.range_entity,
+      config?.lock_entity,
+    ].find((entityId) => typeof entityId === 'string' && entityId !== '');
+  }
+
   private onPreconditionToggle(): void {
     if (!this.armed) {
       this.armed = true;
@@ -120,6 +136,7 @@ export class QuietLuxeCarCard extends QlBaseCard {
     QlBaseCard.qlCardStyles,
     css`
       .eyebrow {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
@@ -194,6 +211,7 @@ export class QuietLuxeCarCard extends QlBaseCard {
     }
     const locale = this.locale();
     const name = config.name ?? config.brand;
+    const infoEntity = this.infoEntity();
     const lockId = config.lock_entity;
     const lockAvailable = lockId !== undefined && this.availability(lockId) === 'available';
     const unlocked = lockAvailable && this.entity(lockId)?.state === 'on';
@@ -209,7 +227,19 @@ export class QuietLuxeCarCard extends QlBaseCard {
         : undefined;
     return html`
       <div class="ql-card">
-        <p class="eyebrow ql-clamp-2">${name}</p>
+        ${infoEntity === undefined
+          ? html`<p class="eyebrow ql-clamp-2">${name}</p>`
+          : html`
+              <button
+                class="ql-info"
+                type="button"
+                data-ql-info=${infoEntity}
+                aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+                @click=${this.onMoreInfo}
+              >
+                <span class="eyebrow ql-clamp-2">${name}</span>
+              </button>
+            `}
         <svg class="hero" viewBox=${CAR_VIEWBOX} role="img" aria-label=${name}>
           <path d=${CAR_BODY_PATHS[config.brand]} fill="currentColor"></path>
           ${CAR_WHEELS[config.brand].map(

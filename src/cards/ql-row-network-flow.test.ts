@@ -90,4 +90,26 @@ describe('ql-row-network-flow', () => {
     expect(toggle?.disabled).toBe(true);
     row.remove();
   });
+
+  it('the name and description open more-info without arming the flow toggle', async () => {
+    const hass = makeMockHass([makeEntity('switch.guest_wifi', 'on')]);
+    const row = await mount(
+      { entity: 'switch.guest_wifi', name: 'Guest Wi-Fi', description: 'UniFi guest network' },
+      hass,
+    );
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    row.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    await row.updateComplete;
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['switch.guest_wifi']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    expect(hass.calls).toEqual([]);
+    expect(row.shadowRoot?.textContent).not.toContain('Tap again to confirm');
+    row.remove();
+  });
 });

@@ -64,4 +64,20 @@ describe('quiet-luxe-device-cutout-card', () => {
     expect(card.shadowRoot?.textContent).toContain('不可用');
     card.remove();
   });
+
+  it('the device name opens HA’s more-info dialog for the entity', async () => {
+    const hass = makeMockHass([makeEntity('media_player.tv', 'on', { friendly_name: 'Living TV' })]);
+    const card = await mount({ entity: 'media_player.tv' }, hass);
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['media_player.tv']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+    card.remove();
+  });
 });

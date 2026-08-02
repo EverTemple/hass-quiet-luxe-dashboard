@@ -110,8 +110,14 @@ export class QuietLuxeTasksCard extends QlBaseCard {
   static override styles: CSSResultGroup = [
     QlBaseCard.qlCardStyles,
     css`
+      /* The base pill already pads 4px below the label; this restores the rest
+         of the 8px the eyebrow used to reserve above the first task. */
+      .ql-info {
+        margin-bottom: var(--ql-space-xs, 4px);
+      }
       .eyebrow {
-        margin: 0 0 var(--ql-space-s, 8px);
+        display: block;
+        margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
         letter-spacing: 0.14em;
@@ -149,6 +155,24 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     `,
   ];
 
+  /**
+   * Identity region. Rendered in both branches — a to-do list that will not
+   * load is exactly when a user reaches for HA's own diagnostics.
+   */
+  private renderInfo(entityId: string, name: string): TemplateResult {
+    return html`
+      <button
+        class="ql-info"
+        type="button"
+        data-ql-info=${entityId}
+        aria-label=${`${name} — ${t(this.locale(), 'common.show_details')}`}
+        @click=${this.onMoreInfo}
+      >
+        <span class="eyebrow ql-clamp-2">${name}</span>
+      </button>
+    `;
+  }
+
   protected override render(): TemplateResult {
     const config = this.config;
     if (config === undefined) {
@@ -160,7 +184,7 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     if (availability !== 'available') {
       return html`
         <div class="ql-card ql-unavailable">
-          <p class="eyebrow ql-clamp-2">${name}</p>
+          ${this.renderInfo(config.entity, name)}
           <p class="empty">${t(locale, 'common.unavailable')}</p>
         </div>
       `;
@@ -168,7 +192,7 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     const openCount = this.items.filter((item) => item.status !== 'completed').length;
     return html`
       <div class="ql-card">
-        <p class="eyebrow ql-clamp-2">${name}</p>
+        ${this.renderInfo(config.entity, name)}
         ${this.items.map((item) => {
           const completed = item.status === 'completed';
           return html`

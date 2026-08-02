@@ -96,10 +96,12 @@ export class QlRowNetworkFlow extends QlBaseCard {
         min-width: 0;
       }
       .name {
+        display: block;
         margin: 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
       }
       .description {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
@@ -128,12 +130,18 @@ export class QlRowNetworkFlow extends QlBaseCard {
     return html`
       <div class="ql-card ${unavailable ? 'ql-unavailable' : ''}">
         <div class="row">
-          <div class="lines">
-            <p class="name ql-clamp-2">${name}</p>
+          <button
+            class="ql-info lines"
+            type="button"
+            data-ql-info=${config.entity}
+            aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+            @click=${this.onMoreInfo}
+          >
+            <span class="name ql-clamp-2">${name}</span>
             ${config.description === undefined
               ? nothing
-              : html`<p class="description">${config.description}</p>`}
-          </div>
+              : html`<span class="description">${config.description}</span>`}
+          </button>
           <ql-toggle
             .checked=${live(!unavailable && on)}
             label=${name}

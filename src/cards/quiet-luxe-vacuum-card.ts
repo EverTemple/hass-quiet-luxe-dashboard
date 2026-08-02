@@ -105,6 +105,7 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
     QlBaseCard.qlCardStyles,
     css`
       .eyebrow {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
@@ -119,6 +120,7 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
         margin-top: var(--ql-space-s, 8px);
       }
       .status {
+        display: block;
         margin: 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
       }
@@ -132,6 +134,7 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
         color: var(--ql-status-warn, #c08552);
       }
       .battery {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
@@ -153,22 +156,29 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
     const locale = this.locale();
     const availability = this.availability(config.entity);
     const entity = this.entity(config.entity);
-    const name =
-      this.nameOf(config.entity, config.name);
+    const name = this.nameOf(config.entity, config.name);
     const status = this.statusLine();
     const battery = Number(entity?.attributes.battery_level);
     const rooms = config.rooms ?? [];
     return html`
       <div class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}">
-        <p class="eyebrow ql-clamp-2">${name}</p>
-        <div class="row">
-          <p class="status ${status.cls}">${status.text}</p>
-          ${Number.isFinite(battery)
-            ? html`<p class="battery">
-                ${Math.round(battery)}% · ${t(locale, 'common.battery')}
-              </p>`
-            : nothing}
-        </div>
+        <button
+          class="ql-info"
+          type="button"
+          data-ql-info=${config.entity}
+          aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+          @click=${this.onMoreInfo}
+        >
+          <span class="eyebrow ql-clamp-2">${name}</span>
+          <span class="row">
+            <span class="status ${status.cls}">${status.text}</span>
+            ${Number.isFinite(battery)
+              ? html`<span class="battery">
+                  ${Math.round(battery)}% · ${t(locale, 'common.battery')}
+                </span>`
+              : nothing}
+          </span>
+        </button>
         ${rooms.length > 0 && availability === 'available'
           ? html`
               <div class="chips" role="group" aria-label=${t(locale, 'vacuum.rooms')}>

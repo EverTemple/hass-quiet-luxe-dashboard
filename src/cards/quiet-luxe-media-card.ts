@@ -88,6 +88,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
         min-width: 0;
       }
       .eyebrow {
+        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
@@ -95,6 +96,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
         text-transform: uppercase;
       }
       .title {
+        display: block;
         margin: 2px 0 0;
         font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
         overflow: hidden;
@@ -102,6 +104,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
         white-space: nowrap;
       }
       .caption {
+        display: block;
         margin: 2px 0 0;
         font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
         overflow: hidden;
@@ -111,11 +114,14 @@ export class QuietLuxeMediaCard extends QlBaseCard {
       .muted {
         color: var(--ql-ink-muted, #8c8578);
       }
+      /* The group row has no reading of its own, so its name carries the
+         more-info tap; an explicit auto width keeps the base pill from
+         claiming the whole row and squeezing the volume slider. */
       .name {
-        margin: 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
         flex: 1 1 auto;
         min-width: 0;
+        width: auto;
       }
       .transport-row {
         display: flex;
@@ -242,12 +248,20 @@ export class QuietLuxeMediaCard extends QlBaseCard {
     const unavailable = availability !== 'available';
     const cardClass = unavailable ? 'ql-card ql-unavailable' : 'ql-card';
     const entity = this.entity(config.entity);
-    const name =
-      this.nameOf(config.entity, config.name);
+    const name = this.nameOf(config.entity, config.name);
+    const infoLabel = `${name} — ${t(locale, 'common.show_details')}`;
     if (this.form() === 'group-row') {
       return html`
         <div class="${cardClass} row">
-          <p class="name ql-clamp-1">${name}</p>
+          <button
+            class="ql-info name"
+            type="button"
+            data-ql-info=${config.entity}
+            aria-label=${infoLabel}
+            @click=${this.onMoreInfo}
+          >
+            <span class="ql-clamp-1">${name}</span>
+          </button>
           <ql-slider
             class="row-volume"
             .value=${this.volumePercent()}
@@ -285,10 +299,16 @@ export class QuietLuxeMediaCard extends QlBaseCard {
       return html`
         <div class="${cardClass} row">
           ${this.artwork('bar')}
-          <div class="lines">
-            <p class="caption ${trackMuted ? 'muted' : ''}">${trackText}</p>
-            ${source === undefined ? nothing : html`<p class="caption muted">${source}</p>`}
-          </div>
+          <button
+            class="ql-info lines"
+            type="button"
+            data-ql-info=${config.entity}
+            aria-label=${infoLabel}
+            @click=${this.onMoreInfo}
+          >
+            <span class="caption ${trackMuted ? 'muted' : ''}">${trackText}</span>
+            ${source === undefined ? nothing : html`<span class="caption muted">${source}</span>`}
+          </button>
           ${playButton}
         </div>
       `;
@@ -301,11 +321,19 @@ export class QuietLuxeMediaCard extends QlBaseCard {
       <div class=${cardClass}>
         <div class="row">
           ${this.artwork('player')}
-          <div class="lines">
-            ${source === undefined ? nothing : html`<p class="eyebrow ql-clamp-1">${source}</p>`}
-            <p class="title ${trackMuted ? 'muted' : ''}">${trackText}</p>
-            ${artistLine === undefined ? nothing : html`<p class="caption muted">${artistLine}</p>`}
-          </div>
+          <button
+            class="ql-info lines"
+            type="button"
+            data-ql-info=${config.entity}
+            aria-label=${infoLabel}
+            @click=${this.onMoreInfo}
+          >
+            ${source === undefined ? nothing : html`<span class="eyebrow ql-clamp-1">${source}</span>`}
+            <span class="title ${trackMuted ? 'muted' : ''}">${trackText}</span>
+            ${artistLine === undefined
+              ? nothing
+              : html`<span class="caption muted">${artistLine}</span>`}
+          </button>
         </div>
         <div class="transport-row">
           <button

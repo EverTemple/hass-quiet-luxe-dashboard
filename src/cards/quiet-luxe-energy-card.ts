@@ -97,7 +97,15 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
         color: var(--ql-accent-champagne, #b08d57);
         font-size: 16px;
       }
+      /* Both forms hang the more-info tap off the live power reading: the ring
+         separates its label from its numeral with the donut, and the strip has
+         no label at all. An explicit auto width keeps the pill inside the
+         flex line rather than stretching it across the card. */
+      .ql-info {
+        width: auto;
+      }
       .value {
+        display: block;
         margin: 0;
         font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
         letter-spacing: 0.01em;
@@ -147,6 +155,7 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
     const watts = this.powerWatts();
     const unavailable = this.availability(config.power_entity) !== 'available';
     const cardClass = unavailable ? 'ql-card ql-unavailable' : 'ql-card';
+    const infoLabel = `${this.nameOf(config.power_entity, config.name)} — ${t(locale, 'common.show_details')}`;
     if (this.form() === 'ring') {
       return html`
         <div class="${cardClass} ring">
@@ -166,7 +175,15 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
               transform="rotate(-90 24 24)"
             ></circle>
           </svg>
-          <p class="value">${formatPower(watts)}</p>
+          <button
+            class="ql-info"
+            type="button"
+            data-ql-info=${config.power_entity}
+            aria-label=${infoLabel}
+            @click=${this.onMoreInfo}
+          >
+            <span class="value">${formatPower(watts)}</span>
+          </button>
         </div>
       `;
     }
@@ -174,7 +191,15 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
     return html`
       <div class="${cardClass} strip">
         <span class="bolt" aria-hidden="true">⚡</span>
-        <p class="value">${formatPower(watts)}</p>
+        <button
+          class="ql-info"
+          type="button"
+          data-ql-info=${config.power_entity}
+          aria-label=${infoLabel}
+          @click=${this.onMoreInfo}
+        >
+          <span class="value">${formatPower(watts)}</span>
+        </button>
         ${config.today_entity === undefined
           ? nothing
           : html`<p class="caption">${formatEnergy(today)} · ${t(locale, 'energy.today')}</p>`}

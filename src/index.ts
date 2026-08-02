@@ -9,6 +9,7 @@ import './elements/ql-chip';
 import './elements/ql-toggle';
 import './elements/ql-slider';
 import './elements/ql-segmented';
+import './elements/ql-stepper';
 import './elements/ql-section-eyebrow';
 import './elements/ql-header-home';
 import './elements/ql-header-room';
@@ -41,6 +42,7 @@ export { QlChip, type QlChipEmphasis, type QlChipVariant } from './elements/ql-c
 export { QlToggle } from './elements/ql-toggle';
 export { QlSlider } from './elements/ql-slider';
 export { QlSegmented, type QlSegmentOption } from './elements/ql-segmented';
+export { QlStepper, STEPPER_COMMIT_MS } from './elements/ql-stepper';
 export { QlSectionEyebrow } from './elements/ql-section-eyebrow';
 export { QlHeaderHome, type QlHeaderVariant } from './elements/ql-header-home';
 export { QlHeaderRoom } from './elements/ql-header-room';
@@ -69,6 +71,43 @@ export {
   type ClimateActivity,
   type ClimateDeviceType,
 } from './cards/climate-device-type';
+export {
+  fireMoreInfo,
+  moreInfoTargetOf,
+  MORE_INFO_ATTRIBUTE,
+  MORE_INFO_EVENT,
+  type MoreInfoEventDetail,
+} from './cards/more-info';
+export {
+  angleForSpan,
+  climateTargetTemperature,
+  coverTiltPosition,
+  fanOscillationAngle,
+  fanPercentage,
+  humidifierTargetHumidity,
+  nearestSpan,
+  optionList,
+  selectableOptions,
+  snapToStep,
+  supportsFeature,
+  ANGLE_SPANS,
+  CLIMATE_FEATURE,
+  COVER_FEATURE,
+  FAN_FEATURE,
+  HUMIDIFIER_FEATURE,
+  type NumericTarget,
+  type OscillationAngle,
+} from './cards/supported-features';
+export {
+  controlServiceCall,
+  deviceControls,
+  optionLabel,
+  titleCase,
+  type ControlId,
+  type DeviceControl,
+  type ServiceCall,
+} from './cards/device-controls';
+export { renderControl, renderControls, type ControlEmit } from './cards/render-controls';
 export {
   formatSensorValue,
   SENSOR_METRICS,

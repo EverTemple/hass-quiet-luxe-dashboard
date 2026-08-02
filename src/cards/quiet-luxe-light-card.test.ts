@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { lightEntity, makeMockHass } from '../testing/mock-hass';
+import { lightEntity, makeEntity, makeMockHass } from '../testing/mock-hass';
 import type { QlSlider } from '../elements/ql-slider';
 import { QuietLuxeLightCard, type LightCardConfig } from './quiet-luxe-light-card';
 
@@ -109,5 +109,52 @@ describe('quiet-luxe-light-card', () => {
     expect(missing.shadowRoot?.querySelector('.value')?.textContent?.trim()).toBe('Unavailable');
     expect(missing.getCardSize()).toBe(2);
     expect(missing.getGridOptions()).toEqual({ rows: 'auto', columns: 6 });
+  });
+});
+
+describe('quiet-luxe-light-card more-info', () => {
+  it('opens HA’s dialog from the brightness reading, leaving the head a toggle', async () => {
+    const hass = makeMockHass([lightEntity('light.a', 'on', 128)]);
+    const card = await mount({ entity: 'light.a' }, hass);
+    const seen: string[] = [];
+    document.body.addEventListener('hass-more-info', (event) => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    });
+
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+
+    expect(seen).toEqual(['light.a']);
+    expect(hass.calls).toEqual([]);
+  });
+
+  it('keeps the name head toggling the light', async () => {
+    const hass = makeMockHass([lightEntity('light.a', 'on', 128)]);
+    const card = await mount({ entity: 'light.a' }, hass);
+    const seen: string[] = [];
+    document.body.addEventListener('hass-more-info', (event) => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    });
+
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.head')?.click();
+
+    expect(hass.calls).toEqual([
+      { domain: 'light', service: 'toggle', data: { entity_id: 'light.a' } },
+    ]);
+    expect(seen).toEqual([]);
+  });
+
+  it('still opens the dialog for a light that is not answering', async () => {
+    const card = await mount(
+      { entity: 'light.a' },
+      makeMockHass([makeEntity('light.a', 'unavailable')]),
+    );
+    const seen: string[] = [];
+    document.body.addEventListener('hass-more-info', (event) => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    });
+
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+
+    expect(seen).toEqual(['light.a']);
   });
 });

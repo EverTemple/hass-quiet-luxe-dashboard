@@ -46,6 +46,32 @@ their own light and dark palettes.
 
 No external font CDN is contacted at runtime, in any install mode.
 
+## Using the cards
+
+**Tap a card's name or its reading** to open Home Assistant's own more-info
+dialog for that device. Every card and row does this, so anything a device
+supports is always reachable — including the settings, history and related
+entities the cards deliberately leave out.
+
+**The controls on the card are the everyday ones.** Each card reads what its
+entity actually reports and draws only what that device supports, so no two
+devices get the same control set:
+
+| Device | On the card |
+| --- | --- |
+| Air conditioner, heater (`climate`) | Target temperature, mode, preset, fan speed |
+| Dehumidifier, humidifier (`humidifier`) | Target humidity, mode |
+| Fan, purifier (`fan`) | Speed, preset, oscillation, airflow direction, rotation |
+| Curtain, blind (`cover`) | Position, open/stop/close, and tilt where fitted |
+| Light | On/off, brightness |
+
+A control a device does not support is simply absent — never shown greyed out
+or broken. Setpoints stay adjustable while a device is off, and a change you
+make shows immediately in champagne until the device confirms it.
+
+Explicit controls keep their own gestures: the power button, the sliders and
+the toggles never open a dialog, and tapping the name never changes anything.
+
 ## Optional enhancements
 
 Both are genuinely optional — skipping them leaves a correct dashboard.

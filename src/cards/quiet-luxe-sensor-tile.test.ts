@@ -72,4 +72,35 @@ describe('quiet-luxe-sensor-tile', () => {
     expect(missing.getCardSize()).toBe(1);
     expect(missing.getGridOptions()).toEqual({ rows: 'auto', columns: 4 });
   });
+
+  it('the identity region opens HA’s more-info dialog for the tile entity', async () => {
+    const tile = await mount(
+      { entity: 'sensor.living_aqi', metric: 'aqi' },
+      makeMockHass([sensorEntity('sensor.living_aqi', '18')]),
+    );
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    tile.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['sensor.living_aqi']);
+    expect(seen[0]?.bubbles).toBe(true);
+    expect(seen[0]?.composed).toBe(true);
+  });
+
+  it('still opens more-info for an entity that is missing entirely', async () => {
+    const tile = await mount({ entity: 'sensor.ghost', metric: 'temp' }, makeMockHass());
+    const seen: string[] = [];
+    const record = (event: Event): void => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    const info = tile.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info');
+    expect(info?.disabled).toBe(false);
+    info?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen).toEqual(['sensor.ghost']);
+  });
 });
