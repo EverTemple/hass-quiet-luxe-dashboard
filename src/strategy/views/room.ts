@@ -1,19 +1,10 @@
-import {
-  contentGrid,
-  COLUMNS_FULL,
-  COLUMNS_HALF_OF_WIDE_SECTION,
-} from '../../cards/grid-options';
+import { contentGrid, COLUMNS_HALF_OF_WIDE_SECTION } from '../../cards/grid-options';
 import { t } from '../../i18n/translate';
 import { viewUrl } from '../config';
 import { roomName, roomScopedLabels } from '../labels';
-import {
-  MAX_COLUMNS,
-  orderTallestFirst,
-  REGION_SPAN,
-  ROOM_CONTROLS_ROW_SPAN,
-} from '../layout';
+import { MAX_COLUMNS, REGION_SPAN, ROOM_CONTROLS_ROW_SPAN } from '../layout';
 import type { AreaEntry } from '../registry';
-import { climateCards } from '../sections/climate';
+import { climateColumnCards } from '../sections/climate';
 import { columnSection, headingCard, viewHeaderSection } from '../sections/heading';
 import { orderedPlayers } from '../sections/media';
 import { orderedAreas } from '../sections/rooms';
@@ -90,22 +81,6 @@ function mediaCards(ctx: StrategyContext, areaId: string): ReadonlyArray<Lovelac
       grid_options: contentGrid('full'),
     },
   ];
-}
-
-/**
- * The climate column is ONE track wide, so its cards take the whole track
- * rather than the half-track they ask for in a wider grid — a dial squeezed
- * into 187px is unreadable. Ordered tallest → shortest so the height the column
- * cannot fill is spent at its bottom edge (packing rule 3).
- */
-function climateColumnCards(
-  ctx: StrategyContext,
-  areaId: string,
-): ReadonlyArray<LovelaceCardConfig> {
-  return orderTallestFirst(climateCards(ctx, areaId)).map((card) => ({
-    ...card,
-    grid_options: contentGrid(COLUMNS_FULL),
-  }));
 }
 
 function headerSection(ctx: StrategyContext, area: AreaEntry): LovelaceSectionConfig {

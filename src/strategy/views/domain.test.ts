@@ -80,6 +80,21 @@ describe('domain views', () => {
     expect(climatesView(makeContext({}))).toBeNull();
   });
 
+  /**
+   * The column is one track, so a card that keeps its half-track default stands
+   * ~150px wide under a full-width dial. The room view already forced the full
+   * track; All Climates did not, which put a half-width dehumidifier tile at the
+   * bottom of the live Steven Bedroom column.
+   */
+  it('gives every All-Climates card the whole track, like the room column does', () => {
+    const view = climatesView(contextFor('subang'));
+    const cards = view?.sections.slice(1).flatMap((section) => section.cards.slice(1)) ?? [];
+    expect(cards.length).toBeGreaterThan(0);
+    for (const card of cards) {
+      expect(card.grid_options, card.entity as string).toEqual({ columns: 12, rows: 'auto' });
+    }
+  });
+
   it('carView carries the per-home brand and is null for car: none', () => {
     const subangCar = carView(contextFor('subang'));
     expect(subangCar?.sections[1]?.cards[0]).toMatchObject({ brand: 'bmw' });

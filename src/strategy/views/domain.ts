@@ -1,10 +1,10 @@
 import type { TranslationKey } from '../../i18n/locales/en';
 import { t } from '../../i18n/translate';
 import { roomName } from '../labels';
-import { MAX_COLUMNS, orderTallestFirst, REGION_SPAN } from '../layout';
+import { MAX_COLUMNS, REGION_SPAN } from '../layout';
 import { adminSection } from '../sections/admin';
 import { carCard } from '../sections/car';
-import { climateCards } from '../sections/climate';
+import { climateColumnCards } from '../sections/climate';
 import { energyViewSections } from '../sections/energy';
 import { sectionOf, viewHeaderSection } from '../sections/heading';
 import { mediaViewSections } from '../sections/media';
@@ -62,16 +62,19 @@ export function energyView(ctx: StrategyContext): LovelaceViewConfig | null {
 
 /**
  * All Climates (spec §6): devices grouped by room; area names are proper nouns.
- * One span-1 column per area, free flow across the four tracks, and each
- * column's cards ordered tallest → shortest so the height it cannot fill is
- * spent at the bottom edge (packing rule 3).
+ * One span-1 column per area, free flow across the four tracks.
+ *
+ * The column is a single track, so it takes the same card treatment as the room
+ * view's climate column — full-track cards, tallest first. Sharing the helper
+ * is what stops a dehumidifier tile standing half-width under a full-width
+ * dial, which is what the two views did differently before.
  */
 export function climatesView(ctx: StrategyContext): LovelaceViewConfig | null {
   const sections = orderedAreas(ctx)
     .map((area) =>
       sectionOf(
         { type: 'heading', heading: roomName(ctx.home, area) },
-        orderTallestFirst(climateCards(ctx, area.area_id, undefined, 'full')),
+        climateColumnCards(ctx, area.area_id, 'full'),
         REGION_SPAN.climatesArea,
       ),
     )
