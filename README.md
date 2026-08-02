@@ -89,7 +89,9 @@ Latin typography is unaffected either way.
 - The Latin faces are inlined into `quiet-luxe.js` at build time by
   `scripts/inline-fonts-plugin.ts`, which reads the installed `@fontsource`
   packages and fails the build if a weight or subset goes missing. `dist/fonts/`
-  holds only the large CJK families plus a `fonts.css` that `@import`s them.
+  (27 MB, built separately by `scripts/build-fonts.mjs`) serves the optional
+  upgrade: the large CJK families, the same Latin faces as woff2 files, and a
+  `fonts.css` that `@import`s all of them.
 
 ## Repository docs
 
