@@ -54,9 +54,12 @@ describe('orderedAreas', () => {
 });
 
 describe('roomPhoto', () => {
-  it('prefers override photo, then area picture, then the photo_base default', () => {
+  it('prefers override photo, then area picture, then a configured photo_base', () => {
     const ctx = makeContext({
-      home: { rooms: { living: { photo: '/local/custom.jpg' } } },
+      home: {
+        photo_base: '/local/quiet-luxe/rooms',
+        rooms: { living: { photo: '/local/custom.jpg' } },
+      },
       snapshot,
       entities,
     });
@@ -68,11 +71,19 @@ describe('roomPhoto', () => {
       '/local/quiet-luxe/rooms/bedroom.jpg',
     );
   });
+
+  /* Guessing a path nobody has filled is what produced empty black room cards
+     on Tung Chung; without photo_base the card draws its own fallback. */
+  it('is undefined when the home has no photo library and the area has no picture', () => {
+    const ctx = makeContext({ snapshot, entities });
+    expect(roomPhoto(ctx.home, mockArea('bedroom', 'Bedroom'))).toBeUndefined();
+    expect(roomCardFor(ctx, mockArea('bedroom', 'Bedroom')).image).toBeUndefined();
+  });
 });
 
 describe('roomCardFor / roomsSection', () => {
   it('emits the full room card config for a populated area', () => {
-    const ctx = makeContext({ snapshot, entities });
+    const ctx = makeContext({ home: { photo_base: '/local/quiet-luxe/rooms' }, snapshot, entities });
     expect(roomCardFor(ctx, mockArea('living', 'Living Room'))).toEqual({
       type: 'custom:quiet-luxe-room-card',
       name: 'Living Room',
@@ -85,7 +96,7 @@ describe('roomCardFor / roomsSection', () => {
         { entity: 'light.living_ceiling', label: 'Lights' },
         { entity: 'climate.living_ac', label: 'Aircon' },
       ],
-      grid_options: { columns: 6 },
+      grid_options: { columns: 12 },
     });
   });
 

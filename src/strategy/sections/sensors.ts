@@ -11,12 +11,9 @@ const TILE_METRICS: ReadonlyArray<{ readonly metric: SensorMetric; readonly devi
 
 export function sensorTiles(ctx: StrategyContext, areaId: string): ReadonlyArray<LovelaceCardConfig> {
   return TILE_METRICS.flatMap(({ metric, deviceClass }) =>
-    ctx.registry.inArea(areaId, 'sensor', deviceClass).map((entity) => ({
-      type: 'custom:quiet-luxe-sensor-tile',
-      entity,
-      metric,
-      grid_options: { columns: 3, rows: 1 },
-    })),
+    ctx.registry
+      .inArea(areaId, 'sensor', deviceClass)
+      .map((entity) => ({ type: 'custom:quiet-luxe-sensor-tile', entity, metric })),
   );
 }
 

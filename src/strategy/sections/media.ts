@@ -1,3 +1,4 @@
+import { isUsable } from '../availability';
 import { viewUrl } from '../config';
 import {
   isSection,
@@ -8,11 +9,16 @@ import {
 } from '../types';
 import { headingCard, sectionOf } from './heading';
 
+/**
+ * Players worth showing: a player that is merely idle is a speaker the home
+ * has, a player that reads unavailable is one it does not (spec §8). Playing
+ * first, then whatever is on.
+ */
 export function orderedPlayers(ctx: StrategyContext, areaId?: string): ReadonlyArray<string> {
   const ids =
     areaId === undefined ? ctx.registry.all('media_player') : ctx.registry.inArea(areaId, 'media_player');
   const playingRank = (id: string): number => (ctx.states[id]?.state === 'playing' ? 0 : 1);
-  return [...ids].sort((a, b) => playingRank(a) - playingRank(b));
+  return ids.filter((id) => isUsable(ctx, id)).sort((a, b) => playingRank(a) - playingRank(b));
 }
 
 /** Home/room "Music" collapsed bar for the hero player (spec §6). */

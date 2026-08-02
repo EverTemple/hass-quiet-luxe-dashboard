@@ -28,19 +28,16 @@ describe('sensorTiles / sensorsSection', () => {
         type: 'custom:quiet-luxe-sensor-tile',
         entity: 'sensor.living_temp',
         metric: 'temp',
-        grid_options: { columns: 3, rows: 1 },
       },
       {
         type: 'custom:quiet-luxe-sensor-tile',
         entity: 'sensor.living_humidity',
         metric: 'humidity',
-        grid_options: { columns: 3, rows: 1 },
       },
       {
         type: 'custom:quiet-luxe-sensor-tile',
         entity: 'sensor.living_aqi',
         metric: 'aqi',
-        grid_options: { columns: 3, rows: 1 },
       },
     ]);
   });

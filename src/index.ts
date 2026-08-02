@@ -178,7 +178,6 @@ export {
 } from './strategy/quiet-luxe-strategy';
 export {
   DEFAULT_DASHBOARD_PATH,
-  DEFAULT_PHOTO_BASE,
   QuietLuxeConfigError,
   validateHomeConfig,
   viewUrl,

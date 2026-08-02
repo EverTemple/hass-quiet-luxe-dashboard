@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { sensorEntity } from '../../testing/mock-hass';
 import { makeContext } from '../../testing/mock-registry';
 import { energySection, energyViewSections } from './energy';
 
@@ -10,9 +11,17 @@ const energyHome = {
   },
 };
 
+const meters = [
+  sensorEntity('sensor.total_power', '1236'),
+  sensorEntity('sensor.today_energy', '8.6'),
+  sensorEntity('sensor.l1', '400'),
+  sensorEntity('sensor.l2', '500'),
+  sensorEntity('sensor.l3', '336'),
+];
+
 describe('energySection', () => {
   it('emits the strip card linking to the energy view', () => {
-    const section = energySection(makeContext({ home: energyHome }));
+    const section = energySection(makeContext({ home: energyHome, entities: meters }));
     expect(section?.cards[0]).toMatchObject({
       tap_action: { action: 'navigate', navigation_path: '/quiet-luxe/energy' },
     });
@@ -27,11 +36,17 @@ describe('energySection', () => {
   it('returns null when energy is disabled', () => {
     expect(energySection(makeContext({}))).toBeNull();
   });
+
+  it('returns null when the configured meter does not exist (spec §8)', () => {
+    expect(energySection(makeContext({ home: energyHome }))).toBeNull();
+  });
 });
 
 describe('energyViewSections', () => {
   it('renders strip + one ring per phase, chart only when apexcharts is installed', () => {
-    const withChart = energyViewSections(makeContext({ home: energyHome, hasApexcharts: true }));
+    const withChart = energyViewSections(
+      makeContext({ home: energyHome, entities: meters, hasApexcharts: true }),
+    );
     expect(withChart).toHaveLength(1);
     const cards = withChart[0]?.cards ?? [];
     expect(cards).toHaveLength(6); // heading + strip + 3 rings + chart
@@ -40,19 +55,29 @@ describe('energyViewSections', () => {
       form: 'ring',
       power_entity: 'sensor.l1',
       name: 'L1',
-      grid_options: { columns: 4 },
     });
     expect(cards[5]).toMatchObject({ type: 'custom:apexcharts-card' });
   });
 
   it('omits the chart when apexcharts-card is absent (graceful degradation)', () => {
-    const sections = energyViewSections(makeContext({ home: energyHome }));
+    const sections = energyViewSections(makeContext({ home: energyHome, entities: meters }));
     expect(
       sections[0]?.cards.some((card) => card.type === 'custom:apexcharts-card'),
     ).toBe(false);
   });
 
+  it('drops phase rings whose sensors do not exist', () => {
+    const sections = energyViewSections(
+      makeContext({ home: energyHome, entities: [sensorEntity('sensor.total_power', '1236')] }),
+    );
+    expect(sections[0]?.cards).toHaveLength(2); // heading + strip only
+  });
+
   it('returns no sections when energy is disabled', () => {
     expect(energyViewSections(makeContext({}))).toEqual([]);
+  });
+
+  it('returns no sections when the meter does not exist', () => {
+    expect(energyViewSections(makeContext({ home: energyHome }))).toEqual([]);
   });
 });

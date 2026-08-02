@@ -13,9 +13,13 @@ export function scheduleSection(ctx: StrategyContext): LovelaceSectionConfig | n
   if (calendars.length === 0 && todo === undefined) {
     return null;
   }
-  const cards: LovelaceCardConfig[] = [
-    { type: 'custom:quiet-luxe-schedule-card', calendars, todo_entity: todo, days: AGENDA_DAYS },
-  ];
+  /* No calendars → no agenda to segment: the schedule card would be a header
+     and a "coming soon" control over nothing. The tasks card carries the
+     section on its own (spec §8). */
+  const cards: LovelaceCardConfig[] =
+    calendars.length === 0
+      ? []
+      : [{ type: 'custom:quiet-luxe-schedule-card', calendars, todo_entity: todo, days: AGENDA_DAYS }];
   if (todo !== undefined) {
     cards.push({ type: 'custom:quiet-luxe-tasks-card', entity: todo });
   }

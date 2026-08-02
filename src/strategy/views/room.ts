@@ -42,7 +42,6 @@ function lightCards(ctx: StrategyContext, area: AreaEntry): ReadonlyArray<Lovela
       type: 'custom:quiet-luxe-light-card',
       entity: entityId,
       name: label,
-      grid_options: { columns: 6 },
     }),
   );
 }
@@ -53,7 +52,6 @@ function coverCards(ctx: StrategyContext, area: AreaEntry): ReadonlyArray<Lovela
       type: 'custom:quiet-luxe-cover-card',
       entity: entityId,
       name: label,
-      grid_options: { columns: 6 },
     }),
   );
 }

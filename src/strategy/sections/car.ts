@@ -1,3 +1,4 @@
+import { anyExists } from '../availability';
 import { viewUrl } from '../config';
 import {
   PATHS,
@@ -7,14 +8,22 @@ import {
 } from '../types';
 import { headingCard, sectionOf } from './heading';
 
+/**
+ * Null unless the car integration is actually present: `car: audi` with
+ * placeholder ids is a config intent, not a car (spec §8).
+ */
 export function carCard(ctx: StrategyContext): LovelaceCardConfig | null {
   if (ctx.home.car === 'none') {
+    return null;
+  }
+  const entities = ctx.home.car_entities ?? {};
+  if (!anyExists(ctx, Object.values(entities))) {
     return null;
   }
   return {
     type: 'custom:quiet-luxe-car-card',
     brand: ctx.home.car,
-    ...(ctx.home.car_entities ?? {}),
+    ...entities,
   };
 }
 

@@ -71,7 +71,6 @@ export interface HomeConfig {
 }
 
 export const DEFAULT_DASHBOARD_PATH = 'quiet-luxe';
-export const DEFAULT_PHOTO_BASE = '/local/quiet-luxe/rooms';
 
 export class QuietLuxeConfigError extends Error {
   constructor(message: string) {

@@ -35,4 +35,19 @@ describe('scheduleSection', () => {
   it('omits the section when the integration is missing despite the flag', () => {
     expect(scheduleSection(makeContext({ home: { calendar: 'google' } }))).toBeNull();
   });
+
+  /* A schedule card with no calendars is a segmented control over nothing, and
+     it collided with the tasks card beside it. */
+  it('emits only the tasks card when the home has no calendars', () => {
+    const ctx = makeContext({
+      home: { calendar: 'google' },
+      snapshot: { areas: [], devices: [], entities: [mockRegEntity('todo.shopping_list')] },
+      entities: [makeEntity('todo.shopping_list', '0')],
+    });
+    const section = scheduleSection(ctx);
+    expect(section?.cards.map((card) => card.type)).toEqual([
+      'heading',
+      'custom:quiet-luxe-tasks-card',
+    ]);
+  });
 });

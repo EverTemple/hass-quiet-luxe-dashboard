@@ -40,7 +40,6 @@ describe('orderedCameras / securitySection', () => {
       type: 'custom:quiet-luxe-camera-card',
       entity: 'camera.front',
       form: 'glance',
-      grid_options: { columns: 6 },
     });
   });
 
@@ -102,5 +101,14 @@ describe('cameraWallCards / securityViewSections', () => {
     const sections = securityViewSections(makeContext({ snapshot, entities }));
     expect(sections).toHaveLength(2);
     expect(securityViewSections(makeContext({}))).toEqual([]);
+  });
+
+  it('drops cameras that are unavailable at generation, section and all', () => {
+    const ctx = makeContext({
+      snapshot: { areas: [], devices: [], entities: [mockRegEntity('camera.dead')] },
+      entities: [makeEntity('camera.dead', 'unavailable')],
+    });
+    expect(orderedCameras(ctx)).toEqual([]);
+    expect(securitySection(ctx)).toBeNull();
   });
 });

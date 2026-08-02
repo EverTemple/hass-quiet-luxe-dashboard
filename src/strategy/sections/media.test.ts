@@ -74,4 +74,34 @@ describe('sonosGroupRows / mediaViewSections', () => {
     });
     expect(sonosGroupRows(ctx)).toEqual([]);
   });
+
+  /* Tung Chung's only "player" is an unavailable PlayStation; the home glance
+     used to render a dead Unavailable bar for it (spec §8). */
+  it('keeps idle players and drops unavailable ones', () => {
+    const ctx = makeContext({
+      snapshot: {
+        areas: [],
+        devices: [],
+        entities: [
+          mockRegEntity('media_player.speaker'),
+          mockRegEntity('media_player.console'),
+        ],
+      },
+      entities: [
+        makeEntity('media_player.console', 'unavailable'),
+        makeEntity('media_player.speaker', 'idle'),
+      ],
+    });
+    expect(orderedPlayers(ctx)).toEqual(['media_player.speaker']);
+    expect(mediaSection(ctx)?.cards[1]).toMatchObject({ entity: 'media_player.speaker' });
+  });
+
+  it('omits the section when every player is unavailable', () => {
+    const ctx = makeContext({
+      snapshot: { areas: [], devices: [], entities: [mockRegEntity('media_player.console')] },
+      entities: [makeEntity('media_player.console', 'unavailable')],
+    });
+    expect(orderedPlayers(ctx)).toEqual([]);
+    expect(mediaSection(ctx)).toBeNull();
+  });
 });

@@ -148,7 +148,9 @@ Conventions the strategy reads from HA itself: areas = rooms; entities bucket
 per area by domain and device class; labels refine — `ql-favorite` (sort
 first), `ql-hidden` (never rendered), `ql-primary-camera` (leads camera
 sections). Room photos resolve override → area picture →
-`/local/quiet-luxe/rooms/<area_id>.jpg`.
+`<photo_base>/<area_id>.jpg` when the home sets `photo_base`. With none of
+those, the room card draws its own warm fallback instead of pointing at a file
+that may not exist.
 
 Labels never repeat the room a card already names. Chips on a room card read as
 device types (Lights, Aircon, Curtain, TV) and only fall back to entity names
@@ -158,9 +160,14 @@ aliases` are all stripped, so a room whose devices are named after some other
 name for it (area `Master Bedroom`, entities `Master Room …`) is fixed by
 listing that name in `aliases`.
 
-Missing integrations never render (no energy config → no Energy view; no
-calendar entities or `calendar: none` → no Schedule). apexcharts-card and the
-WebRTC camera card are used only when installed.
+Missing integrations never render, and a flag is not evidence an integration is
+installed: `car: audi` with entity ids nothing provides produces no Car card,
+an `energy:` block whose meter is absent produces no Energy section or view,
+no calendar entities leaves the Schedule section to the tasks card alone, and
+media players and cameras that read `unavailable` at generation are dropped
+(a section with nothing left is omitted). Entities that exist but are offline
+still render, muted. apexcharts-card and the WebRTC camera card are used only
+when installed.
 
 RBAC tiers: `admin` (HA admins) / `family` / `guest` (default for unknown
 users; use it for the shared iPad kiosk account). Family and guests never see

@@ -54,9 +54,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
                 },
               ],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/main_living.jpg",
               "lights_entity": "light.main_living_pendant",
               "name": "Main Living",
               "navigation_path": "/quiet-luxe/room-main_living",
@@ -67,9 +66,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "aqi_entity": undefined,
               "chips": [],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/side_living.jpg",
               "lights_entity": undefined,
               "name": "Side Living",
               "navigation_path": "/quiet-luxe/room-side_living",
@@ -93,9 +91,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
                 },
               ],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/master_bedroom.jpg",
               "lights_entity": "light.master_lamp",
               "name": "Master Bedroom",
               "navigation_path": "/quiet-luxe/room-master_bedroom",
@@ -118,23 +115,14 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.main_living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
             {
               "entity": "fan.side_living_fan",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
             {
               "entity": "climate.master_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -171,17 +159,11 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             {
               "entity": "camera.front_gate",
               "form": "glance",
-              "grid_options": {
-                "columns": 6,
-              },
               "type": "custom:quiet-luxe-camera-card",
             },
             {
               "entity": "camera.porch",
               "form": "glance",
-              "grid_options": {
-                "columns": 6,
-              },
               "type": "custom:quiet-luxe-camera-card",
             },
           ],
@@ -297,9 +279,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "light.main_living_pendant",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Pendant",
               "type": "custom:quiet-luxe-light-card",
             },
@@ -314,9 +293,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.main_living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -330,9 +306,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "cover.main_living_shade",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Shade",
               "type": "custom:quiet-luxe-cover-card",
             },
@@ -361,28 +334,16 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "sensor.main_living_temp",
-              "grid_options": {
-                "columns": 3,
-                "rows": 1,
-              },
               "metric": "temp",
               "type": "custom:quiet-luxe-sensor-tile",
             },
             {
               "entity": "sensor.main_living_humidity",
-              "grid_options": {
-                "columns": 3,
-                "rows": 1,
-              },
               "metric": "humidity",
               "type": "custom:quiet-luxe-sensor-tile",
             },
             {
               "entity": "sensor.main_living_aqi",
-              "grid_options": {
-                "columns": 3,
-                "rows": 1,
-              },
               "metric": "aqi",
               "type": "custom:quiet-luxe-sensor-tile",
             },
@@ -442,9 +403,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "fan.side_living_fan",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -482,9 +440,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "light.master_lamp",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Master Lamp",
               "type": "custom:quiet-luxe-light-card",
             },
@@ -499,9 +454,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.master_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -515,9 +467,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "cover.master_curtain",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Master Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
@@ -660,27 +609,18 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "form": "ring",
-              "grid_options": {
-                "columns": 4,
-              },
               "name": "L1",
               "power_entity": "sensor.shelly_3em_phase_a_power",
               "type": "custom:quiet-luxe-energy-card",
             },
             {
               "form": "ring",
-              "grid_options": {
-                "columns": 4,
-              },
               "name": "L2",
               "power_entity": "sensor.shelly_3em_phase_b_power",
               "type": "custom:quiet-luxe-energy-card",
             },
             {
               "form": "ring",
-              "grid_options": {
-                "columns": 4,
-              },
               "name": "L3",
               "power_entity": "sensor.shelly_3em_phase_c_power",
               "type": "custom:quiet-luxe-energy-card",
@@ -705,9 +645,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.main_living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -721,9 +658,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "fan.side_living_fan",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -737,9 +671,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.master_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -865,9 +796,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
                 },
               ],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/bedroom.jpg",
               "lights_entity": "light.bedroom_lamp",
               "name": "Bedroom",
               "navigation_path": "/quiet-luxe/room-bedroom",
@@ -895,9 +825,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
                 },
               ],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/living.jpg",
               "lights_entity": "light.living_ceiling",
               "name": "Living Room",
               "navigation_path": "/quiet-luxe/room-living",
@@ -920,9 +849,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -959,9 +885,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             {
               "entity": "camera.srihome_living",
               "form": "glance",
-              "grid_options": {
-                "columns": 6,
-              },
               "type": "custom:quiet-luxe-camera-card",
             },
           ],
@@ -1057,9 +980,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "light.bedroom_lamp",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Lamp",
               "type": "custom:quiet-luxe-light-card",
             },
@@ -1112,9 +1032,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "light.living_ceiling",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Living Ceiling",
               "type": "custom:quiet-luxe-light-card",
             },
@@ -1129,9 +1046,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -1145,9 +1059,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "cover.living_curtain",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Living Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
@@ -1176,19 +1087,11 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "sensor.living_temp",
-              "grid_options": {
-                "columns": 3,
-                "rows": 1,
-              },
               "metric": "temp",
               "type": "custom:quiet-luxe-sensor-tile",
             },
             {
               "entity": "sensor.living_aqi",
-              "grid_options": {
-                "columns": 3,
-                "rows": 1,
-              },
               "metric": "aqi",
               "type": "custom:quiet-luxe-sensor-tile",
             },
@@ -1287,9 +1190,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -1409,9 +1309,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
                 },
               ],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/bedroom.jpg",
               "lights_entity": undefined,
               "name": "Bedroom",
               "navigation_path": "/quiet-luxe/room-bedroom",
@@ -1439,9 +1338,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
                 },
               ],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/living.jpg",
               "lights_entity": "light.living_ceiling",
               "name": "Living Room",
               "navigation_path": "/quiet-luxe/room-living",
@@ -1457,9 +1355,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
                 },
               ],
               "grid_options": {
-                "columns": 6,
+                "columns": 12,
               },
-              "image": "/local/quiet-luxe/rooms/storage.jpg",
               "lights_entity": "light.storage_light",
               "name": "Storage",
               "navigation_path": "/quiet-luxe/room-storage",
@@ -1482,16 +1379,10 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
             {
               "entity": "climate.bedroom_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -1528,9 +1419,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             {
               "entity": "camera.dahua_living",
               "form": "glance",
-              "grid_options": {
-                "columns": 6,
-              },
               "type": "custom:quiet-luxe-camera-card",
             },
           ],
@@ -1618,9 +1506,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.bedroom_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -1658,9 +1543,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "light.living_ceiling",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Living Ceiling",
               "type": "custom:quiet-luxe-light-card",
             },
@@ -1675,9 +1557,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -1691,9 +1570,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "cover.living_curtain",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Living Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
@@ -1722,19 +1598,11 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "sensor.living_temp",
-              "grid_options": {
-                "columns": 3,
-                "rows": 1,
-              },
               "metric": "temp",
               "type": "custom:quiet-luxe-sensor-tile",
             },
             {
               "entity": "sensor.living_aqi",
-              "grid_options": {
-                "columns": 3,
-                "rows": 1,
-              },
               "metric": "aqi",
               "type": "custom:quiet-luxe-sensor-tile",
             },
@@ -1780,9 +1648,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "light.storage_light",
-              "grid_options": {
-                "columns": 6,
-              },
               "name": "Light",
               "type": "custom:quiet-luxe-light-card",
             },
@@ -1874,9 +1739,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.bedroom_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -1890,9 +1752,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
-              "grid_options": {
-                "columns": 4,
-              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],

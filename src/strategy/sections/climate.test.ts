@@ -52,7 +52,6 @@ describe('climateSection', () => {
     expect(section?.cards[1]).toEqual({
       type: 'custom:quiet-luxe-climate-card',
       entity: 'climate.bedroom_ac',
-      grid_options: { columns: 4 },
     });
   });
 

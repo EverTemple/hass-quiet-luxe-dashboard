@@ -1,3 +1,4 @@
+import { isUsable } from '../availability';
 import { LABEL_PRIMARY_CAMERA } from '../registry';
 import { viewUrl } from '../config';
 import {
@@ -11,10 +12,14 @@ import { headingCard, sectionOf } from './heading';
 
 const DOOR_CLASSES = ['door', 'window', 'garage_door', 'opening'] as const;
 
+/** Primary camera first; cameras that are unavailable at generation are dropped. */
 export function orderedCameras(ctx: StrategyContext): ReadonlyArray<string> {
   const primaryRank = (id: string): number =>
     ctx.registry.hasLabel(id, LABEL_PRIMARY_CAMERA) ? 0 : 1;
-  return [...ctx.registry.all('camera')].sort((a, b) => primaryRank(a) - primaryRank(b));
+  return ctx.registry
+    .all('camera')
+    .filter((id) => isUsable(ctx, id))
+    .sort((a, b) => primaryRank(a) - primaryRank(b));
 }
 
 /** Home glance: two thumbnails, primary camera first (spec §6). */
@@ -25,7 +30,6 @@ export function securitySection(ctx: StrategyContext): LovelaceSectionConfig | n
       type: 'custom:quiet-luxe-camera-card',
       entity,
       form: 'glance',
-      grid_options: { columns: 6 },
     }));
   return sectionOf(headingCard(ctx.locale, 'section.cameras', viewUrl(ctx.home, PATHS.security)), cards);
 }

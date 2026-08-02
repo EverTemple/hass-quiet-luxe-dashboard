@@ -29,11 +29,7 @@ export function climateCards(
 ): ReadonlyArray<LovelaceCardConfig> {
   const ids = climateEntityIds(ctx, areaId);
   const scoped = limit === undefined ? ids : ids.slice(0, limit);
-  return scoped.map((entity) => ({
-    type: 'custom:quiet-luxe-climate-card',
-    entity,
-    grid_options: { columns: 4 },
-  }));
+  return scoped.map((entity) => ({ type: 'custom:quiet-luxe-climate-card', entity }));
 }
 
 export interface ClimateSectionOptions {

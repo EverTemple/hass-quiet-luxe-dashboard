@@ -1,4 +1,4 @@
-import { DEFAULT_PHOTO_BASE, viewUrl, type HomeConfig } from '../config';
+import { viewUrl, type HomeConfig } from '../config';
 import { chipLabels, roomName } from '../labels';
 import type { AreaEntry } from '../registry';
 import {
@@ -9,8 +9,13 @@ import {
 } from '../types';
 import { headingCard, sectionOf } from './heading';
 
-/** Photo precedence: config override → HA area picture → photo_base default. */
-export function roomPhoto(home: HomeConfig, area: AreaEntry): string {
+/**
+ * Photo precedence: config override → HA area picture → `<photo_base>/<area>.jpg`.
+ * Undefined when the home has not opted into a photo library, so the card draws
+ * its own fallback instead of pointing at a path nobody has filled: guessing a
+ * URL that 404s produced the empty black room cards on Tung Chung.
+ */
+export function roomPhoto(home: HomeConfig, area: AreaEntry): string | undefined {
   const override = home.rooms?.[area.area_id]?.photo;
   if (override !== undefined) {
     return override;
@@ -18,7 +23,7 @@ export function roomPhoto(home: HomeConfig, area: AreaEntry): string {
   if (area.picture !== null) {
     return area.picture;
   }
-  return `${home.photo_base ?? DEFAULT_PHOTO_BASE}/${area.area_id}.jpg`;
+  return home.photo_base === undefined ? undefined : `${home.photo_base}/${area.area_id}.jpg`;
 }
 
 /** Visible areas: not hidden by override, at least one visible entity; room_order first, then name. */
@@ -48,16 +53,19 @@ export function roomCardFor(ctx: StrategyContext, area: AreaEntry): LovelaceCard
     entity: entityId,
     label,
   }));
+  const photo = roomPhoto(ctx.home, area);
   return {
     type: 'custom:quiet-luxe-room-card',
     name: roomName(ctx.home, area),
-    image: roomPhoto(ctx.home, area),
+    ...(photo === undefined ? {} : { image: photo }),
     navigation_path: viewUrl(ctx.home, roomPath(areaId)),
     temperature_entity: registry.inArea(areaId, 'sensor', 'temperature')[0],
     aqi_entity: registry.inArea(areaId, 'sensor', 'aqi')[0],
     lights_entity: registry.inArea(areaId, 'light')[0],
     chips,
-    grid_options: { columns: 6 },
+    /* Half of the two-column Rooms section (12 of 12×2), which is also full
+       width once the view collapses to one column — 2-up, then 1-up. */
+    grid_options: { columns: 12 },
   };
 }
 
