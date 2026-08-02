@@ -39,12 +39,13 @@ export const SUBANG_CONFIG: HomeConfig = validateHomeConfig({
 });
 
 /**
- * Areas confirmed against the live registry on 2026-08-02 (B-TC-5 audit,
- * `.ai/tungchung-registry.json`). The registry holds paired areas per room:
- * Chinese-named areas (客厅/饭厅/儿子房) carry Dooya curtains + Xiaomi speakers,
- * English-named ones carry ONVIF cameras + motion cells. Audi and Google
- * Calendar integrations were NOT present in the audit; their entity ids stay
- * as UNCONFIRMED placeholders that degrade to omitted at render time.
+ * Areas confirmed against the live registry on 2026-08-02 after the area
+ * merge (backup: `.ai/tungchung-registry-pre-merge.json`). The duplicate
+ * Chinese-named areas (客厅/饭厅/父母房/儿子房) were merged into their English
+ * equivalents (living_room/dining_room/parents_room/steven_bedroom); the
+ * Chinese names remain as area aliases. Audi and Google Calendar
+ * integrations were NOT present in the audit; their entity ids stay as
+ * UNCONFIRMED placeholders that degrade to omitted at render time.
  */
 export const TUNGCHUNG_CONFIG: HomeConfig = validateHomeConfig({
   name: 'Tung Chung',
@@ -57,13 +58,10 @@ export const TUNGCHUNG_CONFIG: HomeConfig = validateHomeConfig({
   camera_engine: 'webrtc',
   broadlink: true,
   room_order: [
-    'ke_ting',
     'living_room',
-    'fan_ting',
     'dining_room',
     'master_bedroom',
     'steven_bedroom',
-    'er_zi_fang',
     'parents_room',
     'parking',
   ],
