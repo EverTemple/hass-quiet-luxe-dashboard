@@ -4,6 +4,7 @@ import {
   nothing,
   type CSSResultGroup,
   type PropertyDeclarations,
+  type PropertyValues,
   type TemplateResult,
 } from 'lit';
 import { t } from '../i18n/translate';
@@ -59,7 +60,8 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     return { rows: 3, columns: 4 };
   }
 
-  protected override willUpdate(): void {
+  protected override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed);
     if (!this.started && this.hass !== undefined && this.config !== undefined) {
       this.started = true;
       void this.refresh();

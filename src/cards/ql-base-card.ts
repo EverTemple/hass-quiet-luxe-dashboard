@@ -4,10 +4,12 @@ import {
   type CSSResult,
   type CSSResultGroup,
   type PropertyDeclarations,
+  type PropertyValues,
 } from 'lit';
 import type { HassEntity, HomeAssistant } from '../types/home-assistant';
 import { resolveLocale } from '../i18n/resolve';
 import type { Locale } from '../i18n/types';
+import { syncDarkMode } from '../theme/inject-theme';
 
 export type EntityAvailability = 'available' | 'unavailable' | 'missing';
 
@@ -29,6 +31,18 @@ export abstract class QlBaseCard extends LitElement {
   /** Public wrapper so tests and the strategy can query availability. */
   availabilityOf(entityId: string): EntityAvailability {
     return this.availability(entityId);
+  }
+
+  /**
+   * Publishes HA's dark-mode flag to the document so the injected base
+   * stylesheet follows HA instead of the OS preference. Cards are the only
+   * place the bundle sees `hass`, and the attribute is document-wide, so the
+   * first card to update settles the mode for every card.
+   */
+  protected override willUpdate(changed: PropertyValues): void {
+    if (changed.has('hass')) {
+      syncDarkMode(this.ownerDocument, this.hass?.themes?.darkMode);
+    }
   }
 
   /** Session locale per spec §10: HA user profile language → hass.language → en. */

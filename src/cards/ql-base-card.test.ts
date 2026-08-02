@@ -1,5 +1,6 @@
 import { html, type TemplateResult } from 'lit';
 import { describe, expect, it } from 'vitest';
+import { DARK_MODE_ATTRIBUTE } from '../theme/inject-theme';
 import type { HomeAssistant } from '../types/home-assistant';
 import { QlBaseCard } from './ql-base-card';
 
@@ -63,6 +64,29 @@ describe('QlBaseCard availability', () => {
     const div = card.shadowRoot?.querySelector('div');
     expect(div?.classList.contains('ql-unavailable')).toBe(true);
     card.remove();
+  });
+});
+
+describe('QlBaseCard dark mode', () => {
+  async function renderWith(hass: HomeAssistant): Promise<void> {
+    const card = new QlTestCard();
+    card.hass = hass;
+    document.body.append(card);
+    await card.updateComplete;
+    card.remove();
+  }
+
+  it('republishes HA dark mode onto the document before the first paint', async () => {
+    await renderWith({ ...makeHass({}), themes: { darkMode: true } });
+    expect(document.documentElement.getAttribute(DARK_MODE_ATTRIBUTE)).toBe('true');
+    await renderWith({ ...makeHass({}), themes: { darkMode: false } });
+    expect(document.documentElement.getAttribute(DARK_MODE_ATTRIBUTE)).toBe('false');
+  });
+
+  it('leaves the system preference in charge when HA reports no theme state', async () => {
+    await renderWith({ ...makeHass({}), themes: { darkMode: true } });
+    await renderWith(makeHass({}));
+    expect(document.documentElement.hasAttribute(DARK_MODE_ATTRIBUTE)).toBe(false);
   });
 });
 

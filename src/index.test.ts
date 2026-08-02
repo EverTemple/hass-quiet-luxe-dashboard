@@ -89,10 +89,32 @@ describe('bundle entry', () => {
     );
   });
 
-  it('installs its own Latin webfaces on import (zero-file-copy install)', () => {
+  it('installs its own fonts and tokens on import (zero-file-copy install)', () => {
     const fonts = document.getElementById(bundle.INLINE_FONT_STYLE_ID);
     expect(fonts?.textContent).toContain('@font-face');
     expect(fonts?.textContent).toContain('data:font/woff2;base64,');
+    const theme = document.getElementById(bundle.THEME_STYLE_ID);
+    expect(theme?.textContent).toContain('--ql-surface-card');
+    expect(theme?.textContent).toContain('@media (prefers-color-scheme: dark)');
+  });
+
+  it('publishes HA dark mode from every card, overrides included', () => {
+    // syncDarkMode rides on QlBaseCard.willUpdate, so a subclass that overrides
+    // willUpdate without calling super would silently stop following HA — and a
+    // view holding only that card would be stuck on the OS preference.
+    for (const tag of [...CARD_TAGS, 'quiet-luxe-header-card']) {
+      const constructor = customElements.get(tag);
+      expect(constructor, tag).toBeDefined();
+      const card = new constructor!() as unknown as {
+        hass: unknown;
+        willUpdate(changed: Map<string, unknown>): void;
+      };
+      document.documentElement.removeAttribute(bundle.DARK_MODE_ATTRIBUTE);
+      card.hass = { themes: { darkMode: true } };
+      card.willUpdate(new Map([['hass', undefined]]));
+      expect(document.documentElement.getAttribute(bundle.DARK_MODE_ATTRIBUTE), tag).toBe('true');
+    }
+    document.documentElement.removeAttribute(bundle.DARK_MODE_ATTRIBUTE);
   });
 
   it('survives the optional font stylesheet failing to load', () => {

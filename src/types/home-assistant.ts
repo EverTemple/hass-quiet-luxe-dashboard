@@ -9,6 +9,12 @@ export interface HomeAssistant {
   readonly states: Readonly<Record<string, HassEntity>>;
   readonly language: string;
   readonly locale?: { readonly language: string };
+  /**
+   * HA's resolved theme state. `darkMode` is the flag the frontend itself uses
+   * for light/dark and is what drives the injected base stylesheet
+   * (src/theme/inject-theme.ts). Optional because narrow mocks omit it.
+   */
+  readonly themes?: { readonly darkMode?: boolean };
   /** Current user; absent in narrow mocks. is_admin drives the RBAC admin tier. */
   readonly user?: {
     readonly id: string;

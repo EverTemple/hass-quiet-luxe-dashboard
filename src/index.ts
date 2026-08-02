@@ -1,6 +1,7 @@
 import { version } from '../package.json';
 import { injectFontStylesheet } from './fonts/load-fonts';
 import { injectInlineFonts } from './fonts/inline-fonts';
+import { injectThemeStyle } from './theme/inject-theme';
 import './elements/ql-canvas';
 import './elements/ql-status-dot';
 import './elements/ql-badge';
@@ -78,6 +79,13 @@ export { navigate } from './cards/navigate';
 export { registerCard, type CustomCardEntry } from './cards/register';
 export * from './tokens/palette';
 export { colorCssVariables, cssVariableBlock, dimensionCssVariables } from './tokens/css';
+export {
+  DARK_MODE_ATTRIBUTE,
+  injectThemeStyle,
+  syncDarkMode,
+  THEME_STYLE_ID,
+  themeStyleCss,
+} from './theme/inject-theme';
 export { INLINE_FONT_CSS, INLINE_FONT_STYLE_ID, injectInlineFonts } from './fonts/inline-fonts';
 export {
   FONT_BODY_STACK,
@@ -188,10 +196,11 @@ export {
   type RegistrySnapshot,
 } from './strategy/registry';
 
-// The bundle carries its own Latin webfaces, so a HACS-only install renders in
-// the right typefaces with no files copied into /config. The /local font
-// stylesheet stays an optional CJK upgrade.
+// Self-sufficiency: the bundle carries its own Latin webfaces and --ql-* tokens,
+// so a HACS-only install renders correctly with no files copied into /config.
+// The /local font stylesheet and themes/quiet-luxe.yaml stay optional upgrades.
 injectInlineFonts(document);
+injectThemeStyle(document);
 injectFontStylesheet(document, import.meta.url);
 
 console.info(

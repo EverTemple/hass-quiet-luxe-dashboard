@@ -4,6 +4,7 @@ import {
   nothing,
   type CSSResultGroup,
   type PropertyDeclarations,
+  type PropertyValues,
   type TemplateResult,
 } from 'lit';
 import '../elements/ql-section-eyebrow';
@@ -76,7 +77,8 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
     return { rows: 4, columns: 6 };
   }
 
-  protected override willUpdate(): void {
+  protected override willUpdate(changed: PropertyValues): void {
+    super.willUpdate(changed);
     if (!this.started && this.hass !== undefined && this.config !== undefined && this.hasSources()) {
       this.started = true;
       void this.refresh();
