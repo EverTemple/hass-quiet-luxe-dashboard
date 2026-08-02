@@ -153,7 +153,7 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
     const availability = this.availability(config.entity);
     const entity = this.entity(config.entity);
     const name =
-      config.name ?? (entity?.attributes.friendly_name as string | undefined) ?? config.entity;
+      this.nameOf(config.entity, config.name);
     const status = this.statusLine();
     const battery = Number(entity?.attributes.battery_level);
     const rooms = config.rooms ?? [];

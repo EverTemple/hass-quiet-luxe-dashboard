@@ -118,10 +118,7 @@ export class QlRowNetworkFlow extends QlBaseCard {
     const locale = this.locale();
     const availability = this.availability(config.entity);
     const unavailable = availability !== 'available';
-    const name =
-      config.name ??
-      (this.entity(config.entity)?.attributes.friendly_name as string | undefined) ??
-      config.entity;
+    const name = this.nameOf(config.entity, config.name);
     const on = this.entity(config.entity)?.state === 'on';
     return html`
       <div class="ql-card ${unavailable ? 'ql-unavailable' : ''}">

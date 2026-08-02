@@ -154,10 +154,7 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     }
     const locale = this.locale();
     const availability = this.availability(config.entity);
-    const name =
-      config.name ??
-      (this.entity(config.entity)?.attributes.friendly_name as string | undefined) ??
-      config.entity;
+    const name = this.nameOf(config.entity, config.name);
     if (availability !== 'available') {
       return html`
         <div class="ql-card ql-unavailable">

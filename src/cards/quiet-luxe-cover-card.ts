@@ -127,10 +127,7 @@ export class QuietLuxeCoverCard extends QlBaseCard {
     const entityId = this.config.entity;
     const available = this.availability(entityId) === 'available';
     const locale = this.locale();
-    const label =
-      this.config.name ??
-      (this.entity(entityId)?.attributes.friendly_name as string | undefined) ??
-      entityId;
+    const label = this.nameOf(entityId, this.config.name);
     const position = this.position();
     return html`
       <div

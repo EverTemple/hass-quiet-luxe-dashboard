@@ -241,7 +241,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
     const cardClass = unavailable ? 'ql-card ql-unavailable' : 'ql-card';
     const entity = this.entity(config.entity);
     const name =
-      config.name ?? (entity?.attributes.friendly_name as string | undefined) ?? config.entity;
+      this.nameOf(config.entity, config.name);
     if (this.form() === 'group-row') {
       return html`
         <div class="${cardClass} row">

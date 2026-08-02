@@ -171,10 +171,7 @@ export class QuietLuxeCameraCard extends QlBaseCard {
     const availability = this.availability(config.entity);
     const url = availability === 'available' ? this.snapshotUrl() : undefined;
     const showImage = url !== undefined && !this.snapshotFailed;
-    const name =
-      config.name ??
-      (this.entity(config.entity)?.attributes.friendly_name as string | undefined) ??
-      config.entity;
+    const name = this.nameOf(config.entity, config.name);
     const fallbackText =
       availability === 'available'
         ? t(locale, 'camera.snapshot_unavailable')

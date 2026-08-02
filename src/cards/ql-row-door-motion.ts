@@ -112,10 +112,7 @@ export class QlRowDoorMotion extends QlBaseCard {
     }
     const locale = this.locale();
     const availability = this.availability(config.entity);
-    const name =
-      config.name ??
-      (this.entity(config.entity)?.attributes.friendly_name as string | undefined) ??
-      config.entity;
+    const name = this.nameOf(config.entity, config.name);
     const info = this.stateInfo();
     const toggleId = config.toggle_entity;
     const showToggle = config.show_toggle === true && toggleId !== undefined;

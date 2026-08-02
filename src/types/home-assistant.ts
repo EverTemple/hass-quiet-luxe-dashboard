@@ -7,6 +7,13 @@ import type { HassEntity } from 'home-assistant-js-websocket';
  */
 export interface HomeAssistant {
   readonly states: Readonly<Record<string, HassEntity>>;
+  /**
+   * Entity registry display entries, keyed by entity id (HA frontend
+   * `hass.entities`, verified 2026-08-01). Only `name` is consumed, as a
+   * display-name fallback behind the state's friendly_name. Optional because
+   * narrow mocks and pre-2023.4 cores omit it.
+   */
+  readonly entities?: Readonly<Record<string, { readonly name?: string | null }>>;
   readonly language: string;
   readonly locale?: { readonly language: string };
   /**

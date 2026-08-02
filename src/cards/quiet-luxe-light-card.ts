@@ -128,10 +128,7 @@ export class QuietLuxeLightCard extends QlBaseCard {
     const availability = this.availability(entityId);
     const available = availability === 'available';
     const on = available && this.entity(entityId)?.state === 'on';
-    const label =
-      this.config.name ??
-      (this.entity(entityId)?.attributes.friendly_name as string | undefined) ??
-      entityId;
+    const label = this.nameOf(entityId, this.config.name);
     const pct = this.brightnessPct();
     return html`
       <div class="ql-card ${available ? '' : 'ql-unavailable'}">

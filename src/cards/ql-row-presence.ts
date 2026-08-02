@@ -6,7 +6,6 @@ import {
   type TemplateResult,
 } from 'lit';
 import { t } from '../i18n/translate';
-import type { HassEntity } from '../types/home-assistant';
 import { QlBaseCard } from './ql-base-card';
 
 export interface PresenceRowConfig {
@@ -81,12 +80,8 @@ export class QlRowPresence extends QlBaseCard {
     `,
   ];
 
-  private personName(entityId: string, entity: HassEntity | undefined): string {
-    return (
-      (entity?.attributes.friendly_name as string | undefined) ??
-      entityId.split('.')[1] ??
-      entityId
-    );
+  private personName(entityId: string): string {
+    return this.nameOf(entityId);
   }
 
   protected override render(): TemplateResult {
@@ -105,7 +100,7 @@ export class QlRowPresence extends QlBaseCard {
             availability !== 'available'
               ? t(locale, 'common.offline')
               : t(locale, home ? 'presence.home' : 'presence.away');
-          const name = this.personName(entityId, entity);
+          const name = this.personName(entityId);
           const picture = entity?.attributes.entity_picture as string | undefined;
           return html`
             <span class="person ${home ? '' : 'away'}">

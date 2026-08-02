@@ -133,6 +133,30 @@ describe('quiet-luxe-room-card', () => {
     expect(history.pushState).not.toHaveBeenCalled();
   });
 
+  it('chip labels use friendly_name, never the raw entity id', async () => {
+    const hass = makeMockHass([
+      makeEntity('cover.dooya_m1_fe9b_curtain', 'open', { friendly_name: '窗帘 Curatain' }),
+      makeEntity('climate.steven_bedroom', 'cool', { friendly_name: 'Steven Bedroom' }),
+      makeEntity('light.steven_room_ceiling_top', 'on'),
+    ]);
+    const card = await mount(
+      {
+        chips: [
+          { entity: 'cover.dooya_m1_fe9b_curtain' },
+          { entity: 'climate.steven_bedroom', label: 'Aircon' },
+          { entity: 'light.steven_room_ceiling_top' },
+        ],
+      },
+      hass,
+    );
+    const labels = [...(card.shadowRoot?.querySelectorAll('ql-chip') ?? [])].map((chip) =>
+      chip.textContent?.trim(),
+    );
+    // friendly_name, explicit label wins, humanized id when nothing else exists
+    expect(labels).toEqual(['窗帘 Curatain', 'Aircon', 'Steven Room Ceiling Top']);
+    expect(labels.join(' ')).not.toContain('.');
+  });
+
   it('sizes the layout grid: s/m/l rows 2/3/4', async () => {
     const card = await mount({ size: 's' });
     expect(card.getCardSize()).toBe(2);

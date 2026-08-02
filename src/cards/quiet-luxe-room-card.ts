@@ -203,7 +203,7 @@ export class QuietLuxeRoomCard extends QlBaseCard {
               ?active=${on}
               class=${availability === 'available' ? '' : 'ql-unavailable'}
               @click=${(event: Event): void => this.onChipTap(event, chip.entity)}
-              >${chip.label ?? chip.entity}</ql-chip
+              >${this.nameOf(chip.entity, chip.label)}</ql-chip
             >
           `;
         })}

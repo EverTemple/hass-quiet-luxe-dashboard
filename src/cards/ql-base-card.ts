@@ -10,6 +10,7 @@ import type { HassEntity, HomeAssistant } from '../types/home-assistant';
 import { resolveLocale } from '../i18n/resolve';
 import type { Locale } from '../i18n/types';
 import { syncDarkMode } from '../theme/inject-theme';
+import { displayName } from './display-name';
 
 export type EntityAvailability = 'available' | 'unavailable' | 'missing';
 
@@ -52,6 +53,14 @@ export abstract class QlBaseCard extends LitElement {
 
   protected entity(entityId: string): HassEntity | undefined {
     return this.hass?.states[entityId];
+  }
+
+  /**
+   * Human-readable label for an entity, never a bare entity id.
+   * See display-name.ts for the precedence rules.
+   */
+  protected nameOf(entityId: string, configName?: string): string {
+    return displayName(this.hass, entityId, configName);
   }
 
   protected availability(entityId: string): EntityAvailability {

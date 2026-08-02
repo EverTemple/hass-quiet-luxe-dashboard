@@ -104,10 +104,7 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
     }
     const names = persons
       .filter((id) => this.entity(id)?.state === 'home')
-      .map((id) => {
-        const friendly: unknown = this.entity(id)?.attributes.friendly_name;
-        return typeof friendly === 'string' ? friendly : id.split('.')[1];
-      });
+      .map((id) => this.nameOf(id));
     if (names.length === 0) {
       return t(this.locale(), 'header.nobody_home');
     }

@@ -94,10 +94,7 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
     }
     const locale = this.locale();
     const availability = this.availability(config.entity);
-    const name =
-      config.name ??
-      (this.entity(config.entity)?.attributes.friendly_name as string | undefined) ??
-      config.entity;
+    const name = this.nameOf(config.entity, config.name);
     const on = availability === 'available' && this.entity(config.entity)?.state === 'on';
     const statusText =
       availability !== 'available'

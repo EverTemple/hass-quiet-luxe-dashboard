@@ -195,10 +195,7 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     }
     const entityId = this.config.entity;
     const availability = this.availability(entityId);
-    const label =
-      this.config.name ??
-      (this.entity(entityId)?.attributes.friendly_name as string | undefined) ??
-      entityId;
+    const label = this.nameOf(entityId, this.config.name);
     const status = this.statusLine();
     return html`
       <div
