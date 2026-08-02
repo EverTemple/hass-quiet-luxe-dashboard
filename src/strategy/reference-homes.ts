@@ -38,6 +38,14 @@ export const SUBANG_CONFIG: HomeConfig = validateHomeConfig({
   users: { guests: ['kiosk'] },
 });
 
+/**
+ * Areas confirmed against the live registry on 2026-08-02 (B-TC-5 audit,
+ * `.ai/tungchung-registry.json`). The registry holds paired areas per room:
+ * Chinese-named areas (客厅/饭厅/儿子房) carry Dooya curtains + Xiaomi speakers,
+ * English-named ones carry ONVIF cameras + motion cells. Audi and Google
+ * Calendar integrations were NOT present in the audit; their entity ids stay
+ * as UNCONFIRMED placeholders that degrade to omitted at render time.
+ */
 export const TUNGCHUNG_CONFIG: HomeConfig = validateHomeConfig({
   name: 'Tung Chung',
   car: 'audi',
@@ -48,8 +56,19 @@ export const TUNGCHUNG_CONFIG: HomeConfig = validateHomeConfig({
   calendar: 'google',
   camera_engine: 'webrtc',
   broadlink: true,
+  room_order: [
+    'ke_ting',
+    'living_room',
+    'fan_ting',
+    'dining_room',
+    'master_bedroom',
+    'steven_bedroom',
+    'er_zi_fang',
+    'parents_room',
+    'parking',
+  ],
   admin_flows: [
-    { entity: 'switch.nr_cam_uplink', name: 'Camera uplink', description: 'UniFi port' },
+    { entity: 'switch.zigbee2mqtt_bridge_permit_join', name: 'Zigbee pairing', description: 'Zigbee2MQTT permit join' },
   ],
   kiosk: { language: 'zh-Hant' },
   users: { guests: ['kiosk'] },

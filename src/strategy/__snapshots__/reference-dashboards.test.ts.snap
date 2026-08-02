@@ -1314,9 +1314,9 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "heading",
             },
             {
-              "description": "UniFi port",
-              "entity": "switch.nr_cam_uplink",
-              "name": "Camera uplink",
+              "description": "Zigbee2MQTT permit join",
+              "entity": "switch.zigbee2mqtt_bridge_permit_join",
+              "name": "Zigbee pairing",
               "type": "custom:ql-row-network-flow",
             },
           ],
