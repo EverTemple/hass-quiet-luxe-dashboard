@@ -56,4 +56,18 @@ describe('ql-toggle', () => {
     expect(cssText).toContain('var(--ql-surface-card, #fdfbf6)');
     expect(cssText).toContain('var(--ql-surface-border, #e4dccb)');
   });
+
+  /**
+   * --ql-surface-card is rgba(255,250,240,0.055) in dark mode. Filling the
+   * checked thumb with it made the knob all but invisible against the
+   * champagne track on every toggle in the product.
+   */
+  it('fills the checked thumb with an opaque token, never surface-card', () => {
+    const checkedThumb = /:host\(\[checked\]\) button::after \{([^}]*)\}/.exec(
+      QlToggle.styles.toString(),
+    )?.[1];
+    expect(checkedThumb).toBeDefined();
+    expect(checkedThumb).toContain('var(--ql-bg-base, #f4f0e8)');
+    expect(checkedThumb).not.toContain('--ql-surface-card');
+  });
 });

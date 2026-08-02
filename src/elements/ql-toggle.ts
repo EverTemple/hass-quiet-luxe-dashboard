@@ -52,9 +52,14 @@ export class QlToggle extends LitElement {
       background: var(--ql-accent-champagne, #b08d57);
       border-color: transparent;
     }
+    /* The knob reads against the champagne track, not against the card behind
+       it: --ql-surface-card is a 5.5%-opacity white in dark mode, which left
+       the thumb all but invisible on every toggle in the product. --ql-bg-base
+       is opaque in both modes and is the same token the selected segment of
+       ql-segmented uses for its label on an ink fill. */
     :host([checked]) button::after {
       transform: translateX(18px);
-      background: var(--ql-surface-card, #fdfbf6);
+      background: var(--ql-bg-base, #f4f0e8);
     }
     :host([disabled]) button {
       opacity: 0.5;

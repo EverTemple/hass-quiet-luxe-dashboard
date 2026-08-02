@@ -11,6 +11,7 @@ import { COLUMNS_FULL, COLUMNS_HALF, contentGrid } from './grid-options';
 const CARD_TAGS = [
   'quiet-luxe-room-card',
   'quiet-luxe-climate-card',
+  'quiet-luxe-fan-card',
   'quiet-luxe-light-card',
   'quiet-luxe-cover-card',
   'quiet-luxe-sensor-tile',
@@ -33,6 +34,7 @@ const CONFIG_FOR: Readonly<Record<string, Record<string, unknown>>> = {
   'quiet-luxe-room-card': { name: 'Living Room' },
   'quiet-luxe-header-card': { form: 'home', name: 'Home' },
   'quiet-luxe-media-card': { entity: 'media_player.a', form: 'bar' },
+  'quiet-luxe-fan-card': { entity: 'fan.a' },
   'quiet-luxe-car-card': { brand: 'bmw' },
   'quiet-luxe-energy-card': { power_entity: 'sensor.a' },
   'quiet-luxe-sensor-tile': { entity: 'sensor.a', metric: 'temp' },

@@ -128,6 +128,13 @@ export interface RegistryIndex {
   platformOf(entityId: string): string | undefined;
   /** Visible entities sharing the entity's device (motion-toggle discovery). */
   siblings(entityId: string): ReadonlyArray<string>;
+  /**
+   * Every enabled entity on the device, including the `entity_category`
+   * config/diagnostic ones `siblings` hides. A device's own settings — a night
+   * mode switch, a filter-life sensor — are config entities by design, so a
+   * card that draws the whole device has to see past the listing filter.
+   */
+  deviceEntities(entityId: string): ReadonlyArray<string>;
 }
 
 const EMPTY: ReadonlyArray<string> = [];
@@ -175,6 +182,19 @@ export function buildRegistryIndex(
     }
   }
 
+  /* Device membership over every enabled entity, config/diagnostic included. */
+  const enabled = snapshot.entities.filter((entity) => entity.disabled_by === null);
+  const deviceIdOf = new Map(enabled.map((entity) => [entity.entity_id, entity.device_id]));
+  const allByDevice = new Map<string, string[]>();
+  for (const entity of enabled) {
+    if (entity.device_id !== null) {
+      allByDevice.set(entity.device_id, [
+        ...(allByDevice.get(entity.device_id) ?? []),
+        entity.entity_id,
+      ]);
+    }
+  }
+
   const domainOf = (id: string): string => id.split('.')[0] ?? '';
   const deviceClassOf = (id: string): string | undefined => {
     const deviceClass: unknown = states[id]?.attributes.device_class;
@@ -204,6 +224,13 @@ export function buildRegistryIndex(
         return EMPTY;
       }
       return (byDevice.get(deviceId) ?? EMPTY).filter((id) => id !== entityId);
+    },
+    deviceEntities: (entityId): ReadonlyArray<string> => {
+      const deviceId = deviceIdOf.get(entityId) ?? null;
+      if (deviceId === null) {
+        return EMPTY;
+      }
+      return allByDevice.get(deviceId) ?? EMPTY;
     },
   };
 }

@@ -10,11 +10,18 @@ import './elements/ql-toggle';
 import './elements/ql-slider';
 import './elements/ql-segmented';
 import './elements/ql-stepper';
+import './elements/ql-dial-button';
+import './elements/ql-preset-row';
+import './elements/ql-sheet-button';
+import './elements/ql-sheet';
+import './elements/ql-sweep-dial';
+import './elements/ql-timer-dial';
 import './elements/ql-section-eyebrow';
 import './elements/ql-header-home';
 import './elements/ql-header-room';
 import './cards/quiet-luxe-room-card';
 import './cards/quiet-luxe-climate-card';
+import './cards/quiet-luxe-fan-card';
 import './cards/quiet-luxe-light-card';
 import './cards/quiet-luxe-cover-card';
 import './cards/quiet-luxe-sensor-tile';
@@ -43,6 +50,13 @@ export { QlToggle } from './elements/ql-toggle';
 export { QlSlider } from './elements/ql-slider';
 export { QlSegmented, type QlSegmentOption } from './elements/ql-segmented';
 export { QlStepper, STEPPER_COMMIT_MS } from './elements/ql-stepper';
+export { QlDialButton, type QlDialState } from './elements/ql-dial-button';
+export { QlPresetRow, type QlPresetOption } from './elements/ql-preset-row';
+export { QlSheet } from './elements/ql-sheet';
+export { QlSheetButton, type QlSheetButtonEmphasis } from './elements/ql-sheet-button';
+export { QlSweepDial } from './elements/ql-sweep-dial';
+export { QlTimerDial } from './elements/ql-timer-dial';
+export { dysonIcon, DYSON_ICON_NAMES, type DysonIconName } from './elements/dyson-icons';
 export { QlSectionEyebrow } from './elements/ql-section-eyebrow';
 export { QlHeaderHome, type QlHeaderVariant } from './elements/ql-header-home';
 export { QlHeaderRoom } from './elements/ql-header-room';
@@ -57,6 +71,15 @@ export {
   QuietLuxeClimateCard,
   type ClimateCardConfig,
 } from './cards/quiet-luxe-climate-card';
+export { QuietLuxeFanCard, type FanCardConfig } from './cards/quiet-luxe-fan-card';
+export {
+  dialButtonsFor,
+  fanCapabilities,
+  TIMER_PRESETS,
+  type DialId,
+  type FanCapabilities,
+  type FanCardForm,
+} from './cards/fan-capabilities';
 export { QuietLuxeLightCard, type LightCardConfig } from './cards/quiet-luxe-light-card';
 export {
   detectCoverType,
