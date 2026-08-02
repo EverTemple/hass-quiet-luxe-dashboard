@@ -26,24 +26,35 @@ import {
   type DialSetpointKind,
 } from '../cards/climate-dial';
 
-export type QlRingDialSize = 'full' | 'compact';
+export type QlRingDialSize = 'full' | 'compact' | 'sheet';
 /** Which grip a gesture belongs to. A single-setpoint dial only has `value`. */
 export type QlRingDialHandle = 'value' | 'low' | 'high';
 
 interface DialGeometry {
-  /** The drawn box, and so the SVG viewBox. */
+  /** The SVG viewBox the ring is drawn in. */
   readonly size: number;
   readonly stroke: number;
   /** Centreline radius of the ring: the grips ride on it. */
   readonly radius: number;
+  /** How wide the drawn ring is on screen; the SVG scales to it. */
+  readonly box: number;
   readonly grip: number;
   readonly ticks: boolean;
 }
 
-/** Figma `card/climate-dial` (55:4707), both sizes. */
+/**
+ * Figma `card/climate-dial-v2` (114:2885) and `modal/climate-dial` (106:8971).
+ *
+ * `full` and `sheet` are the same drawing at two scales — the card dial is 198
+ * across, the sheet's is 244 — so they share one viewBox and differ only in the
+ * box they are rendered into. `compact` is a genuinely different drawing: no
+ * ticks, and a thinner ring, because at 136 the tick marks would close up into
+ * a solid band.
+ */
 export const DIAL_GEOMETRY: Readonly<Record<QlRingDialSize, DialGeometry>> = {
-  full: { size: 220, stroke: 14, radius: 103, grip: 18, ticks: true },
-  compact: { size: 136, stroke: 10, radius: 63, grip: 14, ticks: false },
+  full: { size: 220, stroke: 14, radius: 103, box: 198, grip: 16, ticks: true },
+  compact: { size: 136, stroke: 10, radius: 63, box: 136, grip: 14, ticks: false },
+  sheet: { size: 220, stroke: 14, radius: 103, box: 244, grip: 20, ticks: true },
 };
 
 /** Major ticks: 1x6, just inside the ring. Fine ticks: 1x4, closer to it. */
@@ -110,6 +121,10 @@ export class QlRingDial extends LitElement {
   declare disabled: boolean;
 
   private dragging?: QlRingDialHandle;
+  /** Distinguishes this dial's gradient from every other dial's on the page. */
+  private readonly instanceId = String((QlRingDial.instances += 1));
+
+  private static instances = 0;
 
   constructor() {
     super();
@@ -140,13 +155,16 @@ export class QlRingDial extends LitElement {
     .stage {
       position: relative;
       width: 100%;
-      max-width: ${DIAL_GEOMETRY.full.size}px;
+      max-width: ${DIAL_GEOMETRY.full.box}px;
       margin: 0 auto;
       aspect-ratio: 1;
       touch-action: none;
     }
     :host([size='compact']) .stage {
-      max-width: ${DIAL_GEOMETRY.compact.size}px;
+      max-width: ${DIAL_GEOMETRY.compact.box}px;
+    }
+    :host([size='sheet']) .stage {
+      max-width: ${DIAL_GEOMETRY.sheet.box}px;
     }
     svg {
       display: block;
@@ -191,9 +209,10 @@ export class QlRingDial extends LitElement {
       position: absolute;
       top: 50%;
       left: 50%;
-      width: var(--ql-grip-size, 18px);
-      height: var(--ql-grip-size, 18px);
-      margin: calc(-0.5 * var(--ql-grip-size, 18px)) 0 0 calc(-0.5 * var(--ql-grip-size, 18px));
+      width: var(--ql-grip-size, ${DIAL_GEOMETRY.full.grip}px);
+      height: var(--ql-grip-size, ${DIAL_GEOMETRY.full.grip}px);
+      margin: calc(-0.5 * var(--ql-grip-size, ${DIAL_GEOMETRY.full.grip}px)) 0 0
+        calc(-0.5 * var(--ql-grip-size, ${DIAL_GEOMETRY.full.grip}px));
       box-sizing: border-box;
       border-radius: var(--ql-radius-chip, 999px);
       border: 2px solid var(--ql-grip-stroke, var(--ql-accent-champagne, #b08d57));
@@ -207,7 +226,10 @@ export class QlRingDial extends LitElement {
       box-shadow: 0 0 18px rgba(224, 178, 99, 0.45);
     }
     :host([size='compact']) .grip::after {
-      --ql-grip-size: 14px;
+      --ql-grip-size: ${DIAL_GEOMETRY.compact.grip}px;
+    }
+    :host([size='sheet']) .grip::after {
+      --ql-grip-size: ${DIAL_GEOMETRY.sheet.grip}px;
     }
     .grip:active {
       cursor: grabbing;
@@ -582,9 +604,11 @@ export class QlRingDial extends LitElement {
     const geometry = this.geometry();
     const centre = geometry.size / 2;
     const span = this.arcSpan();
-    // Scoped per instance: several dials share one document and an id collision
-    // would make them all take the first one's ramp.
-    const gradientId = `ql-dial-ramp-${String(geometry.size)}-${this.mode}`;
+    // Scoped per instance: several dials share one document — a card's dial and
+    // the same entity's dial inside an open sheet, at once — and an id collision
+    // would make them all take the first one's ramp, which is drawn over the
+    // first one's arc and so points the wrong way.
+    const gradientId = `ql-dial-ramp-${this.instanceId}`;
     return html`
       <div class="stage">
         <svg viewBox=${`0 0 ${String(geometry.size)} ${String(geometry.size)}`} aria-hidden="true">

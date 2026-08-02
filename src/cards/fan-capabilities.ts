@@ -66,8 +66,16 @@ export const TIMER_MAX_MINUTES = 540;
 /** Figma `modal/timer` presets. 0 is "Off". */
 export const TIMER_PRESETS: ReadonlyArray<number> = [0, 15, 30, 60, 120, 240, 480];
 
-/** Below this the two oscillation handles would meet and the sweep lose meaning. */
-export const MIN_SWEEP = 5;
+/**
+ * The narrowest sweep the control will set.
+ *
+ * The hardware accepts 5°, but a 5° sweep is a fan that jitters rather than
+ * oscillates: the two handles overlap at that width, the wedge has no readable
+ * body to drag, and the device spends the whole sweep decelerating. 30° is the
+ * floor the design pins to (Figma `modal/oscillation-v2`, 113:11176) and the
+ * width at which the wedge is still a target.
+ */
+export const MIN_SWEEP = 30;
 /** Arrow keys move a handle this far; shift refines to `SWEEP_FINE_STEP`. */
 export const SWEEP_COARSE_STEP = 5;
 export const SWEEP_FINE_STEP = 1;
@@ -244,6 +252,35 @@ function clampRange(value: number): number {
   return Math.min(ANGLE_MAX, Math.max(ANGLE_MIN, value));
 }
 
+/** The widest sweep the hardware can express. */
+export const MAX_SWEEP = ANGLE_MAX - ANGLE_MIN;
+
+/**
+ * A sweep that is safe to drive the control from.
+ *
+ * A device can report a span narrower than the floor — the TP09 remembers
+ * whatever was last set, including sweeps set by Dyson's own app. Widening it on
+ * read, rather than at the moment of a drag, keeps every handle rule below able
+ * to assume the invariant instead of re-checking it. The sweep is widened about
+ * its own midpoint and then slid inside the hardware range, so a sweep parked
+ * against a limit stays against it.
+ */
+export function normaliseSweep(angle: OscillationAngle): OscillationAngle {
+  const span = Math.min(MAX_SWEEP, Math.max(MIN_SWEEP, angle.high - angle.low));
+  if (span === angle.high - angle.low) {
+    return { low: angle.low, high: angle.high, span };
+  }
+  const midpoint = (angle.low + angle.high) / 2;
+  const low = clampRange(Math.round(midpoint - span / 2));
+  const slid = Math.min(low, ANGLE_MAX - span);
+  return { low: slid, high: slid + span, span };
+}
+
+/** True when the sweep is sitting on its floor and cannot narrow further. */
+export function isMinSweep(angle: OscillationAngle): boolean {
+  return angle.high - angle.low <= MIN_SWEEP;
+}
+
 /** Applies a new position to one handle, keeping the pair ordered and in range. */
 function withHandle(
   angle: OscillationAngle,
@@ -252,11 +289,52 @@ function withHandle(
 ): OscillationAngle {
   const clamped = clampRange(Math.round(next));
   if (handle === 'low') {
-    const low = Math.min(clamped, angle.high - MIN_SWEEP);
+    // The floor pins the handle rather than pushing its neighbour: the user
+    // grabbed one edge, so the other one stays where it was put.
+    const low = clampRange(Math.min(clamped, angle.high - MIN_SWEEP));
     return { low, high: angle.high, span: angle.high - low };
   }
-  const high = Math.max(clamped, angle.low + MIN_SWEEP);
+  const high = clampRange(Math.max(clamped, angle.low + MIN_SWEEP));
   return { low: angle.low, high, span: high - angle.low };
+}
+
+/**
+ * Slides the whole sweep by `delta` degrees, keeping its span.
+ *
+ * The hardware arc runs 5..355 and does not wrap, so a rotation that would
+ * carry an edge past a limit stops with that edge on the limit. It never wraps
+ * to the far side and never inverts the pair — a sweep that ran left-to-right
+ * before the drag still runs left-to-right after it.
+ */
+export function sweepRotate(angle: OscillationAngle, delta: number): OscillationAngle {
+  const span = Math.min(MAX_SWEEP, Math.max(MIN_SWEEP, angle.high - angle.low));
+  const low = Math.min(ANGLE_MAX - span, Math.max(ANGLE_MIN, Math.round(angle.low + delta)));
+  return { low, high: low + span, span };
+}
+
+/** Where the sweep is pointing: the bisector of its two edges. */
+export function sweepBearing(angle: OscillationAngle): number {
+  return (angle.low + angle.high) / 2;
+}
+
+/** Re-aims the sweep so its bisector lands on `bearing`, keeping its span. */
+export function sweepAim(angle: OscillationAngle, bearing: number): OscillationAngle {
+  return sweepRotate(angle, bearing - sweepBearing(angle));
+}
+
+/**
+ * Folds a bearing onto the branch nearest `previous`.
+ *
+ * The only bearing the fan cannot face is straight down, which is exactly where
+ * the 0/360 seam falls. Reading each pointer sample as an absolute bearing would
+ * make a drag across the bottom of the dial jump from 355 to 5 — the sweep would
+ * flip to the opposite side of the room mid-gesture. Unwrapping against the
+ * previous sample instead lets the value run past 360 (or below 0), where
+ * `sweepRotate` then stops it cleanly on the limit.
+ */
+export function unwrapBearing(previous: number, next: number): number {
+  const delta = ((((next - previous) % 360) + 540) % 360) - 180;
+  return previous + delta;
 }
 
 /** Keyboard nudge: `delta` is signed degrees. */
@@ -281,9 +359,30 @@ export function sweepHandleDrag(
   dx: number,
   dy: number,
 ): OscillationAngle {
+  return withHandle(angle, handle, deviceBearing(dx, dy));
+}
+
+/** The device bearing a pointer at (dx, dy) from the dial centre points at. */
+export function deviceBearing(dx: number, dy: number): number {
   const screenDegrees = (Math.atan2(dy, dx) * 180) / Math.PI;
-  const device = (((screenDegrees + 270) % 360) + 360) % 360;
-  return withHandle(angle, handle, device);
+  return (((screenDegrees + 270) % 360) + 360) % 360;
+}
+
+/**
+ * The wedge body dragged to a new aim.
+ *
+ * `previous` is the bearing the last sample resolved to, which is what makes a
+ * drag across the bottom seam continuous rather than a jump to the far side.
+ * Returns the new sweep and the unwrapped bearing to carry into the next sample.
+ */
+export function sweepAimDrag(
+  angle: OscillationAngle,
+  previous: number,
+  dx: number,
+  dy: number,
+): { readonly angle: OscillationAngle; readonly bearing: number } {
+  const bearing = unwrapBearing(previous, deviceBearing(dx, dy));
+  return { angle: sweepAim(angle, bearing), bearing };
 }
 
 export function powerCall(entityId: string, on: boolean): ServiceCall {

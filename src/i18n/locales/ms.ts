@@ -187,4 +187,13 @@ export const ms: TranslationTable = {
   'climate.set_to': 'Ditetapkan ke',
   'climate.heating': 'Memanaskan',
   'climate.cooling': 'Menyejukkan',
+  'air.good': 'Baik',
+  'air.fair': 'Sederhana',
+  'air.poor': 'Buruk',
+  'air.very_poor': 'Sangat buruk',
+  'fan.sweep_aim': 'Arah ayunan',
+  'fan.aim_hint': 'Seret bentuk kipas untuk menala arah',
+  'fan.span_held': 'sudut dikekalkan pada',
+  'fan.min_span': 'Sudut minimum',
+  'fan.release_to_set': 'lepaskan untuk tetapkan',
 };

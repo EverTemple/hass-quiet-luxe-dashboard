@@ -1,8 +1,7 @@
 import { css, html, nothing, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-preset-row';
-import '../elements/ql-ring-dial';
 import '../elements/ql-status-dot';
-import type { QlRingDialHandle, QlRingDialSize } from '../elements/ql-ring-dial';
+import type { QlRingDialHandle } from '../elements/ql-ring-dial';
 import { t } from '../i18n/translate';
 import type { TranslationKey } from '../i18n/locales/en';
 import type { Locale } from '../i18n/types';
@@ -17,19 +16,29 @@ import {
   type DialSetpoints,
 } from './climate-dial';
 import { climateSheetCall, climateSheetGroups, type ClimateControlId } from './climate-sheet';
-import { contentGrid, COLUMNS_FULL, COLUMNS_HALF, type QlGridOptions } from './grid-options';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
+import {
+  adjustSetpoints,
+  QUICK_ADJUST_COMMIT_DELAY_MS,
+  type AdjustDirection,
+} from './quick-adjust';
 import { registerCard } from './register';
+import { climateDialStyles, renderClimateDial } from './render-climate-dial';
 import { climateSheetStyles, renderClimateSheet } from './render-climate-sheet';
-import { optionLabel } from './device-controls';
-import { selectableOptions } from './supported-features';
+import { optionLabel, titleCase } from './device-controls';
+import { CLIMATE_FEATURE, selectableOptions } from './supported-features';
+import { fireMoreInfo } from './more-info';
+
+/** The card's own two sizes. The sheet's dial is a third, owned by the sheet. */
+export type ClimateDialForm = 'full' | 'compact';
 
 export interface ClimateDialCardConfig {
   readonly type: string;
   readonly entity: string;
   readonly name?: string;
-  /** `compact` is the room-view dial: smaller ring, no ticks, no mode row. */
-  readonly form?: QlRingDialSize;
+  /** `compact` is the room-view dial: a smaller ring, and no ticks on it. */
+  readonly form?: ClimateDialForm;
 }
 
 /** The eyebrow above the numeral, which names what the device is doing. */
@@ -42,13 +51,20 @@ const MODE_LABELS: Readonly<Record<DialMode, TranslationKey>> = {
 };
 
 /**
- * Climate dial card (Figma `card/climate-dial`, 55:4707).
+ * Climate dial card (Figma `card/climate-dial-v2`, 114:2885).
  *
  * The dial is the card: a draggable ring over the entity's own temperature
- * band, the hvac mode row beneath it, and everything else — fan, swing, preset,
- * humidity — one tap away behind "More controls". Nothing here is hard-coded to
- * a device: the band, the step and every control in the sheet come from what
- * the entity itself reports.
+ * band, a minus and a plus flanking it for the single steps a drag is clumsy
+ * at, then the hvac mode row and the fan row beneath. Everything else — swing,
+ * preset, humidity — is one tap away behind "More controls", which opens the
+ * same sheet the dial itself lives in.
+ *
+ * Both sizes carry the whole set. The earlier compact card dropped the mode
+ * row, the fan row and the sheet, which made a room-view thermostat a
+ * read-mostly tile; the only difference now is the ring's diameter.
+ *
+ * Nothing here is hard-coded to a device: the band, the step, the modes, the
+ * fan speeds and every control in the sheet come from what the entity reports.
  */
 export class QuietLuxeClimateDialCard extends QlBaseCard {
   static override properties = {
@@ -61,10 +77,17 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
   declare config?: ClimateDialCardConfig;
   declare sheetOpen: boolean;
   declare draft?: DialSetpoints;
+  /** Collapses a burst of quick-adjust taps into one service call. */
+  private commitTimer?: number;
 
   constructor() {
     super();
     this.sheetOpen = false;
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    window.clearTimeout(this.commitTimer);
   }
 
   setConfig(config: ClimateDialCardConfig): void {
@@ -75,24 +98,30 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
   }
 
   getCardSize(): number {
-    return this.form() === 'compact' ? 3 : 5;
+    return this.form() === 'compact' ? 4 : 5;
   }
 
   /**
-   * The full dial takes the whole view column. Half a column is about 230px,
-   * which is four mode pills at 26px of label each — every one of them
-   * ellipsised. The compact dial carries no mode row and still shares.
+   * Both sizes take a whole view column.
+   *
+   * The compact card is 292px at its narrowest — 56 for the minus, 136 for the
+   * ring, 56 for the plus, plus the gaps and the card's own padding — and none
+   * of those can give: two of them are thumb targets and the third is the
+   * control. Half a view column is about 171px at four columns, so the card
+   * used to be asked to draw itself in a box it could not fit. It now asks for
+   * the column, and the two forms differ in height rather than width.
    */
   getGridOptions(): QlGridOptions {
-    return contentGrid(this.form() === 'compact' ? COLUMNS_HALF : COLUMNS_FULL);
+    return contentGrid(COLUMNS_FULL);
   }
 
-  form(): QlRingDialSize {
+  form(): ClimateDialForm {
     return this.config?.form === 'compact' ? 'compact' : 'full';
   }
 
   static override styles: CSSResultGroup = [
     QlBaseCard.qlCardStyles,
+    climateDialStyles,
     climateSheetStyles,
     css`
       .ql-card {
@@ -118,6 +147,14 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
       ql-status-dot {
         flex: 0 0 auto;
         margin-top: 3px;
+      }
+      /* A named row: the eyebrow says what the segments are for, because "Auto
+         / Low / Mid / High" on its own could be a fan or a mode. */
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ql-space-s, 8px);
+        min-width: 0;
       }
       .more {
         display: flex;
@@ -203,6 +240,40 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     }
   };
 
+  /**
+   * One quick-adjust press.
+   *
+   * The numeral moves at once and the call is deferred, because the two have
+   * different audiences: the screen answers to the thumb, the thermostat
+   * answers to a settled intention. A hold that fires ten presses is one
+   * `climate.set_temperature` for the value it landed on, not ten for the
+   * values it passed through.
+   */
+  private readonly onQuickAdjust = (direction: AdjustDirection): void => {
+    const scale = climateScale(this.entity(this.entityId()));
+    const next = adjustSetpoints(scale, this.setpoints(), direction);
+    if (next === undefined) {
+      return;
+    }
+    this.draft = next;
+    window.clearTimeout(this.commitTimer);
+    this.commitTimer = window.setTimeout(this.commitDraft, QUICK_ADJUST_COMMIT_DELAY_MS);
+  };
+
+  private readonly commitDraft = (): void => {
+    const draft = this.draft;
+    if (draft === undefined) {
+      return;
+    }
+    const call =
+      draft.kind === 'range'
+        ? setTemperatureCall(this.entityId(), { targetLow: draft.low, targetHigh: draft.high })
+        : setTemperatureCall(this.entityId(), { temperature: draft.value });
+    if (call !== undefined) {
+      this.call(call.domain, call.service, call.data);
+    }
+  };
+
   protected override updated(changed: Map<string, unknown>): void {
     if (!changed.has('hass') || this.draft === undefined) {
       return;
@@ -233,12 +304,22 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     this.onSheetControl('hvac_mode', event.detail.value);
   };
 
+  private readonly onFanMode = (event: CustomEvent<{ value: string }>): void => {
+    this.onSheetControl('fan_mode', event.detail.value);
+  };
+
   private readonly openSheet = (): void => {
     this.sheetOpen = true;
   };
 
   private readonly closeSheet = (): void => {
     this.sheetOpen = false;
+  };
+
+  /** HA's own dialog, still one tap away from inside the sheet. */
+  private readonly openDetails = (): void => {
+    this.sheetOpen = false;
+    fireMoreInfo(this, this.entityId());
   };
 
   /** "Now 22.6°" under the setpoint, or the standing setpoint when off. */
@@ -267,7 +348,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
    * not drawn at all, rather than drawn as a control that silently does nothing.
    */
   private renderModeRow(locale: Locale, disabled: boolean): TemplateResult | typeof nothing {
-    if (this.form() === 'compact' || disabled) {
+    if (disabled) {
       return nothing;
     }
     const entity = this.entity(this.entityId());
@@ -285,8 +366,37 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     `;
   }
 
+  /**
+   * The fan row the design has always drawn and the card never showed.
+   *
+   * Gated on the entity's own `FAN_MODE` bit and its own `fan_modes` list, so
+   * the live Sensibo gets its six speeds, a thermostat with no fan control gets
+   * no row at all, and neither is a special case in this code.
+   */
+  private renderFanRow(locale: Locale, disabled: boolean): TemplateResult | typeof nothing {
+    if (disabled) {
+      return nothing;
+    }
+    const entity = this.entity(this.entityId());
+    const modes = selectableOptions(entity, 'fan_modes', CLIMATE_FEATURE.FAN_MODE);
+    if (modes.length === 0) {
+      return nothing;
+    }
+    return html`
+      <div class="group">
+        <span class="eyebrow">${t(locale, 'control.fan')}</span>
+        <ql-preset-row
+          .options=${modes.map((mode) => ({ value: mode, label: titleCase(mode) }))}
+          .value=${String(entity?.attributes.fan_mode ?? '')}
+          .label=${t(locale, 'control.fan')}
+          @ql-change=${this.onFanMode}
+        ></ql-preset-row>
+      </div>
+    `;
+  }
+
   private renderMore(locale: Locale, disabled: boolean): TemplateResult | typeof nothing {
-    if (this.form() === 'compact' || climateSheetGroups(this.entity(this.entityId())).length === 0) {
+    if (climateSheetGroups(this.entity(this.entityId())).length === 0) {
       return nothing;
     }
     return html`
@@ -312,41 +422,36 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     const mode = offline ? 'off' : dialMode(entity);
     const scale = climateScale(entity);
     const setpoints = this.setpoints();
+    const dial = (size: 'full' | 'compact' | 'sheet'): TemplateResult =>
+      renderClimateDial({
+        size,
+        scale,
+        setpoints,
+        mode,
+        locale,
+        disabled: offline,
+        modeLabel: t(locale, MODE_LABELS[mode]),
+        ambientText: this.captionOf(locale, mode),
+        heroText: this.heroOf(mode),
+        onAdjust: this.onQuickAdjust,
+        onInput: this.onDialInput,
+        onChange: this.onDialChange,
+      });
     return html`
       <div class="ql-card ${offline ? 'ql-unavailable' : ''}">
         <div class="head">
           <button
             class="ql-info"
             type="button"
-            data-ql-info=${entityId}
-            aria-label=${`${label} — ${t(locale, 'common.show_details')}`}
-            @click=${this.onMoreInfo}
+            aria-label=${`${label} — ${t(locale, 'control.more')}`}
+            @click=${this.openSheet}
           >
             <span class="eyebrow ql-clamp-2">${label}</span>
           </button>
           <ql-status-dot status=${mode === 'off' ? 'neutral' : 'good'}></ql-status-dot>
         </div>
-        <ql-ring-dial
-          size=${this.form()}
-          mode=${mode}
-          kind=${setpoints.kind}
-          .min=${scale.min}
-          .max=${scale.max}
-          .step=${scale.step}
-          .value=${setpoints.value ?? scale.min}
-          .low=${setpoints.low ?? scale.min}
-          .high=${setpoints.high ?? scale.max}
-          mode-label=${t(locale, MODE_LABELS[mode])}
-          ambient-text=${this.captionOf(locale, mode)}
-          hero-text=${this.heroOf(mode)}
-          value-label=${t(locale, 'control.target')}
-          low-label=${t(locale, 'control.heat_to')}
-          high-label=${t(locale, 'control.cool_to')}
-          ?disabled=${offline}
-          @ql-input=${this.onDialInput}
-          @ql-change=${this.onDialChange}
-        ></ql-ring-dial>
-        ${this.renderModeRow(locale, offline)} ${this.renderMore(locale, offline)}
+        ${dial(this.form())} ${this.renderModeRow(locale, offline)}
+        ${this.renderFanRow(locale, offline)} ${this.renderMore(locale, offline)}
         ${this.sheetOpen
           ? renderClimateSheet({
               open: this.sheetOpen,
@@ -356,6 +461,8 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
               disabled: offline,
               emit: this.onSheetControl,
               onClose: this.closeSheet,
+              dial: setpoints.kind === 'none' ? undefined : dial('sheet'),
+              onDetails: this.openDetails,
             })
           : nothing}
       </div>

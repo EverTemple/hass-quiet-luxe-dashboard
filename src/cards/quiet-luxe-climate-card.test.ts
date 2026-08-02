@@ -190,7 +190,23 @@ const DEHUMIDIFIER = makeEntity('humidifier.dmaker_22ht_b0bf_dehumidifier', 'on'
 });
 
 describe('quiet-luxe-climate-card more-info', () => {
-  it('opens HA’s dialog from the identity region, escaping the shadow root', async () => {
+  /*
+   * Tapping the card is now the way into the device's own controls, so the
+   * identity region opens the Quiet Luxe sheet rather than HA's dialog. HA's
+   * dialog is still one tap away, from inside that sheet.
+   */
+  it('opens the control sheet from the identity region', async () => {
+    const card = await mount(
+      { entity: 'climate.steven_bedroom' },
+      makeMockHass([SENSIBO]),
+    );
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    await card.updateComplete;
+
+    expect(card.shadowRoot?.querySelector('ql-sheet')).not.toBeNull();
+  });
+
+  it('opens HA’s dialog from inside the sheet, escaping the shadow root', async () => {
     const card = await mount(
       { entity: 'climate.steven_bedroom' },
       makeMockHass([SENSIBO]),
@@ -201,6 +217,10 @@ describe('quiet-luxe-climate-card more-info', () => {
     });
 
     card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    await card.updateComplete;
+    card.shadowRoot
+      ?.querySelector('ql-sheet-button[emphasis="secondary"]')
+      ?.dispatchEvent(new Event('click', { bubbles: true }));
 
     expect(seen).toEqual(['climate.steven_bedroom']);
   });
@@ -235,12 +255,19 @@ describe('quiet-luxe-climate-card more-info', () => {
 /*
  * This card is now the plain tile: a climate entity with no setpoint to dial,
  * a humidifier, or any other domain that just powers on and off. Everything it
- * can drive lives behind "More controls" — the same sheet the dial card opens,
- * so one device's controls do not look different from another's.
+ * can drive lives one tap away in the sheet — the same sheet the dial card
+ * opens, so one device's controls do not look different from another's.
  */
 
 function openSheet(card: QuietLuxeClimateCard): void {
-  card.shadowRoot?.querySelector<HTMLButtonElement>('.more')?.click();
+  card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+}
+
+/** True when tapping the card leads to controls rather than to HA's dialog. */
+async function opensSheet(card: QuietLuxeClimateCard): Promise<boolean> {
+  openSheet(card);
+  await card.updateComplete;
+  return card.shadowRoot?.querySelector('ql-sheet') !== null;
 }
 
 function sheetTitles(card: QuietLuxeClimateCard): string[] {
@@ -269,10 +296,10 @@ describe('quiet-luxe-climate-card control sheet: dehumidifier', () => {
     );
     expect(card.shadowRoot?.querySelector('ql-stepper')).toBeNull();
     expect(card.shadowRoot?.querySelector('.power')).not.toBeNull();
-    expect(card.shadowRoot?.querySelector('.more')).not.toBeNull();
+    expect(await opensSheet(card)).toBe(true);
   });
 
-  it('offers target humidity and humidity mode behind More controls', async () => {
+  it('offers target humidity and humidity mode one tap away', async () => {
     const card = await mount(
       { entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' },
       makeMockHass([DEHUMIDIFIER]),
@@ -383,12 +410,12 @@ describe('quiet-luxe-climate-card control degradation', () => {
       { entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' },
       makeMockHass([offline]),
     );
-    expect(card.shadowRoot?.querySelector('.more')).toBeNull();
+    expect(await opensSheet(card)).toBe(false);
   });
 
   it('offers no controls for a missing entity', async () => {
     const card = await mount({ entity: 'climate.ghost' }, makeMockHass());
-    expect(card.shadowRoot?.querySelector('.more')).toBeNull();
+    expect(await opensSheet(card)).toBe(false);
   });
 
   it('keeps the card compact for a domain the sheet does not drive', async () => {
@@ -396,8 +423,23 @@ describe('quiet-luxe-climate-card control degradation', () => {
       { entity: 'switch.exhaust' },
       makeMockHass([makeEntity('switch.exhaust', 'on')]),
     );
-    expect(card.shadowRoot?.querySelector('.more')).toBeNull();
+    expect(await opensSheet(card)).toBe(false);
     expect(card.shadowRoot?.querySelector('.power')).not.toBeNull();
+  });
+
+  /* A device the sheet cannot drive keeps HA's own dialog on the card, so the
+     identity region always leads somewhere. */
+  it('falls back to HA’s dialog when there is no sheet to open', async () => {
+    const card = await mount(
+      { entity: 'switch.exhaust' },
+      makeMockHass([makeEntity('switch.exhaust', 'on')]),
+    );
+    const seen: string[] = [];
+    document.body.addEventListener('hass-more-info', (event) => {
+      seen.push((event as CustomEvent<{ entityId: string }>).detail.entityId);
+    });
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    expect(seen).toEqual(['switch.exhaust']);
   });
 
   it('still lets a setpoint be changed while the device is off', async () => {
@@ -416,7 +458,9 @@ describe('quiet-luxe-climate-card control degradation', () => {
     await card.updateComplete;
     expect(card.shadowRoot?.querySelector('ql-sheet')).not.toBeNull();
 
-    card.shadowRoot?.querySelector('ql-sheet-button')?.dispatchEvent(new Event('click', { bubbles: true }));
+    card.shadowRoot
+      ?.querySelector('ql-sheet-button[emphasis="primary"]')
+      ?.dispatchEvent(new Event('click', { bubbles: true }));
     await card.updateComplete;
     expect(card.shadowRoot?.querySelector('ql-sheet')).toBeNull();
   });

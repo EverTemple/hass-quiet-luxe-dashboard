@@ -60,6 +60,32 @@ function nightModeOf(ctx: StrategyContext, fanId: string): string | undefined {
 }
 
 /**
+ * The gas-index sensors, matched on the entity id.
+ *
+ * PM2.5 and PM10 each get their own device class, but a Dyson's VOC and NO₂
+ * sensors both report `device_class: aqi` with no unit — verified on the live
+ * TP09 (`sensor.tp09_volatile_organic_compounds_index` and
+ * `sensor.tp09_nitrogen_dioxide_index`, HA 2026.7.1, 2026-08-03). There is
+ * nothing in the state machine that tells them apart, so the id is the only
+ * discriminator available, the same way the night-mode switch is matched.
+ */
+const GAS_PATTERNS: Readonly<Record<'voc' | 'no2', RegExp>> = {
+  voc: /volatile_organic|_voc\b|_voc_/,
+  no2: /nitrogen_dioxide|_no2\b|_no2_/,
+};
+
+function gasIndexOf(ctx: StrategyContext, fanId: string, gas: 'voc' | 'no2'): string | undefined {
+  return ctx.registry
+    .deviceEntities(fanId)
+    .find(
+      (id) =>
+        domainOf(id) === 'sensor' &&
+        GAS_PATTERNS[gas].test(id) &&
+        ctx.states[id]?.attributes.device_class === 'aqi',
+    );
+}
+
+/**
  * The card has no registry access of its own, so every companion entity is
  * resolved here and passed on the config.
  */
@@ -71,7 +97,12 @@ export function fanCardConfig(
   const climate = climatePartnerOf(ctx, entityId);
   const nightMode = nightModeOf(ctx, entityId);
   const temperature = siblingWithDeviceClass(ctx, entityId, ['temperature']);
-  const aqi = siblingWithDeviceClass(ctx, entityId, ['pm25', 'aqi', 'pm10']);
+  /* Every pollutant the device actually publishes, so the card can draw the
+     ones that exist and simply not draw the ones that do not. */
+  const pm25 = siblingWithDeviceClass(ctx, entityId, ['pm25']);
+  const pm10 = siblingWithDeviceClass(ctx, entityId, ['pm10']);
+  const voc = gasIndexOf(ctx, entityId, 'voc');
+  const no2 = gasIndexOf(ctx, entityId, 'no2');
   const platform = ctx.registry.platformOf(entityId);
   return {
     type: 'custom:quiet-luxe-fan-card',
@@ -81,6 +112,9 @@ export function fanCardConfig(
     ...(climate === undefined ? {} : { climate_entity: climate }),
     ...(nightMode === undefined ? {} : { night_mode_entity: nightMode }),
     ...(temperature === undefined ? {} : { temperature_entity: temperature }),
-    ...(aqi === undefined ? {} : { aqi_entity: aqi }),
+    ...(pm25 === undefined ? {} : { pm25_entity: pm25 }),
+    ...(pm10 === undefined ? {} : { pm10_entity: pm10 }),
+    ...(voc === undefined ? {} : { voc_entity: voc }),
+    ...(no2 === undefined ? {} : { no2_entity: no2 }),
   };
 }
