@@ -187,3 +187,23 @@ describe('ql-ring-dial', () => {
     expect(styles).toContain('prefers-reduced-motion');
   });
 });
+
+describe('ql-ring-dial compact', () => {
+  it('carries the mode and the reading only', async () => {
+    const el = await mount({ size: 'compact', ambientText: 'Now 22.1°', modeLabel: 'Cooling' });
+    expect(el.shadowRoot?.querySelector('.eyebrow')?.textContent?.trim()).toBe('Cooling');
+    expect(el.shadowRoot?.querySelector('.numeral')?.textContent?.trim()).toBe('23°');
+    expect(el.shadowRoot?.querySelector('.caption')).toBeNull();
+    expect(el.shadowRoot?.querySelectorAll('.tick')).toHaveLength(0);
+  });
+
+  it('still shows the caption at full size', async () => {
+    const el = await mount({ size: 'full', ambientText: 'Now 22.1°' });
+    expect(el.shadowRoot?.querySelector('.caption')?.textContent?.trim()).toBe('Now 22.1°');
+  });
+
+  it('drops the caption when the device reports no ambient reading', async () => {
+    const el = await mount({ size: 'full', ambientText: '' });
+    expect(el.shadowRoot?.querySelector('.caption')).toBeNull();
+  });
+});

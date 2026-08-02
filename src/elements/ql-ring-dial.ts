@@ -537,6 +537,18 @@ export class QlRingDial extends LitElement {
     return html`<span class="reading ${cls}">${text}<span class="unit">${this.unit}</span></span>`;
   }
 
+  /**
+   * The compact dial carries the mode and the reading only. At 136px the ring's
+   * inner well is not tall enough for a third line, and the room view already
+   * shows the room's own temperature above the card.
+   */
+  private caption(): TemplateResult | typeof nothing {
+    if (this.size === 'compact' || this.ambientText === '') {
+      return nothing;
+    }
+    return html`<p class="caption">${this.ambientText}</p>`;
+  }
+
   private renderCentre(): TemplateResult {
     // Off shows the room's own reading as the hero, with the standing setpoint
     // demoted to the caption — the honest statement of a device doing nothing.
@@ -544,7 +556,7 @@ export class QlRingDial extends LitElement {
       return html`
         <p class="eyebrow">${this.modeLabel}</p>
         <p class="numeral">${this.heroText}</p>
-        ${this.ambientText === '' ? nothing : html`<p class="caption">${this.ambientText}</p>`}
+        ${this.caption()}
       `;
     }
     if (this.kind === 'range') {
@@ -556,13 +568,13 @@ export class QlRingDial extends LitElement {
             'high',
           )}
         </p>
-        ${this.ambientText === '' ? nothing : html`<p class="caption">${this.ambientText}</p>`}
+        ${this.caption()}
       `;
     }
     return html`
       <p class="eyebrow">${this.modeLabel}</p>
       <p class="numeral">${this.reading(this.value)}</p>
-      ${this.ambientText === '' ? nothing : html`<p class="caption">${this.ambientText}</p>`}
+      ${this.caption()}
     `;
   }
 
