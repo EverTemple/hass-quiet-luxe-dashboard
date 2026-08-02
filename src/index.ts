@@ -15,12 +15,14 @@ import './elements/ql-preset-row';
 import './elements/ql-sheet-button';
 import './elements/ql-sheet';
 import './elements/ql-sweep-dial';
+import './elements/ql-ring-dial';
 import './elements/ql-timer-dial';
 import './elements/ql-section-eyebrow';
 import './elements/ql-header-home';
 import './elements/ql-header-room';
 import './cards/quiet-luxe-room-card';
 import './cards/quiet-luxe-climate-card';
+import './cards/quiet-luxe-climate-dial-card';
 import './cards/quiet-luxe-fan-card';
 import './cards/quiet-luxe-light-card';
 import './cards/quiet-luxe-cover-card';
@@ -54,6 +56,12 @@ export { QlPresetRow, type QlPresetOption } from './elements/ql-preset-row';
 export { QlSheet } from './elements/ql-sheet';
 export { QlSheetButton, type QlSheetButtonEmphasis } from './elements/ql-sheet-button';
 export { QlSweepDial } from './elements/ql-sweep-dial';
+export {
+  QlRingDial,
+  DIAL_GEOMETRY,
+  type QlRingDialHandle,
+  type QlRingDialSize,
+} from './elements/ql-ring-dial';
 export { QlTimerDial } from './elements/ql-timer-dial';
 export { dysonIcon, DYSON_ICON_NAMES, type DysonIconName } from './elements/dyson-icons';
 export { cameraGlyph, pictureGlyph } from './elements/ql-glyphs';
@@ -265,6 +273,34 @@ export {
   type RegistryIndex,
   type RegistrySnapshot,
 } from './strategy/registry';
+
+export {
+  QuietLuxeClimateDialCard,
+  type ClimateDialCardConfig,
+} from './cards/quiet-luxe-climate-dial-card';
+export {
+  angleForValue,
+  arcPath,
+  climateScale,
+  dialMode,
+  dialSetpoints,
+  hasDialSetpoint,
+  setTemperatureCall,
+  valueForAngle,
+  DIAL_START_ANGLE,
+  DIAL_SWEEP,
+  type DialMode,
+  type DialScale,
+  type DialSetpoints,
+} from './cards/climate-dial';
+export {
+  climateSheetCall,
+  climateSheetGroups,
+  hasClimateSheet,
+  type ClimateControlId,
+  type ClimateSheetControl,
+  type ClimateSheetGroup,
+} from './cards/climate-sheet';
 
 // Self-sufficiency: the bundle carries its own Latin webfaces and --ql-* tokens,
 // so a HACS-only install renders correctly with no files copied into /config.

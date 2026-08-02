@@ -171,6 +171,20 @@ export const en = {
   'schedule.nothing_scheduled': 'Nothing scheduled',
   'tasks.due_today': 'Due today',
   'tasks.due_tomorrow': 'Tomorrow',
+  'control.more': 'More controls',
+  'control.hvac_mode': 'HVAC mode',
+  'control.temperature_range': 'Temperature range',
+  'control.heat_to': 'Heat to',
+  'control.cool_to': 'Cool to',
+  'control.fan': 'Fan',
+  'control.swing': 'Swing',
+  'control.swing_vertical': 'Vertical',
+  'control.swing_horizontal': 'Horizontal',
+  'control.humidity_mode': 'Humidity mode',
+  'climate.now': 'Now',
+  'climate.set_to': 'Set to',
+  'climate.heating': 'Heating',
+  'climate.cooling': 'Cooling',
 } as const;
 
 export type TranslationKey = keyof typeof en;

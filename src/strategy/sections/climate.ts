@@ -1,3 +1,4 @@
+import { hasDialSetpoint } from '../../cards/climate-dial';
 import { viewUrl } from '../config';
 import {
   PATHS,
@@ -56,11 +57,33 @@ function pairedClimateIds(
   return paired;
 }
 
+/**
+ * A `climate` entity that reports a setpoint gets the dial; one that does not —
+ * a purifier or exhaust whose climate entity is only an on/off and a mode — has
+ * nothing for a dial to point at and keeps the plain tile.
+ */
+function climateCardConfig(
+  ctx: StrategyContext,
+  entity: string,
+  form: 'compact' | 'full',
+): LovelaceCardConfig {
+  if (!entity.startsWith('climate.') || !hasDialSetpoint(ctx.states[entity])) {
+    return { type: 'custom:quiet-luxe-climate-card', entity };
+  }
+  return { type: 'custom:quiet-luxe-climate-dial-card', entity, form };
+}
+
+/**
+ * `form` is the room a card is given, not the view it is in: All Climates
+ * groups by area too, so it passes an `areaId` and still asks for `full`.
+ * Every card in one call takes the same form, so a fan and a thermostat
+ * standing side by side are the same height.
+ */
 export function climateCards(
   ctx: StrategyContext,
   areaId?: string,
   limit?: number,
-  fanForm: 'compact' | 'full' = 'compact',
+  form: 'compact' | 'full' = 'compact',
 ): ReadonlyArray<LovelaceCardConfig> {
   const ids = climateEntityIds(ctx, areaId);
   const paired = pairedClimateIds(ctx, ids);
@@ -68,8 +91,8 @@ export function climateCards(
   const scoped = limit === undefined ? visible : visible.slice(0, limit);
   return scoped.map((entity) =>
     isFanDevice(ctx, entity)
-      ? fanCardConfig(ctx, entity, fanForm)
-      : { type: 'custom:quiet-luxe-climate-card', entity },
+      ? fanCardConfig(ctx, entity, form)
+      : climateCardConfig(ctx, entity, form),
   );
 }
 

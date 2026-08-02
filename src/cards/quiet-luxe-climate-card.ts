@@ -1,15 +1,16 @@
-import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
+import { css, html, nothing, type CSSResultGroup, type TemplateResult } from 'lit';
 import { t } from '../i18n/translate';
+import type { Locale } from '../i18n/types';
 import {
   climateActivity,
   detectClimateDeviceType,
   type ClimateDeviceType,
 } from './climate-device-type';
-import { controlServiceCall, deviceControls, type ControlId } from './device-controls';
+import { climateSheetCall, climateSheetGroups, type ClimateControlId } from './climate-sheet';
 import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
-import { renderControls } from './render-controls';
+import { climateSheetStyles, renderClimateSheet } from './render-climate-sheet';
 
 export interface ClimateCardConfig {
   readonly type: string;
@@ -32,15 +33,18 @@ export class QuietLuxeClimateCard extends QlBaseCard {
   static override properties = {
     config: { attribute: false },
     armed: { state: true },
+    sheetOpen: { state: true },
   };
 
   declare config?: ClimateCardConfig;
   declare armed: boolean;
+  declare sheetOpen: boolean;
   private disarmTimer?: number;
 
   constructor() {
     super();
     this.armed = false;
+    this.sheetOpen = false;
   }
 
   setConfig(config: ClimateCardConfig): void {
@@ -69,6 +73,7 @@ export class QuietLuxeClimateCard extends QlBaseCard {
 
   static override styles: CSSResultGroup = [
     QlBaseCard.qlCardStyles,
+    climateSheetStyles,
     css`
       .eyebrow {
         display: block;
@@ -117,6 +122,50 @@ export class QuietLuxeClimateCard extends QlBaseCard {
         opacity: 0.5;
         cursor: default;
       }
+      /* Same affordance as the dial card's, so "there is more here" reads the
+         same on a thermostat and on a dehumidifier. */
+      .more {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--ql-space-s, 8px);
+        box-sizing: border-box;
+        width: 100%;
+        min-height: var(--ql-touch-min, 56px);
+        margin-top: var(--ql-space-m, 12px);
+        padding: var(--ql-space-m, 12px) var(--ql-space-l, 16px);
+        border: 1px solid var(--ql-surface-border, #e4dccb);
+        border-radius: var(--ql-radius-chip, 999px);
+        background: transparent;
+        color: var(--ql-ink-primary, #2b2620);
+        font: 400 14px/18px var(--ql-font-body, Outfit, sans-serif);
+        cursor: pointer;
+        transition: border-color 200ms ease;
+      }
+      .more:hover:not(:disabled) {
+        border-color: var(--ql-accent-champagne, #b08d57);
+      }
+      .more:focus-visible {
+        outline: 2px solid var(--ql-accent-champagne, #b08d57);
+        outline-offset: 2px;
+      }
+      .more:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .more .chevron {
+        flex: 0 0 auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .more {
+          transition: none;
+        }
+      }
     `,
   ];
 
@@ -134,19 +183,46 @@ export class QuietLuxeClimateCard extends QlBaseCard {
   }
 
   /**
-   * One inline control moved. The payload is built from the entity's own
-   * state, so a control the device cannot actually take is never sent.
+   * One sheet control moved. The payload is built from the entity's own state,
+   * so a control the device cannot actually take is never sent.
    */
-  private onControl(id: ControlId, value: string | number | boolean): void {
+  private readonly onControl = (id: ClimateControlId, value: string | number | boolean): void => {
     const entityId = this.config?.entity;
     if (entityId === undefined || this.hass === undefined) {
       return;
     }
-    const call = controlServiceCall(entityId, id, value, this.entity(entityId));
+    const call = climateSheetCall(entityId, id, value, this.entity(entityId));
     if (call === undefined) {
       return;
     }
     void this.hass.callService(call.domain, call.service, call.data);
+  };
+
+  private readonly openSheet = (): void => {
+    this.sheetOpen = true;
+  };
+
+  private readonly closeSheet = (): void => {
+    this.sheetOpen = false;
+  };
+
+  /**
+   * The whole control surface lives behind one button. A dehumidifier's four
+   * vendor modes and a 40–70 humidity band do not fit a half-column card
+   * legibly, and the sheet gives every device the same full-width room.
+   */
+  private renderMore(locale: Locale, disabled: boolean): TemplateResult | typeof nothing {
+    if (climateSheetGroups(this.entity(this.config?.entity ?? '')).length === 0) {
+      return nothing;
+    }
+    return html`
+      <button class="more" type="button" ?disabled=${disabled} @click=${this.openSheet}>
+        ${t(locale, 'control.more')}
+        <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M6 3.5 10.5 8 6 12.5" />
+        </svg>
+      </button>
+    `;
   }
 
   private callToggle(): void {
@@ -245,12 +321,18 @@ export class QuietLuxeClimateCard extends QlBaseCard {
             ⏻
           </button>
         </div>
-        ${renderControls(
-          deviceControls(this.entity(entityId)),
-          locale,
-          availability !== 'available',
-          (id, value) => this.onControl(id, value),
-        )}
+        ${this.renderMore(locale, availability !== 'available')}
+        ${this.sheetOpen
+          ? renderClimateSheet({
+              open: this.sheetOpen,
+              heading: label,
+              groups: climateSheetGroups(this.entity(entityId)),
+              locale,
+              disabled: availability !== 'available',
+              emit: this.onControl,
+              onClose: this.closeSheet,
+            })
+          : nothing}
       </div>
     `;
   }

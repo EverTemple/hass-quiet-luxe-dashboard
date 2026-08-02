@@ -1,9 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { climateEntity, makeEntity, makeMockHass, sensorEntity } from '../testing/mock-hass';
-import type { QlSegmented } from '../elements/ql-segmented';
-import type { QlSlider } from '../elements/ql-slider';
+import type { QlPresetRow } from '../elements/ql-preset-row';
 import { STEPPER_COMMIT_MS, type QlStepper } from '../elements/ql-stepper';
-import type { QlToggle } from '../elements/ql-toggle';
 import { QuietLuxeClimateCard, type ClimateCardConfig } from './quiet-luxe-climate-card';
 
 async function mount(
@@ -178,18 +176,6 @@ const DYSON_CLIMATE = makeEntity('climate.tp09', 'off', {
   supported_features: 385,
 });
 
-const DYSON_FAN = makeEntity('fan.tp09', 'off', {
-  preset_modes: ['Auto', 'Normal'],
-  direction: 'forward',
-  oscillating: true,
-  percentage: 0,
-  percentage_step: 10.0,
-  preset_mode: 'Normal',
-  angle_low: 142,
-  angle_high: 187,
-  friendly_name: 'TP09',
-  supported_features: 63,
-});
 
 const DEHUMIDIFIER = makeEntity('humidifier.dmaker_22ht_b0bf_dehumidifier', 'on', {
   min_humidity: 40,
@@ -202,24 +188,6 @@ const DEHUMIDIFIER = makeEntity('humidifier.dmaker_22ht_b0bf_dehumidifier', 'on'
   friendly_name: 'Xiaomi Smart Dehumidifier Dehumidifier',
   supported_features: 1,
 });
-
-function controlLabels(card: QuietLuxeClimateCard): string[] {
-  return [...(card.shadowRoot?.querySelectorAll('.ql-control-label') ?? [])].map(
-    (node) => node.textContent?.trim() ?? '',
-  );
-}
-
-function segmentedFor(card: QuietLuxeClimateCard, label: string): QlSegmented | undefined {
-  return [...(card.shadowRoot?.querySelectorAll<QlSegmented>('ql-segmented') ?? [])].find(
-    (node) => node.label === label,
-  );
-}
-
-function segmentButton(group: QlSegmented | undefined, text: string): HTMLButtonElement | undefined {
-  return [...(group?.shadowRoot?.querySelectorAll<HTMLButtonElement>('button') ?? [])].find(
-    (button) => button.textContent?.trim() === text,
-  );
-}
 
 describe('quiet-luxe-climate-card more-info', () => {
   it('opens HA’s dialog from the identity region, escaping the shadow root', async () => {
@@ -263,210 +231,63 @@ describe('quiet-luxe-climate-card more-info', () => {
   });
 });
 
-describe('quiet-luxe-climate-card inline controls: Sensibo AC', () => {
-  it('offers target temperature, mode and fan speed', async () => {
-    const card = await mount({ entity: 'climate.steven_bedroom' }, makeMockHass([SENSIBO]));
-    expect(controlLabels(card)).toEqual(['Target', 'Mode', 'Fan speed']);
-  });
 
-  it('sets the target temperature from the entity’s own bounds and step', async () => {
-    vi.useFakeTimers();
-    const hass = makeMockHass([SENSIBO]);
-    const card = await mount({ entity: 'climate.steven_bedroom' }, hass);
-    const stepper = card.shadowRoot?.querySelector<QlStepper>('ql-stepper');
+/*
+ * This card is now the plain tile: a climate entity with no setpoint to dial,
+ * a humidifier, or any other domain that just powers on and off. Everything it
+ * can drive lives behind "More controls" — the same sheet the dial card opens,
+ * so one device's controls do not look different from another's.
+ */
 
-    expect(stepper?.min).toBe(17);
-    expect(stepper?.max).toBe(30);
-    expect(stepper?.step).toBe(1);
-    expect(stepper?.value).toBe(23);
+function openSheet(card: QuietLuxeClimateCard): void {
+  card.shadowRoot?.querySelector<HTMLButtonElement>('.more')?.click();
+}
 
-    stepper?.shadowRoot?.querySelectorAll('button')[1]?.click();
-    vi.advanceTimersByTime(STEPPER_COMMIT_MS);
+function sheetTitles(card: QuietLuxeClimateCard): string[] {
+  return [...(card.shadowRoot?.querySelectorAll('.ql-sheet-title') ?? [])].map(
+    (node) => node.textContent?.trim() ?? '',
+  );
+}
 
-    expect(hass.calls).toEqual([
-      {
-        domain: 'climate',
-        service: 'set_temperature',
-        data: { entity_id: 'climate.steven_bedroom', temperature: 24 },
-      },
-    ]);
-  });
+function presetRow(card: QuietLuxeClimateCard, label: string): QlPresetRow | undefined {
+  return [...(card.shadowRoot?.querySelectorAll<QlPresetRow>('ql-preset-row') ?? [])].find(
+    (node) => node.label === label,
+  );
+}
 
-  it('sets an hvac mode, localizing the vocabulary it knows', async () => {
-    const hass = makeMockHass([SENSIBO]);
-    const card = await mount({ entity: 'climate.steven_bedroom' }, hass);
-    const modes = segmentedFor(card, 'Mode');
+function presetButton(row: QlPresetRow | undefined, text: string): HTMLButtonElement | undefined {
+  return [...(row?.shadowRoot?.querySelectorAll<HTMLButtonElement>('button') ?? [])].find(
+    (button) => button.textContent?.trim() === text,
+  );
+}
 
-    expect(modes?.value).toBe('cool');
-    expect(
-      [...(modes?.shadowRoot?.querySelectorAll('button') ?? [])].map((b) => b.textContent?.trim()),
-    ).toEqual(['Cool', 'Heat', 'Fan', 'Dry', 'Auto', 'Off']);
-
-    segmentButton(modes, 'Dry')?.click();
-
-    expect(hass.calls).toEqual([
-      {
-        domain: 'climate',
-        service: 'set_hvac_mode',
-        data: { entity_id: 'climate.steven_bedroom', hvac_mode: 'dry' },
-      },
-    ]);
-  });
-
-  it('sets a fan mode, title-casing the vendor’s own vocabulary', async () => {
-    const hass = makeMockHass([SENSIBO]);
-    const card = await mount({ entity: 'climate.steven_bedroom' }, hass);
-    const fan = segmentedFor(card, 'Fan speed');
-
-    expect(fan?.value).toBe('low');
-    segmentButton(fan, 'Strong')?.click();
-
-    expect(hass.calls).toEqual([
-      {
-        domain: 'climate',
-        service: 'set_fan_mode',
-        data: { entity_id: 'climate.steven_bedroom', fan_mode: 'strong' },
-      },
-    ]);
-  });
-});
-
-describe('quiet-luxe-climate-card inline controls: Dyson TP09', () => {
-  it('reaches heating and cooling through the climate half', async () => {
-    const hass = makeMockHass([DYSON_CLIMATE]);
-    const card = await mount({ entity: 'climate.tp09' }, hass);
-    const modes = segmentedFor(card, 'Mode');
-
-    expect(
-      [...(modes?.shadowRoot?.querySelectorAll('button') ?? [])].map((b) => b.textContent?.trim()),
-    ).toEqual(['Off', 'Cool', 'Heat']);
-
-    segmentButton(modes, 'Heat')?.click();
-
-    expect(hass.calls).toEqual([
-      {
-        domain: 'climate',
-        service: 'set_hvac_mode',
-        data: { entity_id: 'climate.tp09', hvac_mode: 'heat' },
-      },
-    ]);
-  });
-
-  it('offers no fan speed on the climate half, which does not support one', async () => {
-    const card = await mount({ entity: 'climate.tp09' }, makeMockHass([DYSON_CLIMATE]));
-    expect(controlLabels(card)).toEqual(['Target', 'Mode']);
-  });
-
-  it('offers speed, preset, oscillation, airflow and rotation on the fan half', async () => {
-    const card = await mount({ entity: 'fan.tp09' }, makeMockHass([DYSON_FAN]));
-    expect(controlLabels(card)).toEqual([
-      'Speed',
-      'Preset',
-      'Oscillate',
-      'Airflow',
-      'Rotation',
-    ]);
-  });
-
-  it('sets fan speed on the entity’s own 10% step', async () => {
-    const hass = makeMockHass([DYSON_FAN]);
-    const card = await mount({ entity: 'fan.tp09' }, hass);
-    const slider = card.shadowRoot?.querySelector<QlSlider>('ql-slider');
-
-    expect(slider?.step).toBe(10);
-    slider?.dispatchEvent(
-      new CustomEvent('ql-change', { detail: { value: 40 }, bubbles: true, composed: true }),
-    );
-
-    expect(hass.calls).toEqual([
-      { domain: 'fan', service: 'set_percentage', data: { entity_id: 'fan.tp09', percentage: 40 } },
-    ]);
-  });
-
-  it('switches front and back venting through fan direction', async () => {
-    const hass = makeMockHass([DYSON_FAN]);
-    const card = await mount({ entity: 'fan.tp09' }, hass);
-    const airflow = segmentedFor(card, 'Airflow');
-
-    expect(
-      [...(airflow?.shadowRoot?.querySelectorAll('button') ?? [])].map((b) =>
-        b.textContent?.trim(),
-      ),
-    ).toEqual(['Front', 'Back']);
-    expect(airflow?.value).toBe('forward');
-
-    segmentButton(airflow, 'Back')?.click();
-
-    expect(hass.calls).toEqual([
-      {
-        domain: 'fan',
-        service: 'set_direction',
-        data: { entity_id: 'fan.tp09', direction: 'reverse' },
-      },
-    ]);
-  });
-
-  it('turns oscillation off from the card', async () => {
-    const hass = makeMockHass([DYSON_FAN]);
-    const card = await mount({ entity: 'fan.tp09' }, hass);
-    const toggle = card.shadowRoot?.querySelector<QlToggle>('ql-toggle');
-
-    expect(toggle?.checked).toBe(true);
-    toggle?.shadowRoot?.querySelector<HTMLButtonElement>('button')?.click();
-
-    expect(hass.calls).toEqual([
-      { domain: 'fan', service: 'oscillate', data: { entity_id: 'fan.tp09', oscillating: false } },
-    ]);
-  });
-
-  it('widens the rotation sweep around the sweep the device reports', async () => {
-    const hass = makeMockHass([DYSON_FAN]);
-    const card = await mount({ entity: 'fan.tp09' }, hass);
-    const rotation = segmentedFor(card, 'Rotation');
-
-    expect(
-      [...(rotation?.shadowRoot?.querySelectorAll('button') ?? [])].map((b) =>
-        b.textContent?.trim(),
-      ),
-    ).toEqual(['45°', '90°', '180°', '350°']);
-    expect(rotation?.value).toBe('45');
-
-    segmentButton(rotation, '90°')?.click();
-
-    expect(hass.calls).toEqual([
-      {
-        domain: 'dyson_local',
-        service: 'set_angle',
-        data: { entity_id: 'fan.tp09', angle_low: 120, angle_high: 210 },
-      },
-    ]);
-  });
-
-  it('omits rotation for a fan that reports no sweep', async () => {
-    const plain = makeEntity('fan.plain', 'on', {
-      percentage: 50,
-      percentage_step: 1,
-      oscillating: false,
-      supported_features: 51,
-    });
-    const card = await mount({ entity: 'fan.plain' }, makeMockHass([plain]));
-    expect(controlLabels(card)).toEqual(['Speed', 'Oscillate']);
-  });
-});
-
-describe('quiet-luxe-climate-card inline controls: dehumidifier', () => {
-  it('offers target humidity and mode', async () => {
+describe('quiet-luxe-climate-card control sheet: dehumidifier', () => {
+  it('keeps the card itself to a reading and a power button', async () => {
     const card = await mount(
       { entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' },
       makeMockHass([DEHUMIDIFIER]),
     );
-    expect(controlLabels(card)).toEqual(['Target humidity', 'Mode']);
+    expect(card.shadowRoot?.querySelector('ql-stepper')).toBeNull();
+    expect(card.shadowRoot?.querySelector('.power')).not.toBeNull();
+    expect(card.shadowRoot?.querySelector('.more')).not.toBeNull();
   });
 
-  it('sets target humidity inside the device’s 40–70% range', async () => {
+  it('offers target humidity and humidity mode behind More controls', async () => {
+    const card = await mount(
+      { entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' },
+      makeMockHass([DEHUMIDIFIER]),
+    );
+    openSheet(card);
+    await card.updateComplete;
+    expect(sheetTitles(card)).toEqual(['Target humidity', 'Humidity mode']);
+  });
+
+  it('sets target humidity inside the device’s own 40–70% band', async () => {
     vi.useFakeTimers();
     const hass = makeMockHass([DEHUMIDIFIER]);
     const card = await mount({ entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' }, hass);
+    openSheet(card);
+    await card.updateComplete;
     const stepper = card.shadowRoot?.querySelector<QlStepper>('ql-stepper');
 
     expect(stepper?.min).toBe(40);
@@ -488,10 +309,12 @@ describe('quiet-luxe-climate-card inline controls: dehumidifier', () => {
   it('sets a vendor mode by its own name', async () => {
     const hass = makeMockHass([DEHUMIDIFIER]);
     const card = await mount({ entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' }, hass);
-    const modes = segmentedFor(card, 'Mode');
+    openSheet(card);
+    await card.updateComplete;
+    const modes = presetRow(card, 'Humidity mode');
 
     expect(modes?.value).toBe('Clothes Drying');
-    segmentButton(modes, 'Smart')?.click();
+    presetButton(modes, 'Smart')?.click();
 
     expect(hass.calls).toEqual([
       {
@@ -501,29 +324,100 @@ describe('quiet-luxe-climate-card inline controls: dehumidifier', () => {
       },
     ]);
   });
+
+  it('offers all four vendor modes, none of them invented', async () => {
+    const card = await mount(
+      { entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' },
+      makeMockHass([DEHUMIDIFIER]),
+    );
+    openSheet(card);
+    await card.updateComplete;
+    expect(presetRow(card, 'Humidity mode')?.options.map((option) => option.label)).toEqual([
+      'Off',
+      'Smart',
+      'Sleep',
+      'Clothes Drying',
+    ]);
+  });
+});
+
+describe('quiet-luxe-climate-card control sheet: a climate entity with no setpoint', () => {
+  const EXHAUST = makeEntity('climate.exhaust', 'fan_only', {
+    hvac_modes: ['off', 'fan_only'],
+    friendly_name: 'Exhaust',
+    supported_features: 384,
+  });
+
+  it('offers the modes it has and nothing else', async () => {
+    const card = await mount({ entity: 'climate.exhaust' }, makeMockHass([EXHAUST]));
+    openSheet(card);
+    await card.updateComplete;
+    expect(sheetTitles(card)).toEqual(['HVAC mode']);
+    expect(card.shadowRoot?.querySelector('ql-stepper')).toBeNull();
+  });
+
+  it('sets an hvac mode, localizing the vocabulary it knows', async () => {
+    const hass = makeMockHass([EXHAUST]);
+    const card = await mount({ entity: 'climate.exhaust' }, hass);
+    openSheet(card);
+    await card.updateComplete;
+    const modes = presetRow(card, 'HVAC mode');
+
+    expect(modes?.options.map((option) => option.label)).toEqual(['Off', 'Fan']);
+    presetButton(modes, 'Off')?.click();
+
+    expect(hass.calls).toEqual([
+      {
+        domain: 'climate',
+        service: 'set_hvac_mode',
+        data: { entity_id: 'climate.exhaust', hvac_mode: 'off' },
+      },
+    ]);
+  });
 });
 
 describe('quiet-luxe-climate-card control degradation', () => {
-  it('draws no controls for a device that is not answering', async () => {
-    const offline = makeEntity('climate.steven_bedroom', 'unavailable', SENSIBO.attributes);
-    const card = await mount({ entity: 'climate.steven_bedroom' }, makeMockHass([offline]));
-    expect(card.shadowRoot?.querySelector('.ql-controls')).toBeNull();
+  it('offers no controls for a device that is not answering', async () => {
+    const offline = makeEntity('humidifier.dmaker_22ht_b0bf_dehumidifier', 'unavailable', DEHUMIDIFIER.attributes);
+    const card = await mount(
+      { entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' },
+      makeMockHass([offline]),
+    );
+    expect(card.shadowRoot?.querySelector('.more')).toBeNull();
   });
 
-  it('draws no controls for a missing entity', async () => {
+  it('offers no controls for a missing entity', async () => {
     const card = await mount({ entity: 'climate.ghost' }, makeMockHass());
-    expect(card.shadowRoot?.querySelector('.ql-controls')).toBeNull();
+    expect(card.shadowRoot?.querySelector('.more')).toBeNull();
   });
 
-  it('keeps the card compact for a domain with no inline controls', async () => {
-    const card = await mount({ entity: 'switch.exhaust' }, makeMockHass([makeEntity('switch.exhaust', 'on')]));
-    expect(card.shadowRoot?.querySelector('.ql-controls')).toBeNull();
+  it('keeps the card compact for a domain the sheet does not drive', async () => {
+    const card = await mount(
+      { entity: 'switch.exhaust' },
+      makeMockHass([makeEntity('switch.exhaust', 'on')]),
+    );
+    expect(card.shadowRoot?.querySelector('.more')).toBeNull();
     expect(card.shadowRoot?.querySelector('.power')).not.toBeNull();
   });
 
   it('still lets a setpoint be changed while the device is off', async () => {
     const card = await mount({ entity: 'climate.tp09' }, makeMockHass([DYSON_CLIMATE]));
-    const stepper = card.shadowRoot?.querySelector<QlStepper>('ql-stepper');
-    expect(stepper?.disabled).toBe(false);
+    openSheet(card);
+    await card.updateComplete;
+    expect(card.shadowRoot?.querySelector<QlStepper>('ql-stepper')?.disabled).toBe(false);
+  });
+
+  it('closes the sheet on Done', async () => {
+    const card = await mount(
+      { entity: 'humidifier.dmaker_22ht_b0bf_dehumidifier' },
+      makeMockHass([DEHUMIDIFIER]),
+    );
+    openSheet(card);
+    await card.updateComplete;
+    expect(card.shadowRoot?.querySelector('ql-sheet')).not.toBeNull();
+
+    card.shadowRoot?.querySelector('ql-sheet-button')?.dispatchEvent(new Event('click', { bubbles: true }));
+    await card.updateComplete;
+    expect(card.shadowRoot?.querySelector('ql-sheet')).toBeNull();
   });
 });
