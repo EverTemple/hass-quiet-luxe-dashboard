@@ -49,10 +49,15 @@ describe('climateSection', () => {
       tap_action: { action: 'navigate', navigation_path: '/quiet-luxe/climates' },
     });
     expect(section?.cards).toHaveLength(4); // heading + 3
+    /* The section is one view track wide, so nothing in it takes a half-track. */
     expect(section?.cards[1]).toEqual({
       type: 'custom:quiet-luxe-climate-card',
       entity: 'climate.bedroom_ac',
+      grid_options: { columns: 12, rows: 'auto' },
     });
+    for (const card of section?.cards.slice(1) ?? []) {
+      expect(card.grid_options, card.entity as string).toEqual({ columns: 12, rows: 'auto' });
+    }
   });
 
   it('room-scoped sections have no heading navigation', () => {

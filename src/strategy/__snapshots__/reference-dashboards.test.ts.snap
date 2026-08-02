@@ -122,14 +122,26 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.main_living_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
             {
               "entity": "fan.side_living_fan",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
             {
               "entity": "climate.master_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -982,6 +994,10 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
@@ -1603,10 +1619,18 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
             {
               "entity": "climate.bedroom_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],

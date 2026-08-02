@@ -99,21 +99,24 @@ export function climateCards(
 }
 
 /**
- * Climate cards for a column that is ONE view track wide — the room view's
- * climate region and every All-Climates area column.
+ * Climate cards for a column that is ONE view track wide — which is every
+ * climate column there is: Home's climate rail, the room view's climate region
+ * and each All-Climates area column.
  *
  * A track is 296–390px, so the small climate tile's usual half-track is
  * 148–195px: standing under a full-width dial it reads as a stray narrow card
  * rather than the bottom of a stack. In a single-track column every card takes
  * the whole track. Ordered tallest → shortest so the height the column cannot
- * fill is spent at its bottom edge (packing rule 3).
+ * fill is spent at its bottom edge (packing rule 3); the limit is applied first
+ * so which devices appear still follows the active-first sort, not the heights.
  */
 export function climateColumnCards(
   ctx: StrategyContext,
-  areaId: string,
+  areaId?: string,
+  limit?: number,
   form: 'compact' | 'full' = 'compact',
 ): ReadonlyArray<LovelaceCardConfig> {
-  return orderTallestFirst(climateCards(ctx, areaId, undefined, form)).map((card) => ({
+  return orderTallestFirst(climateCards(ctx, areaId, limit, form)).map((card) => ({
     ...card,
     grid_options: contentGrid(COLUMNS_FULL),
   }));
@@ -131,6 +134,6 @@ export function climateSection(
   const nav = options.areaId === undefined ? viewUrl(ctx.home, PATHS.climates) : undefined;
   return sectionOf(
     headingCard(ctx.locale, 'section.climate', nav),
-    climateCards(ctx, options.areaId, options.limit),
+    climateColumnCards(ctx, options.areaId, options.limit),
   );
 }

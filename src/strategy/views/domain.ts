@@ -74,7 +74,7 @@ export function climatesView(ctx: StrategyContext): LovelaceViewConfig | null {
     .map((area) =>
       sectionOf(
         { type: 'heading', heading: roomName(ctx.home, area) },
-        climateColumnCards(ctx, area.area_id, 'full'),
+        climateColumnCards(ctx, area.area_id, undefined, 'full'),
         REGION_SPAN.climatesArea,
       ),
     )
