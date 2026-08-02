@@ -8,6 +8,11 @@ Design source of truth: Figma file `vaDrJjhYuziE1lVvNvJqwP`.
 
 ## Install (per instance)
 
+The bundle is self-sufficient: it carries its own Latin webfonts and its own
+`--ql-*` design tokens, so it renders correctly with **no files copied into
+`/config` and no theme installed**. Everything under "Optional enhancements"
+below is a refinement, not a requirement.
+
 ### HACS (recommended)
 
 1. HACS → ⋮ (top right) → **Custom repositories** → Repository
@@ -18,35 +23,61 @@ Design source of truth: Figma file `vaDrJjhYuziE1lVvNvJqwP`.
    auto-registers the dashboard resource
    (`/hacsfiles/hass-quiet-luxe-dashboard/quiet-luxe.js`) — no manual
    resource step needed on storage-mode dashboards.
-3. **Fonts (one-time):** HACS plugin folders are flat, so the font tree
-   ships separately. Download `quiet-luxe.zip` from the latest GitHub
-   release, and copy its `fonts/` folder to `/config/www/quiet-luxe/fonts/`
-   (File editor add-on, Samba, or SSH) so that
-   `/config/www/quiet-luxe/fonts/fonts.css` exists. The bundle loads fonts
-   from `/local/quiet-luxe/fonts/fonts.css` when installed via HACS.
-4. Copy `themes/quiet-luxe.yaml` into your `config/themes/` directory (ensure
-   `frontend: themes: !include_dir_merge_named themes` in `configuration.yaml`),
-   reload themes, then select the **quiet-luxe** theme in your user profile
-   (or set it instance-wide with the `frontend.set_theme` service:
-   `{"name": "quiet-luxe"}`). Light/dark follow HA's mode.
-5. Create a dashboard (Settings → Dashboards → Add, url path `quiet-luxe`),
+3. Create a dashboard (Settings → Dashboards → Add, url path `quiet-luxe`),
    open its raw configuration editor, and paste your per-home strategy config
    (see "Dashboard strategy" below).
+
+That is the whole install. Marcellus and Outfit are embedded in the bundle,
+Chinese text uses the CJK fonts already on your devices, and the cards define
+their own light and dark palettes.
 
 ### Manual (alternative)
 
 1. Download `quiet-luxe.zip` from the latest GitHub release
    (`gh release download -p quiet-luxe.zip` or the Releases page).
 2. Extract it into `/config/www/quiet-luxe/` on the instance so that
-   `/config/www/quiet-luxe/quiet-luxe.js`
-   and `/config/www/quiet-luxe/fonts/fonts.css` exist.
+   `/config/www/quiet-luxe/quiet-luxe.js` exists.
 3. Register the resource: Settings → Dashboards → ⋮ (top right) →
    Resources → Add resource → URL `/local/quiet-luxe/quiet-luxe.js`, type
    **JavaScript module**.
-4. Continue with the theme and dashboard steps (4–5) above.
+4. Continue with the dashboard step (3) above. Extracting the zip also places
+   `fonts/` next to the bundle, which the optional CJK webfont upgrade below
+   picks up automatically.
 
-Fonts (Marcellus, Outfit, Noto Sans/Serif TC+SC) are bundled and served from
-your HA instance — no external font CDN is contacted at runtime.
+No external font CDN is contacted at runtime, in any install mode.
+
+## Optional enhancements
+
+Both are genuinely optional — skipping them leaves a correct dashboard.
+
+### Optional: the `quiet-luxe` theme (recommended)
+
+The cards style themselves. The theme exists to extend the same palette to
+**Home Assistant's own chrome** — sidebar, toolbars, dialogs, the more-info
+panel — so the surrounding frontend matches the dashboard.
+
+Copy `themes/quiet-luxe.yaml` into your `config/themes/` directory (ensure
+`frontend: themes: !include_dir_merge_named themes` in `configuration.yaml`),
+reload themes, then select **quiet-luxe** in your user profile (or set it
+instance-wide via the `frontend.set_theme` service: `{"name": "quiet-luxe"}`).
+Light/dark follows HA's mode.
+
+Without it, the cards still render in Quiet Luxe colours; only HA's chrome
+keeps whatever theme is active.
+
+### Optional: bundled CJK webfonts
+
+Chinese text uses the high-quality CJK fonts that ship with macOS, iOS,
+Windows, Android and Linux (PingFang, Microsoft JhengHei/YaHei, Noto CJK). The
+full Noto Sans/Serif TC+SC webfonts are tens of megabytes, so they are **not**
+embedded in the bundle. To pin Chinese rendering to Noto instead of the local
+system font, download `quiet-luxe.zip` from the latest release and copy its
+`fonts/` folder to `/config/www/quiet-luxe/fonts/` so that
+`/config/www/quiet-luxe/fonts/fonts.css` exists.
+
+The bundle probes for that stylesheet and uses it when present. When it is
+absent the request simply 404s and is ignored — nothing breaks, and the
+Latin typography is unaffected either way.
 
 ## Development
 
@@ -54,7 +85,11 @@ your HA instance — no external font CDN is contacted at runtime.
 - `npm run build` → `dist/quiet-luxe.js` + `dist/fonts/`
 - `dist/` is never committed; releases attach `quiet-luxe.js` (installed by
   HACS via `hacs.json` `filename`) and `quiet-luxe.zip` (bundle + woff2
-  fonts, used for the manual install and the HACS fonts step above).
+  fonts, used for the manual install and the optional CJK webfont upgrade).
+- The Latin faces are inlined into `quiet-luxe.js` at build time by
+  `scripts/inline-fonts-plugin.ts`, which reads the installed `@fontsource`
+  packages and fails the build if a weight or subset goes missing. `dist/fonts/`
+  holds only the large CJK families plus a `fonts.css` that `@import`s them.
 
 ## Repository docs
 
