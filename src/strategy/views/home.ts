@@ -1,4 +1,5 @@
 import { t } from '../../i18n/translate';
+import { MAX_COLUMNS, REGION_SPAN } from '../layout';
 import { carSection } from '../sections/car';
 import { climateSection } from '../sections/climate';
 import { energySection } from '../sections/energy';
@@ -40,7 +41,7 @@ export function headerCardConfig(ctx: StrategyContext): LovelaceCardConfig {
 export function homeView(ctx: StrategyContext): LovelaceViewConfig {
   const header: LovelaceSectionConfig = {
     type: 'grid',
-    column_span: 4,
+    column_span: REGION_SPAN.viewHeader,
     cards: [headerCardConfig(ctx)],
   };
   const sections = [
@@ -59,7 +60,8 @@ export function homeView(ctx: StrategyContext): LovelaceViewConfig {
     path: PATHS.home,
     icon: 'mdi:home-variant-outline',
     type: 'sections',
-    max_columns: 4,
+    max_columns: MAX_COLUMNS,
+    dense_section_placement: true,
     sections,
   };
 }

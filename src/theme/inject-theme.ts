@@ -4,6 +4,13 @@ import {
   FONT_DISPLAY_STACK,
   FONT_DISPLAY_STACK_HANS,
 } from '../fonts/font-stacks';
+import {
+  COLUMN_GUTTER_PX,
+  COLUMN_MAX_WIDTH_PX,
+  COLUMN_MIN_WIDTH_PX,
+  NARROW_GUTTER_PX,
+  ROW_GAP_PX,
+} from '../strategy/layout';
 import { colorCssVariables, cssVariableBlock } from '../tokens/css';
 
 export const THEME_STYLE_ID = 'quiet-luxe-theme';
@@ -41,6 +48,35 @@ function indent(block: string): string {
 }
 
 /**
+ * The knobs `hui-sections-view` and `hui-grid-section` expose (read from
+ * home-assistant/frontend, HA 2026.7). They are the ONLY runtime lever on the
+ * view grid: the column count comes out of a ResizeController that reads
+ * `--column-min-width` and the container's own `column-gap` off computed
+ * style, so setting them here makes the grid answer to the width the view
+ * actually has — sidebar, split view and all — not to a media query.
+ *
+ * - gutter 24 → also the page padding, since `.wrapper` pads by the gutter.
+ *   Below 600px HA swaps to the narrow gutter, which is the design's 16.
+ * - max column width 390 → `.wrapper` caps at
+ *   `columns × 390 + (columns − 1) × 24` = 1632 at four tracks. Past 1680 the
+ *   band stays 1632 and the margins take the rest: never a fifth column, never
+ *   a wider card.
+ * - vertical rhythm 16 everywhere: header → grid, section → section, card →
+ *   card.
+ */
+export function layoutCssVariables(): Record<string, string> {
+  return {
+    '--ha-view-sections-column-gap': `${COLUMN_GUTTER_PX}px`,
+    '--ha-view-sections-narrow-column-gap': `${NARROW_GUTTER_PX}px`,
+    '--ha-view-sections-column-max-width': `${COLUMN_MAX_WIDTH_PX}px`,
+    '--ha-view-sections-column-min-width': `${COLUMN_MIN_WIDTH_PX}px`,
+    '--ha-view-sections-row-gap': `${ROW_GAP_PX}px`,
+    '--ha-section-grid-row-gap': `${ROW_GAP_PX}px`,
+    '--ha-section-grid-column-gap': `${ROW_GAP_PX}px`,
+  };
+}
+
+/**
  * The `--ql-*` custom properties for both modes, so every card renders
  * correctly with no `themes/quiet-luxe.yaml` installed. When the YAML theme IS
  * installed HA writes the same tokens as inline styles on <html>, which beat
@@ -57,6 +93,7 @@ export function themeStyleCss(): string {
         indent(cssVariableBlock('light')),
         `  --ql-font-display: ${FONT_DISPLAY_STACK};`,
         `  --ql-font-body: ${FONT_BODY_STACK};`,
+        declarations(layoutCssVariables()),
       ].join('\n'),
     ),
     rule(

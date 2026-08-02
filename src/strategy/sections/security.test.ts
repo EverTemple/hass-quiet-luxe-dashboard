@@ -125,9 +125,9 @@ describe('cameraWallCards / securityViewSections', () => {
     });
   });
 
-  it('gives the camera wall two view columns so the cards can be large', () => {
+  it('runs every security band across the whole content width', () => {
     const sections = securityViewSections(makeContext({ snapshot, entities }));
-    expect(sections[0]?.column_span).toBe(2);
+    expect(sections.map((section) => section.column_span)).toEqual([4, 4]);
   });
 
   it('view sections cover the wall and the door/motion list; empty home yields none', () => {

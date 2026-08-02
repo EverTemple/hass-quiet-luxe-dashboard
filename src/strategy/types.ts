@@ -19,6 +19,12 @@ export interface LovelaceCardConfig {
 export interface LovelaceSectionConfig {
   readonly type: 'grid';
   readonly column_span?: number;
+  /**
+   * Grid ROWS the section occupies. A tall column claims two, so a short
+   * section beside it can drop into the row underneath rather than pushing the
+   * whole grid down — the closest HA's grid gets to masonry (packing rule 2).
+   */
+  readonly row_span?: number;
   readonly cards: ReadonlyArray<LovelaceCardConfig>;
 }
 
@@ -29,6 +35,12 @@ export interface LovelaceViewConfig {
   readonly icon?: string;
   readonly subview?: boolean;
   readonly max_columns?: number;
+  /**
+   * `hui-sections-view` switches its grid to `grid-auto-flow: row dense`, so a
+   * later narrow section backfills a hole a wide one left instead of starting a
+   * new row (packing rule 2).
+   */
+  readonly dense_section_placement?: boolean;
   readonly sections: ReadonlyArray<LovelaceSectionConfig>;
 }
 

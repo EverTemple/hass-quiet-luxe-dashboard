@@ -19,42 +19,84 @@ describe('roomViews', () => {
       'room-master_bedroom',
     ]);
     expect(views[0]?.subview).toBe(true);
-    expect(views[0]?.max_columns).toBe(2);
+    expect(views[0]?.max_columns).toBe(4);
+    expect(views[0]?.dense_section_placement).toBe(true);
     expect(views[0]?.title).toBe('Main Living');
   });
 
-  it('leads with a room header carrying stats entities and the back path', () => {
+  it('leads with the view header: title, live stats, back to Home, All climates', () => {
     const view = roomViews(subangContext())[0];
     expect(view?.sections[0]).toEqual({
       type: 'grid',
-      column_span: 2,
+      column_span: 4,
       cards: [
         {
           type: 'custom:quiet-luxe-header-card',
-          form: 'room',
+          form: 'view',
           name: 'Main Living',
+          back_path: '/quiet-luxe/home',
+          back_label: 'Home',
           temperature_entity: 'sensor.main_living_temp',
           humidity_entity: 'sensor.main_living_humidity',
           aqi_entity: 'sensor.main_living_aqi',
-          back_path: '/quiet-luxe/home',
+          action_label: 'All climates',
+          action_path: '/quiet-luxe/climates',
         },
       ],
     });
   });
 
-  it('renders room sections in the fixed spec §6 priority, only what exists', () => {
+  it('lays the room out as three column sections spanning 1 / 2 / 1', () => {
+    const view = roomViews(subangContext())[0];
+    expect(view?.sections.map((section) => section.column_span)).toEqual([4, 1, 2, 1]);
+  });
+
+  /* Two rows for the tall middle column, so at three tracks the sensors column
+     drops in under climate rather than under the whole grid. */
+  it('gives the control column two grid rows and the others one', () => {
+    const view = roomViews(subangContext())[0];
+    expect(view?.sections.map((section) => section.row_span)).toEqual([
+      undefined,
+      undefined,
+      3,
+      undefined,
+    ]);
+  });
+
+  it('hands the climate column cards the whole track they sit in', () => {
+    const view = roomViews(subangContext())[0];
+    const climate = view?.sections[1]?.cards.filter((card) => card.type !== 'heading') ?? [];
+    expect(climate.length).toBeGreaterThan(0);
+    for (const card of climate) {
+      expect(card.grid_options).toEqual({ columns: 12, rows: 'auto' });
+    }
+  });
+
+  it('never pins a row count — a numeric rows would clip or overflow', () => {
+    const cards = roomViews(subangContext()).flatMap((view) =>
+      view.sections.flatMap((section) => section.cards),
+    );
+    for (const card of cards) {
+      const options = card.grid_options as { rows?: unknown } | undefined;
+      if (options !== undefined) {
+        expect(options.rows).toBe('auto');
+      }
+    }
+  });
+
+  it('renders room regions in Figma column order, only what exists', () => {
     const view = roomViews(subangContext())[0];
     const headings = view?.sections
       .flatMap((section) => section.cards)
       .filter((card) => card.type === 'heading')
       .map((card) => card.heading);
     expect(headings).toEqual([
-      'Lights',
       'Climate',
+      'Lights',
       'Covers',
+      'Switches',
       'Music',
       'Air & sensors',
-      'Switches',
     ]);
   });
 

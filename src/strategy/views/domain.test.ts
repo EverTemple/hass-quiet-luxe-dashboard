@@ -27,11 +27,43 @@ describe('domain views', () => {
     expect(mediaView(makeContext({}))).toBeNull();
   });
 
-  it('securityView covers wall + doors/motion', () => {
+  it('securityView covers wall + doors/motion behind the view header', () => {
     const view = securityView(contextFor('subang'));
     expect(view?.path).toBe('security');
-    expect(view?.sections).toHaveLength(2);
+    expect(view?.sections).toHaveLength(3);
     expect(securityView(makeContext({}))).toBeNull();
+  });
+
+  it('every non-Home view opens with a header that goes back to the dashboard', () => {
+    const views = [
+      mediaView(contextFor('subang')),
+      securityView(contextFor('subang')),
+      energyView(contextFor('subang')),
+      climatesView(contextFor('subang')),
+      carView(contextFor('subang')),
+      adminView(contextFor('subang')),
+      languageView(contextFor('subang')),
+    ];
+    for (const view of views) {
+      expect(view?.sections[0]?.cards[0]).toMatchObject({
+        type: 'custom:quiet-luxe-header-card',
+        form: 'view',
+        name: view?.title,
+        back_path: '/quiet-luxe/home',
+      });
+      expect(view?.sections[0]?.column_span).toBe(4);
+      expect(view?.dense_section_placement).toBe(true);
+    }
+  });
+
+  it('grid views run to four tracks; single-card views keep a narrow band', () => {
+    expect(mediaView(contextFor('subang'))?.max_columns).toBe(4);
+    expect(securityView(contextFor('subang'))?.max_columns).toBe(4);
+    expect(energyView(contextFor('subang'))?.max_columns).toBe(4);
+    expect(climatesView(contextFor('subang'))?.max_columns).toBe(4);
+    expect(carView(contextFor('subang'))?.max_columns).toBe(2);
+    expect(adminView(contextFor('subang'))?.max_columns).toBe(2);
+    expect(languageView(contextFor('subang')).max_columns).toBe(2);
   });
 
   it('energyView exists only for energy homes', () => {
@@ -41,16 +73,18 @@ describe('domain views', () => {
 
   it('climatesView groups climate devices under area-name headings', () => {
     const view = climatesView(contextFor('subang'));
-    const headings = view?.sections.map((section) => section.cards[0]?.heading);
+    const headings = view?.sections.slice(1).map((section) => section.cards[0]?.heading);
     expect(headings).toEqual(['Main Living', 'Side Living', 'Master Bedroom']);
+    /* One span-1 column per area, so they flow free across the four tracks. */
+    expect(view?.sections.slice(1).map((section) => section.column_span)).toEqual([1, 1, 1]);
     expect(climatesView(makeContext({}))).toBeNull();
   });
 
   it('carView carries the per-home brand and is null for car: none', () => {
     const subangCar = carView(contextFor('subang'));
-    expect(subangCar?.sections[0]?.cards[0]).toMatchObject({ brand: 'bmw' });
+    expect(subangCar?.sections[1]?.cards[0]).toMatchObject({ brand: 'bmw' });
     const xiamenCar = carView(contextFor('xiamen'));
-    expect(xiamenCar?.sections[0]?.cards[0]).toMatchObject({ brand: 'liauto' });
+    expect(xiamenCar?.sections[1]?.cards[0]).toMatchObject({ brand: 'liauto' });
     expect(carView(makeContext({}))).toBeNull();
   });
 
@@ -63,6 +97,6 @@ describe('domain views', () => {
   it('languageView always exists with the language card', () => {
     const view = languageView(makeContext({}));
     expect(view.path).toBe('language');
-    expect(view.sections[0]?.cards[0]).toEqual({ type: 'custom:quiet-luxe-language-card' });
+    expect(view.sections[1]?.cards[0]).toEqual({ type: 'custom:quiet-luxe-language-card' });
   });
 });

@@ -47,16 +47,18 @@ describe('energyViewSections', () => {
     const withChart = energyViewSections(
       makeContext({ home: energyHome, entities: meters, hasApexcharts: true }),
     );
-    expect(withChart).toHaveLength(1);
+    /* now 1 track · charts 2 — the chart is the only card that needs width. */
+    expect(withChart).toHaveLength(2);
+    expect(withChart.map((section) => section.column_span)).toEqual([1, 2]);
     const cards = withChart[0]?.cards ?? [];
-    expect(cards).toHaveLength(6); // heading + strip + 3 rings + chart
+    expect(cards).toHaveLength(5); // heading + strip + 3 rings
     expect(cards[2]).toEqual({
       type: 'custom:quiet-luxe-energy-card',
       form: 'ring',
       power_entity: 'sensor.l1',
       name: 'L1',
     });
-    expect(cards[5]).toMatchObject({ type: 'custom:apexcharts-card' });
+    expect(withChart[1]?.cards[1]).toMatchObject({ type: 'custom:apexcharts-card' });
   });
 
   it('omits the chart when apexcharts-card is absent (graceful degradation)', () => {
