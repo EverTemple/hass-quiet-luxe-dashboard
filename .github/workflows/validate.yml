@@ -15,3 +15,8 @@ jobs:
       - uses: hacs/action@main
         with:
           category: plugin
+          # license + images are HACS default-store inclusion checks; this
+          # package is installed as a custom repository, which does not
+          # require them. Remove from ignore if a LICENSE and README
+          # screenshots are added for default-store submission.
+          ignore: "license images"
