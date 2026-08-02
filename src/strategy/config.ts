@@ -11,6 +11,11 @@ export interface RoomOverride {
   readonly name?: string;
   readonly photo?: string;
   readonly hidden?: boolean;
+  /**
+   * Extra names this room is known by, on top of the HA area aliases. Stripped
+   * from card and chip labels inside the room so they never repeat the room.
+   */
+  readonly aliases?: ReadonlyArray<string>;
 }
 
 export interface EnergyConfig {
@@ -208,7 +213,7 @@ function parseRooms(value: unknown): Readonly<Record<string, RoomOverride>> | un
     if (!isRecord(override)) {
       fail(`"rooms.${areaId}" must be an object`);
     }
-    rejectUnknownKeys(override, ['name', 'photo', 'hidden'], `"rooms.${areaId}"`);
+    rejectUnknownKeys(override, ['name', 'photo', 'hidden', 'aliases'], `"rooms.${areaId}"`);
     const hidden = override.hidden;
     if (hidden !== undefined && typeof hidden !== 'boolean') {
       fail(`"rooms.${areaId}.hidden" must be true or false`);
@@ -217,6 +222,7 @@ function parseRooms(value: unknown): Readonly<Record<string, RoomOverride>> | un
       name: optString(override.name, `rooms.${areaId}.name`),
       photo: optString(override.photo, `rooms.${areaId}.photo`),
       hidden,
+      aliases: stringArray(override.aliases, `rooms.${areaId}.aliases`),
     };
   }
   return rooms;

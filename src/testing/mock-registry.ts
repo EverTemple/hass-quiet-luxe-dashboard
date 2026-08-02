@@ -12,7 +12,7 @@ import type { StrategyContext, Tier } from '../strategy/types';
 import { makeEntity } from './mock-hass';
 
 export function mockArea(areaId: string, name: string, extra: Partial<AreaEntry> = {}): AreaEntry {
-  return { area_id: areaId, name, picture: null, labels: [], ...extra };
+  return { area_id: areaId, name, picture: null, labels: [], aliases: [], ...extra };
 }
 
 export function mockDevice(

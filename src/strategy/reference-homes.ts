@@ -64,6 +64,10 @@ export const TUNGCHUNG_CONFIG: HomeConfig = validateHomeConfig({
     'parents_room',
     'parking',
   ],
+  /* Most devices in steven_bedroom are named "Steven Room …", which the area
+     itself is not called; listing it here keeps that prefix out of the labels
+     inside the room (confirmed against the live registry 2026-08-02). */
+  rooms: { steven_bedroom: { aliases: ['Steven Room'] } },
   admin_flows: [
     { entity: 'switch.zigbee2mqtt_bridge_permit_join', name: 'Zigbee pairing', description: 'Zigbee2MQTT permit join' },
   ],

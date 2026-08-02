@@ -1,4 +1,5 @@
 import { DEFAULT_PHOTO_BASE, viewUrl, type HomeConfig } from '../config';
+import { chipLabels, roomName } from '../labels';
 import type { AreaEntry } from '../registry';
 import {
   roomPath,
@@ -7,10 +8,6 @@ import {
   type StrategyContext,
 } from '../types';
 import { headingCard, sectionOf } from './heading';
-
-export function roomName(home: HomeConfig, area: AreaEntry): string {
-  return home.rooms?.[area.area_id]?.name ?? area.name;
-}
 
 /** Photo precedence: config override → HA area picture → photo_base default. */
 export function roomPhoto(home: HomeConfig, area: AreaEntry): string {
@@ -41,14 +38,16 @@ export function orderedAreas(ctx: StrategyContext): ReadonlyArray<AreaEntry> {
 export function roomCardFor(ctx: StrategyContext, area: AreaEntry): LovelaceCardConfig {
   const { registry } = ctx;
   const areaId = area.area_id;
-  const chips = [
+  const chipEntities = [
     registry.inArea(areaId, 'light')[0],
     registry.inArea(areaId, 'climate')[0],
     registry.inArea(areaId, 'cover')[0],
     registry.inArea(areaId, 'media_player', 'tv')[0],
-  ]
-    .filter((entity): entity is string => entity !== undefined)
-    .map((entity) => ({ entity }));
+  ].filter((entity): entity is string => entity !== undefined);
+  const chips = chipLabels(ctx, area, chipEntities).map(({ entityId, label }) => ({
+    entity: entityId,
+    label,
+  }));
   return {
     type: 'custom:quiet-luxe-room-card',
     name: roomName(ctx.home, area),

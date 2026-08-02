@@ -38,15 +38,19 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "chips": [
                 {
                   "entity": "light.main_living_pendant",
+                  "label": "Lights",
                 },
                 {
                   "entity": "climate.main_living_ac",
+                  "label": "Aircon",
                 },
                 {
                   "entity": "cover.main_living_shade",
+                  "label": "Shade",
                 },
                 {
                   "entity": "media_player.living_tv",
+                  "label": "TV",
                 },
               ],
               "grid_options": {
@@ -77,12 +81,15 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "chips": [
                 {
                   "entity": "light.master_lamp",
+                  "label": "Lights",
                 },
                 {
                   "entity": "climate.master_ac",
+                  "label": "Aircon",
                 },
                 {
                   "entity": "cover.master_curtain",
+                  "label": "Curtain",
                 },
               ],
               "grid_options": {
@@ -293,6 +300,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Pendant",
               "type": "custom:quiet-luxe-light-card",
             },
           ],
@@ -325,6 +333,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Shade",
               "type": "custom:quiet-luxe-cover-card",
             },
           ],
@@ -395,6 +404,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "switch.living_fan_rf",
+              "name": "Ceiling Fan",
               "type": "custom:quiet-luxe-device-cutout-card",
             },
           ],
@@ -475,6 +485,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Master Lamp",
               "type": "custom:quiet-luxe-light-card",
             },
           ],
@@ -507,6 +518,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Master Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
           ],
@@ -849,6 +861,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "chips": [
                 {
                   "entity": "light.bedroom_lamp",
+                  "label": "Lights",
                 },
               ],
               "grid_options": {
@@ -866,15 +879,19 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "chips": [
                 {
                   "entity": "light.living_ceiling",
+                  "label": "Lights",
                 },
                 {
                   "entity": "climate.living_ac",
+                  "label": "Aircon",
                 },
                 {
                   "entity": "cover.living_curtain",
+                  "label": "Curtain",
                 },
                 {
                   "entity": "media_player.lg_tv",
+                  "label": "TV",
                 },
               ],
               "grid_options": {
@@ -1043,6 +1060,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Lamp",
               "type": "custom:quiet-luxe-light-card",
             },
           ],
@@ -1056,6 +1074,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "switch.bedroom_fan_rf",
+              "name": "Fan Rf",
               "type": "custom:quiet-luxe-device-cutout-card",
             },
           ],
@@ -1096,6 +1115,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Living Ceiling",
               "type": "custom:quiet-luxe-light-card",
             },
           ],
@@ -1128,6 +1148,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Living Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
           ],
@@ -1384,6 +1405,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "chips": [
                 {
                   "entity": "climate.bedroom_ac",
+                  "label": "Aircon",
                 },
               ],
               "grid_options": {
@@ -1401,15 +1423,19 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "chips": [
                 {
                   "entity": "light.living_ceiling",
+                  "label": "Lights",
                 },
                 {
                   "entity": "climate.living_ac",
+                  "label": "Aircon",
                 },
                 {
                   "entity": "cover.living_curtain",
+                  "label": "Curtain",
                 },
                 {
                   "entity": "media_player.tcl_tv",
+                  "label": "TV",
                 },
               ],
               "grid_options": {
@@ -1427,6 +1453,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "chips": [
                 {
                   "entity": "light.storage_light",
+                  "label": "Lights",
                 },
               ],
               "grid_options": {
@@ -1634,6 +1661,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Living Ceiling",
               "type": "custom:quiet-luxe-light-card",
             },
           ],
@@ -1666,6 +1694,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Living Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
           ],
@@ -1754,6 +1783,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "grid_options": {
                 "columns": 6,
               },
+              "name": "Light",
               "type": "custom:quiet-luxe-light-card",
             },
           ],

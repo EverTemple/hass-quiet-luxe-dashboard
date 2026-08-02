@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { makeEntity } from '../../testing/mock-hass';
+import { makeContext, mockArea, mockRegEntity, referenceHome } from '../../testing/mock-registry';
 import { SUBANG_CONFIG } from '../reference-homes';
-import { makeContext, referenceHome } from '../../testing/mock-registry';
 import type { StrategyContext } from '../types';
 import { roomViews } from './room';
 
@@ -64,6 +65,34 @@ describe('roomViews', () => {
       .filter((card) => card.type === 'custom:quiet-luxe-device-cutout-card')
       .map((card) => card.entity);
     expect(switches).toEqual(['switch.living_fan_rf']);
+  });
+
+  it('names room-view cards without repeating the room the view is titled with', () => {
+    const ctx = makeContext({
+      snapshot: {
+        areas: [mockArea('bedroom', 'Master Bedroom')],
+        devices: [],
+        entities: [
+          mockRegEntity('light.a', { area_id: 'bedroom' }),
+          mockRegEntity('light.b', { area_id: 'bedroom' }),
+          mockRegEntity('cover.a', { area_id: 'bedroom' }),
+          mockRegEntity('cover.b', { area_id: 'bedroom' }),
+        ],
+      },
+      entities: [
+        makeEntity('light.a', 'on', { friendly_name: 'Master Bedroom Ceiling' }),
+        makeEntity('light.b', 'off', { friendly_name: 'Master Bedroom' }),
+        makeEntity('cover.a', 'open', { friendly_name: '窗帘 Curatain', device_class: 'curtain' }),
+        makeEntity('cover.b', 'open', { friendly_name: '窗纱 Curatain', device_class: 'curtain' }),
+      ],
+    });
+    const named = roomViews(ctx)[0]
+      ?.sections.flatMap((section) => section.cards)
+      .filter((card) => typeof card['entity'] === 'string')
+      .map((card) => card['name']);
+    // Ceiling: room name stripped. Lights: name was only the room name.
+    // The two curtains keep their own names — they are genuinely different covers.
+    expect(named).toEqual(['Ceiling', 'Lights', '窗帘 Curatain', '窗纱 Curatain']);
   });
 
   it('a bathroom-like sparse area renders only its own sections', () => {

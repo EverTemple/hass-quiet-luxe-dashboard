@@ -16,7 +16,7 @@ describe('fetchRegistrySnapshot', () => {
     const hass = makeMockHass([], { wsResponses });
     const snapshot = await fetchRegistrySnapshot(hass);
     expect(snapshot.areas).toEqual([
-      { area_id: 'living', name: 'Living Room', picture: null, labels: [] },
+      { area_id: 'living', name: 'Living Room', picture: null, labels: [], aliases: [] },
     ]);
     expect(snapshot.devices).toEqual([{ id: 'dev-1', area_id: 'living', labels: [] }]);
     expect(snapshot.entities).toEqual([

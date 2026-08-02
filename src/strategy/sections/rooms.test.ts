@@ -81,9 +81,37 @@ describe('roomCardFor / roomsSection', () => {
       temperature_entity: 'sensor.living_temp',
       aqi_entity: undefined,
       lights_entity: 'light.living_ceiling',
-      chips: [{ entity: 'light.living_ceiling' }, { entity: 'climate.living_ac' }],
+      chips: [
+        { entity: 'light.living_ceiling', label: 'Lights' },
+        { entity: 'climate.living_ac', label: 'Aircon' },
+      ],
       grid_options: { columns: 6 },
     });
+  });
+
+  it('labels chips by device type instead of repeating the room name', () => {
+    const ctx = makeContext({
+      locale: 'zh-Hant',
+      snapshot: {
+        areas: [mockArea('bedroom', 'Steven Bedroom')],
+        devices: [],
+        entities: [
+          mockRegEntity('light.bedroom', { area_id: 'bedroom' }),
+          mockRegEntity('cover.dooya_3763', { area_id: 'bedroom' }),
+        ],
+      },
+      entities: [
+        makeEntity('light.bedroom', 'on', { friendly_name: 'Steven Room' }),
+        makeEntity('cover.dooya_3763', 'open', {
+          friendly_name: '窗帘 Curatain',
+          device_class: 'curtain',
+        }),
+      ],
+    });
+    expect(roomCardFor(ctx, mockArea('bedroom', 'Steven Bedroom')).chips).toEqual([
+      { entity: 'light.bedroom', label: t('zh-Hant', 'device.lights') },
+      { entity: 'cover.dooya_3763', label: t('zh-Hant', 'device.curtain') },
+    ]);
   });
 
   it('returns a two-column section with heading, and null on an empty registry', () => {

@@ -9,6 +9,8 @@ export interface AreaEntry {
   readonly name: string;
   readonly picture: string | null;
   readonly labels: ReadonlyArray<string>;
+  /** HA area aliases — extra names the room is known by (used to de-duplicate labels). */
+  readonly aliases: ReadonlyArray<string>;
 }
 
 export interface DeviceEntry {
@@ -48,6 +50,7 @@ interface RawAreaEntry {
   readonly name: string;
   readonly picture?: string | null;
   readonly labels?: ReadonlyArray<string>;
+  readonly aliases?: ReadonlyArray<string>;
 }
 
 interface RawDeviceEntry {
@@ -89,6 +92,7 @@ export async function fetchRegistrySnapshot(hass: HomeAssistant): Promise<Regist
         name: area.name,
         picture: area.picture ?? null,
         labels: area.labels ?? [],
+        aliases: area.aliases ?? [],
       })),
       devices: devices.map((device) => ({
         id: device.id,

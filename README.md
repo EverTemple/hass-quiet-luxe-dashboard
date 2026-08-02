@@ -133,6 +133,7 @@ strategy:
     rooms:
       guest_toilet: { hidden: true }
       main_living: { photo: /local/quiet-luxe/rooms/main-living.jpg }
+      master_bedroom: { aliases: ["Master Room"] }  # extra names to strip from labels
     admin_flows:
       - entity: switch.nr_guest_wifi
         name: Guest Wi-Fi
@@ -148,6 +149,14 @@ per area by domain and device class; labels refine — `ql-favorite` (sort
 first), `ql-hidden` (never rendered), `ql-primary-camera` (leads camera
 sections). Room photos resolve override → area picture →
 `/local/quiet-luxe/rooms/<area_id>.jpg`.
+
+Labels never repeat the room a card already names. Chips on a room card read as
+device types (Lights, Aircon, Curtain, TV) and only fall back to entity names
+when two chips would share a type; cards inside a room view drop the room name
+from their own names. The room name, the HA area aliases and `rooms.<area_id>.
+aliases` are all stripped, so a room whose devices are named after some other
+name for it (area `Master Bedroom`, entities `Master Room …`) is fixed by
+listing that name in `aliases`.
 
 Missing integrations never render (no energy config → no Energy view; no
 calendar entities or `calendar: none` → no Schedule). apexcharts-card and the

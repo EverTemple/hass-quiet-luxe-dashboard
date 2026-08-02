@@ -1,12 +1,13 @@
 import type { TranslationKey } from '../../i18n/locales/en';
 import { t } from '../../i18n/translate';
+import { roomName } from '../labels';
 import { adminSection } from '../sections/admin';
 import { carCard } from '../sections/car';
 import { climateCards } from '../sections/climate';
 import { energyViewSections } from '../sections/energy';
 import { sectionOf } from '../sections/heading';
 import { mediaViewSections } from '../sections/media';
-import { orderedAreas, roomName } from '../sections/rooms';
+import { orderedAreas } from '../sections/rooms';
 import { securityViewSections } from '../sections/security';
 import {
   isSection,

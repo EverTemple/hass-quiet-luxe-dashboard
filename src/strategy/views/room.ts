@@ -1,9 +1,10 @@
 import { viewUrl } from '../config';
+import { roomName, roomScopedLabels } from '../labels';
 import type { AreaEntry } from '../registry';
 import { climateSection } from '../sections/climate';
 import { headingCard, sectionOf } from '../sections/heading';
 import { mediaSection } from '../sections/media';
-import { orderedAreas, roomName } from '../sections/rooms';
+import { orderedAreas } from '../sections/rooms';
 import { sensorsSection } from '../sections/sensors';
 import {
   isSection,
@@ -34,20 +35,27 @@ function roomHeaderSection(ctx: StrategyContext, area: AreaEntry): LovelaceSecti
   };
 }
 
-function lightCards(ctx: StrategyContext, areaId: string): ReadonlyArray<LovelaceCardConfig> {
-  return ctx.registry.inArea(areaId, 'light').map((entity) => ({
-    type: 'custom:quiet-luxe-light-card',
-    entity,
-    grid_options: { columns: 6 },
-  }));
+/* Room views are titled with the room, so their cards are named without it. */
+function lightCards(ctx: StrategyContext, area: AreaEntry): ReadonlyArray<LovelaceCardConfig> {
+  return roomScopedLabels(ctx, area, ctx.registry.inArea(area.area_id, 'light')).map(
+    ({ entityId, label }) => ({
+      type: 'custom:quiet-luxe-light-card',
+      entity: entityId,
+      name: label,
+      grid_options: { columns: 6 },
+    }),
+  );
 }
 
-function coverCards(ctx: StrategyContext, areaId: string): ReadonlyArray<LovelaceCardConfig> {
-  return ctx.registry.inArea(areaId, 'cover').map((entity) => ({
-    type: 'custom:quiet-luxe-cover-card',
-    entity,
-    grid_options: { columns: 6 },
-  }));
+function coverCards(ctx: StrategyContext, area: AreaEntry): ReadonlyArray<LovelaceCardConfig> {
+  return roomScopedLabels(ctx, area, ctx.registry.inArea(area.area_id, 'cover')).map(
+    ({ entityId, label }) => ({
+      type: 'custom:quiet-luxe-cover-card',
+      entity: entityId,
+      name: label,
+      grid_options: { columns: 6 },
+    }),
+  );
 }
 
 /** Switches already surfaced as admin flows or motion toggles stay out (D9). */
@@ -59,12 +67,14 @@ function excludedSwitchIds(ctx: StrategyContext): ReadonlySet<string> {
   return new Set([...flowIds, ...motionToggleIds]);
 }
 
-function switchCards(ctx: StrategyContext, areaId: string): ReadonlyArray<LovelaceCardConfig> {
+function switchCards(ctx: StrategyContext, area: AreaEntry): ReadonlyArray<LovelaceCardConfig> {
   const excluded = excludedSwitchIds(ctx);
-  return ctx.registry
-    .inArea(areaId, 'switch')
-    .filter((id) => !excluded.has(id))
-    .map((entity) => ({ type: 'custom:quiet-luxe-device-cutout-card', entity }));
+  const entityIds = ctx.registry.inArea(area.area_id, 'switch').filter((id) => !excluded.has(id));
+  return roomScopedLabels(ctx, area, entityIds).map(({ entityId, label }) => ({
+    type: 'custom:quiet-luxe-device-cutout-card',
+    entity: entityId,
+    name: label,
+  }));
 }
 
 /** Room drill-in (spec §6): fixed priority, rendering only what exists. */
@@ -72,12 +82,12 @@ export function roomView(ctx: StrategyContext, area: AreaEntry): LovelaceViewCon
   const areaId = area.area_id;
   const sections = [
     roomHeaderSection(ctx, area),
-    sectionOf(headingCard(ctx.locale, 'section.lights'), lightCards(ctx, areaId)),
+    sectionOf(headingCard(ctx.locale, 'section.lights'), lightCards(ctx, area)),
     climateSection(ctx, { areaId }),
-    sectionOf(headingCard(ctx.locale, 'section.covers'), coverCards(ctx, areaId)),
+    sectionOf(headingCard(ctx.locale, 'section.covers'), coverCards(ctx, area)),
     mediaSection(ctx, areaId),
     sensorsSection(ctx, areaId),
-    sectionOf(headingCard(ctx.locale, 'section.switches'), switchCards(ctx, areaId)),
+    sectionOf(headingCard(ctx.locale, 'section.switches'), switchCards(ctx, area)),
   ].filter(isSection);
   return {
     title: roomName(ctx.home, area),
