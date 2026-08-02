@@ -6,6 +6,7 @@ import {
   type TemplateResult,
 } from 'lit';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/types';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -59,8 +60,8 @@ export class QuietLuxeLanguageCard extends QlBaseCard {
     return 2;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 2, columns: 12 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   private tiles(): ReadonlyArray<LanguageTile> {

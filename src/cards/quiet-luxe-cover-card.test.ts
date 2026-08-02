@@ -45,7 +45,7 @@ describe('quiet-luxe-cover-card', () => {
     ).toThrow(/entity/);
     card.setConfig({ type: 'custom:quiet-luxe-cover-card', entity: 'cover.a' });
     expect(card.getCardSize()).toBe(2);
-    expect(card.getGridOptions()).toEqual({ rows: 2, columns: 4 });
+    expect(card.getGridOptions()).toEqual({ rows: 'auto', columns: 6 });
   });
 
   it('shows the position % and reflects cover type (config override wins)', async () => {

@@ -9,6 +9,7 @@ import {
 import '../elements/ql-status-dot';
 import type { QlStatus } from '../elements/ql-status-dot';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -51,8 +52,8 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
     return 2;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 2, columns: 3 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_HALF);
   }
 
   private onImageError(): void {
@@ -104,7 +105,7 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
     const showImage = config.image !== undefined && !this.imageFailed;
     return html`
       <div class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}">
-        <p class="eyebrow">${name}</p>
+        <p class="eyebrow ql-clamp-2">${name}</p>
         ${showImage
           ? html`<img class="cutout" src=${config.image} alt="" @error=${this.onImageError} />`
           : nothing}

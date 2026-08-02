@@ -5,7 +5,7 @@ import {
   makeMockHass,
   sensorEntity,
 } from '../testing/mock-hass';
-import { QuietLuxeRoomCard, type RoomCardConfig } from './quiet-luxe-room-card';
+import { glowOrigin, QuietLuxeRoomCard, type RoomCardConfig } from './quiet-luxe-room-card';
 
 const BASE_CONFIG: RoomCardConfig = {
   type: 'custom:quiet-luxe-room-card',
@@ -36,17 +36,21 @@ describe('quiet-luxe-room-card', () => {
     expect((window.customCards ?? []).map((e) => e.type)).toContain('quiet-luxe-room-card');
   });
 
-  it('setConfig rejects missing name or image', () => {
+  it('setConfig rejects a missing name and accepts a missing image', () => {
     const card = new QuietLuxeRoomCard();
     expect(() => card.setConfig({ ...BASE_CONFIG, name: '' })).toThrow(/name/);
-    expect(() => card.setConfig({ ...BASE_CONFIG, image: '' })).toThrow(/image/);
+    expect(() => card.setConfig({ ...BASE_CONFIG, image: '' })).not.toThrow();
+    expect(card.photoUrl()).toBeUndefined();
+    expect(card.showsFallback()).toBe(true);
   });
 
   it('renders the photo, room name, and Figma scrim layers (M default)', async () => {
     const card = await mount();
     const root = card.shadowRoot?.querySelector<HTMLElement>('.room');
     expect(root?.dataset.size).toBe('m');
-    expect(root?.style.backgroundImage).toContain('/local/quiet-luxe/rooms/living.jpg');
+    expect(card.shadowRoot?.querySelector<HTMLImageElement>('img.photo')?.getAttribute('src')).toBe(
+      '/local/quiet-luxe/rooms/living.jpg',
+    );
     expect(card.shadowRoot?.querySelector('.scrim-top .name')?.textContent).toBe('Living Room');
     expect(card.shadowRoot?.querySelector('.scrim-bottom')).not.toBeNull();
     const cssText = (QuietLuxeRoomCard.styles as unknown as ReadonlyArray<{ toString(): string }>)
@@ -157,12 +161,47 @@ describe('quiet-luxe-room-card', () => {
     expect(labels.join(' ')).not.toContain('.');
   });
 
-  it('sizes the layout grid: s/m/l rows 2/3/4', async () => {
+  it('never pins a row count: height is content-driven at every density', async () => {
     const card = await mount({ size: 's' });
     expect(card.getCardSize()).toBe(2);
-    expect(card.getGridOptions()).toEqual({ rows: 2, columns: 6 });
+    expect(card.getGridOptions()).toEqual({ rows: 'auto', columns: 12 });
     card.setConfig({ ...BASE_CONFIG, size: 'l' });
     expect(card.getCardSize()).toBe(4);
-    expect(card.getGridOptions()).toEqual({ rows: 4, columns: 6 });
+    expect(card.getGridOptions()).toEqual({ rows: 'auto', columns: 12 });
+  });
+
+  it('draws a warm fallback when no photo is configured', async () => {
+    const card = await mount({ image: undefined });
+    const room = card.shadowRoot?.querySelector<HTMLElement>('.room');
+    expect(card.showsFallback()).toBe(true);
+    expect(room?.classList.contains('fallback')).toBe(true);
+    expect(room?.style.getPropertyValue('--glow-x')).toMatch(/^\d+%$/);
+    expect(card.shadowRoot?.querySelector('img.photo')).toBeNull();
+    expect(card.shadowRoot?.querySelector('.scrim-top .name')?.textContent).toBe('Living Room');
+  });
+
+  it('falls back when the configured photo fails to load', async () => {
+    const card = await mount();
+    expect(card.showsFallback()).toBe(true); // pending until the image loads
+    const image = card.shadowRoot?.querySelector<HTMLImageElement>('img.photo');
+    image?.dispatchEvent(new Event('error'));
+    await card.updateComplete;
+    expect(card.showsFallback()).toBe(true);
+    expect(card.shadowRoot?.querySelector('.room')?.classList.contains('fallback')).toBe(true);
+    image?.dispatchEvent(new Event('load'));
+    await card.updateComplete;
+    expect(card.showsFallback()).toBe(false);
+  });
+
+  it('lights each room from its own corner, deterministically', () => {
+    expect(glowOrigin('Living Room')).toEqual(glowOrigin('Living Room'));
+    expect(glowOrigin('Living Room')).not.toEqual(glowOrigin('Parking'));
+  });
+
+  it('clamps a long room name instead of letting it escape the card', async () => {
+    const card = await mount({ name: 'Extremely Long Room Name That Would Otherwise Overflow' });
+    expect(
+      card.shadowRoot?.querySelector('.scrim-top .name')?.classList.contains('ql-clamp-2'),
+    ).toBe(true);
   });
 });

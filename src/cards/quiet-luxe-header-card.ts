@@ -3,6 +3,7 @@ import '../elements/ql-header-home';
 import '../elements/ql-header-room';
 import type { QlHeaderVariant } from '../elements/ql-header-home';
 import { t } from '../i18n/translate';
+import { contentGrid, type QlGridOptions } from './grid-options';
 import { navigate } from './navigate';
 import { QlBaseCard } from './ql-base-card';
 
@@ -46,7 +47,9 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
   };
 
   declare config?: HeaderCardConfig;
+  /** Width the header actually has, which is what decides whether a row fits. */
   declare viewportWidth: number;
+  private observer?: ResizeObserver;
 
   constructor() {
     super();
@@ -54,16 +57,26 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
   }
 
   private readonly handleResize = (): void => {
-    this.viewportWidth = window.innerWidth;
+    const own = this.getBoundingClientRect().width;
+    this.viewportWidth = own > 0 ? own : window.innerWidth;
   };
 
   override connectedCallback(): void {
     super.connectedCallback();
     window.addEventListener('resize', this.handleResize);
+    // The card can be narrower than the window (sidebar, section span), and a
+    // row that does not fit its own box is what made the header wrap.
+    if (typeof ResizeObserver === 'function') {
+      this.observer = new ResizeObserver(this.handleResize);
+      this.observer.observe(this);
+    }
+    this.handleResize();
   }
 
   override disconnectedCallback(): void {
     window.removeEventListener('resize', this.handleResize);
+    this.observer?.disconnect();
+    this.observer = undefined;
     super.disconnectedCallback();
   }
 
@@ -79,6 +92,11 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
 
   getCardSize(): number {
     return 2;
+  }
+
+  /* The header owns its whole section, whatever that section spans. */
+  getGridOptions(): QlGridOptions {
+    return contentGrid('full');
   }
 
   meta(): string {

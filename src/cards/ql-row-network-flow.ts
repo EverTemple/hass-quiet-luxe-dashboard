@@ -9,6 +9,7 @@ import {
 import { live } from 'lit/directives/live.js';
 import '../elements/ql-toggle';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { CONFIRM_TIMEOUT_MS } from './quiet-luxe-climate-card';
 
@@ -50,6 +51,10 @@ export class QlRowNetworkFlow extends QlBaseCard {
 
   getCardSize(): number {
     return 1;
+  }
+
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   override disconnectedCallback(): void {
@@ -124,7 +129,7 @@ export class QlRowNetworkFlow extends QlBaseCard {
       <div class="ql-card ${unavailable ? 'ql-unavailable' : ''}">
         <div class="row">
           <div class="lines">
-            <p class="name">${name}</p>
+            <p class="name ql-clamp-2">${name}</p>
             ${config.description === undefined
               ? nothing
               : html`<p class="description">${config.description}</p>`}

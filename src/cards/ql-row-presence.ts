@@ -6,6 +6,7 @@ import {
   type TemplateResult,
 } from 'lit';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 
 export interface PresenceRowConfig {
@@ -35,6 +36,10 @@ export class QlRowPresence extends QlBaseCard {
 
   getCardSize(): number {
     return 1;
+  }
+
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   static override styles: CSSResultGroup = [
@@ -109,7 +114,7 @@ export class QlRowPresence extends QlBaseCard {
                 : html`<span class="initial" aria-hidden="true"
                     >${name.charAt(0).toUpperCase()}</span
                   >`}
-              <span class="name">${name}</span>
+              <span class="name ql-clamp-1">${name}</span>
               <span class="state">${stateText}</span>
             </span>
           `;

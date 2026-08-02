@@ -12,6 +12,7 @@ import '../elements/ql-status-dot';
 import '../elements/ql-toggle';
 import { t } from '../i18n/translate';
 import { CAR_BODY_PATHS, CAR_VIEWBOX, CAR_WHEELS, type CarBrand } from './car-silhouettes';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { CONFIRM_TIMEOUT_MS } from './quiet-luxe-climate-card';
 import { registerCard } from './register';
@@ -63,8 +64,8 @@ export class QuietLuxeCarCard extends QlBaseCard {
     return 3;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 3, columns: 6 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   override disconnectedCallback(): void {
@@ -208,7 +209,7 @@ export class QuietLuxeCarCard extends QlBaseCard {
         : undefined;
     return html`
       <div class="ql-card">
-        <p class="eyebrow">${name}</p>
+        <p class="eyebrow ql-clamp-2">${name}</p>
         <svg class="hero" viewBox=${CAR_VIEWBOX} role="img" aria-label=${name}>
           <path d=${CAR_BODY_PATHS[config.brand]} fill="currentColor"></path>
           ${CAR_WHEELS[config.brand].map(

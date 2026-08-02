@@ -11,6 +11,7 @@ import '../elements/ql-section-eyebrow';
 import '../elements/ql-segmented';
 import type { QlSegmentOption } from '../elements/ql-segmented';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 import {
@@ -73,8 +74,8 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
     return this.hasSources() ? 4 : 0;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 4, columns: 6 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   protected override willUpdate(changed: PropertyValues): void {
@@ -143,11 +144,13 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
         gap: var(--ql-space-s, 8px);
         margin-bottom: var(--ql-space-m, 12px);
       }
       .event {
         display: flex;
+        min-width: 0;
         gap: var(--ql-space-m, 12px);
         padding: var(--ql-space-s, 8px) 0 var(--ql-space-s, 8px) var(--ql-space-m, 12px);
         border-left: 2px solid var(--ql-surface-border, #e4dccb);
@@ -178,6 +181,7 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
       .task {
         display: flex;
         align-items: baseline;
+        min-width: 0;
         gap: var(--ql-space-s, 8px);
         padding: 2px 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
@@ -218,7 +222,7 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
                   (item, index) => html`
                     <div class="event ${index === 0 ? 'next' : ''}">
                       <p class="time">${formatAgendaTime(item, locale)}</p>
-                      <p class="title">${item.title}</p>
+                      <p class="title ql-clamp-2">${item.title}</p>
                     </div>
                   `,
                 )
@@ -230,7 +234,7 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
                 (task) => html`
                   <div class="task">
                     <span class="box" aria-hidden="true">☐</span>
-                    <span>${task.summary}</span>
+                    <span class="ql-clamp-2">${task.summary}</span>
                     ${isDueSoon(task.due) ? html`<span class="due">${task.due}</span>` : nothing}
                   </div>
                 `,

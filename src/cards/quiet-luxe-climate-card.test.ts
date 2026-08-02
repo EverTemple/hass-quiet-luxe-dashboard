@@ -29,7 +29,7 @@ describe('quiet-luxe-climate-card', () => {
     ).toThrow(/entity/);
     card.setConfig({ type: 'custom:quiet-luxe-climate-card', entity: 'climate.a' });
     expect(card.getCardSize()).toBe(2);
-    expect(card.getGridOptions()).toEqual({ rows: 2, columns: 4 });
+    expect(card.getGridOptions()).toEqual({ rows: 'auto', columns: 6 });
   });
 
   it('auto-detects device type from domain, with config override', async () => {

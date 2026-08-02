@@ -10,6 +10,7 @@ import '../elements/ql-status-dot';
 import '../elements/ql-toggle';
 import type { QlStatus } from '../elements/ql-status-dot';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 
 export type DoorMotionKind = 'door' | 'motion';
@@ -47,6 +48,10 @@ export class QlRowDoorMotion extends QlBaseCard {
 
   getCardSize(): number {
     return 1;
+  }
+
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   kind(): DoorMotionKind {
@@ -94,7 +99,8 @@ export class QlRowDoorMotion extends QlBaseCard {
       }
       .name {
         margin: 0;
-        flex: 1;
+        flex: 1 1 auto;
+        min-width: 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
       }
       .state {
@@ -120,7 +126,7 @@ export class QlRowDoorMotion extends QlBaseCard {
     return html`
       <div class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}">
         <ql-status-dot status=${info.dot}></ql-status-dot>
-        <p class="name">${name}</p>
+        <p class="name ql-clamp-2">${name}</p>
         <p class="state">${info.text}</p>
         ${showToggle
           ? html`

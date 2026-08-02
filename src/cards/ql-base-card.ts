@@ -85,10 +85,36 @@ export abstract class QlBaseCard extends LitElement {
       border: 1px solid var(--ql-surface-border, #e4dccb);
       border-radius: var(--ql-radius-card, 18px);
       padding: var(--ql-space-l, 16px);
+      /* Nothing may escape the rounded rect: device names, track titles and
+         task text are arbitrary length and arrive from the user's devices. */
+      overflow: hidden;
+      min-width: 0;
     }
     .ql-unavailable {
       color: var(--ql-ink-muted, #8c8578);
       opacity: 0.7;
+    }
+    /* Clamp helpers for any text a device or integration can make long. */
+    .ql-clamp-1,
+    .ql-clamp-2,
+    .ql-clamp-3 {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      min-width: 0;
+    }
+    .ql-clamp-1 {
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+    }
+    .ql-clamp-2 {
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+    .ql-clamp-3 {
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
     }
   `;
 

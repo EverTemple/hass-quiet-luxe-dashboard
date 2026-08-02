@@ -70,6 +70,6 @@ describe('quiet-luxe-sensor-tile', () => {
     const missing = await mount({ entity: 'sensor.ghost', metric: 'humidity' }, makeMockHass());
     expect(missing.shadowRoot?.querySelector('.value')?.textContent?.trim()).toBe('—');
     expect(missing.getCardSize()).toBe(1);
-    expect(missing.getGridOptions()).toEqual({ rows: 1, columns: 3 });
+    expect(missing.getGridOptions()).toEqual({ rows: 'auto', columns: 4 });
   });
 });

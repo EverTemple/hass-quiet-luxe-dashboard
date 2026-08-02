@@ -2,6 +2,7 @@ import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-slider';
 import { t } from '../i18n/translate';
 import type { HassEntity } from '../types/home-assistant';
+import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -43,8 +44,8 @@ export class QuietLuxeCoverCard extends QlBaseCard {
     return 2;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 2, columns: 4 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_HALF);
   }
 
   static override styles: CSSResultGroup = [
@@ -134,7 +135,7 @@ export class QuietLuxeCoverCard extends QlBaseCard {
         class="ql-card ${available ? '' : 'ql-unavailable'}"
         data-cover-type=${this.coverType()}
       >
-        <p class="eyebrow">${label}</p>
+        <p class="eyebrow ql-clamp-2">${label}</p>
         <p class="value">${position === undefined ? '—' : `${position}%`}</p>
         <ql-slider
           .value=${position ?? 0}

@@ -2,6 +2,7 @@ import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-status-dot';
 import type { TranslationKey } from '../i18n/locales/en';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_THIRD, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 import {
@@ -54,8 +55,8 @@ export class QuietLuxeSensorTile extends QlBaseCard {
     return 1;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 1, columns: 3 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_THIRD);
   }
 
   static override styles: CSSResultGroup = [
@@ -98,7 +99,7 @@ export class QuietLuxeSensorTile extends QlBaseCard {
     return html`
       <div class="ql-card ${available ? '' : 'ql-unavailable'}">
         <div class="top">
-          <p class="eyebrow">${label}</p>
+          <p class="eyebrow ql-clamp-1">${label}</p>
           <ql-status-dot .status=${sensorStatus(metric, state)}></ql-status-dot>
         </div>
         <p class="value">${formatSensorValue(metric, state)}</p>

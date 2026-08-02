@@ -9,6 +9,7 @@ import {
 import '../elements/ql-slider';
 import '../elements/ql-toggle';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -56,8 +57,8 @@ export class QuietLuxeMediaCard extends QlBaseCard {
     return this.form() === 'player' ? 4 : 1;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return this.form() === 'player' ? { rows: 4, columns: 6 } : { rows: 1, columns: 12 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   static override styles: CSSResultGroup = [
@@ -113,7 +114,8 @@ export class QuietLuxeMediaCard extends QlBaseCard {
       .name {
         margin: 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
-        flex: 1;
+        flex: 1 1 auto;
+        min-width: 0;
       }
       .transport-row {
         display: flex;
@@ -245,7 +247,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
     if (this.form() === 'group-row') {
       return html`
         <div class="${cardClass} row">
-          <p class="name">${name}</p>
+          <p class="name ql-clamp-1">${name}</p>
           <ql-slider
             class="row-volume"
             .value=${this.volumePercent()}
@@ -300,7 +302,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
         <div class="row">
           ${this.artwork('player')}
           <div class="lines">
-            ${source === undefined ? nothing : html`<p class="eyebrow">${source}</p>`}
+            ${source === undefined ? nothing : html`<p class="eyebrow ql-clamp-1">${source}</p>`}
             <p class="title ${trackMuted ? 'muted' : ''}">${trackText}</p>
             ${artistLine === undefined ? nothing : html`<p class="caption muted">${artistLine}</p>`}
           </div>

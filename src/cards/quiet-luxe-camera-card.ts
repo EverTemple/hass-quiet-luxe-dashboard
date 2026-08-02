@@ -8,6 +8,7 @@ import {
 } from 'lit';
 import '../elements/ql-status-dot';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -66,8 +67,8 @@ export class QuietLuxeCameraCard extends QlBaseCard {
     return this.form() === 'full' ? 3 : 2;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return this.form() === 'full' ? { rows: 3, columns: 6 } : { rows: 2, columns: 3 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(this.form() === 'full' ? COLUMNS_FULL : COLUMNS_HALF);
   }
 
   override connectedCallback(): void {
@@ -146,6 +147,7 @@ export class QuietLuxeCameraCard extends QlBaseCard {
       }
       .name {
         margin: 0;
+        min-width: 0;
         font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
         overflow: hidden;
         text-overflow: ellipsis;
@@ -184,7 +186,7 @@ export class QuietLuxeCameraCard extends QlBaseCard {
             : html`<p class="fallback">${fallbackText}</p>`}
         </div>
         <div class="meta">
-          <p class="name">${name}</p>
+          <p class="name ql-clamp-2">${name}</p>
           ${this.form() === 'full' && showImage
             ? html`<span class="live"
                 ><ql-status-dot status="alert"></ql-status-dot>${t(locale, 'camera.live')}</span

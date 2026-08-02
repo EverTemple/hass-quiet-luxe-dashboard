@@ -5,6 +5,13 @@ import type { Locale } from '../i18n/types';
 
 export type QlHeaderVariant = 'mobile' | 'ipad' | 'desktop';
 
+/** Meta values arrive pre-joined ("26° · AQI 0.5"); each part stays unbreakable. */
+export const META_SEPARATOR = ' · ';
+
+export function metaParts(meta: string): ReadonlyArray<string> {
+  return meta === '' ? [] : meta.split(META_SEPARATOR);
+}
+
 /**
  * Home header (Figma `header/home`, spec §6):
  * - mobile: meta line → personal greeting (Marcellus) → home + presence line.
@@ -69,6 +76,10 @@ export class QlHeaderHome extends LitElement {
     .presence {
       color: var(--ql-accent-champagne, #b08d57);
     }
+    /* Values like "26°" or "AQI 0.5" must never break across lines. */
+    .atom {
+      white-space: nowrap;
+    }
     header.stack {
       display: flex;
       flex-direction: column;
@@ -76,17 +87,48 @@ export class QlHeaderHome extends LitElement {
     }
     header.row {
       display: flex;
-      align-items: center;
+      align-items: baseline;
+      flex-wrap: nowrap;
       gap: var(--ql-space-l, 16px);
+      min-width: 0;
     }
     header.row .display {
       font-size: 24px;
       line-height: 30px;
+      flex: 0 1 auto;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     header.row .meta {
       margin-left: auto;
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+    header.row .presence {
+      flex: 0 1 auto;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      letter-spacing: 0.02em;
     }
   `;
+
+  private renderMeta(): TemplateResult | typeof nothing {
+    const parts = metaParts(this.meta);
+    if (parts.length === 0) {
+      return nothing;
+    }
+    return html`<p class="meta">
+      ${parts.map(
+        (part, index) =>
+          html`${index === 0 ? nothing : META_SEPARATOR}<span class="atom">${part}</span>`,
+      )}
+    </p>`;
+  }
 
   protected override render(): TemplateResult {
     if (this.variant === 'mobile') {
@@ -94,12 +136,12 @@ export class QlHeaderHome extends LitElement {
         this.userName === '' ? this.greeting() : `${this.greeting()}, ${this.userName}`;
       return html`
         <header class="stack">
-          ${this.meta === '' ? nothing : html`<p class="meta">${this.meta}</p>`}
+          ${this.renderMeta()}
           <h1 class="display">${greeting}</h1>
           <p class="sub">
-            ${this.homeName}${this.presence === ''
+            <span class="atom">${this.homeName}</span>${this.presence === ''
               ? nothing
-              : html` · <span class="presence">${this.presence}</span>`}
+              : html` · <span class="presence atom">${this.presence}</span>`}
           </p>
         </header>
       `;
@@ -107,7 +149,7 @@ export class QlHeaderHome extends LitElement {
     return html`
       <header class="row">
         <h1 class="display">${this.homeName}</h1>
-        <p class="meta">${this.meta}</p>
+        ${this.renderMeta()}
         ${this.presence === '' ? nothing : html`<span class="presence">${this.presence}</span>`}
         <slot name="chip"></slot>
       </header>

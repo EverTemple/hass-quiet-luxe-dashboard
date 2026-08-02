@@ -108,6 +108,6 @@ describe('quiet-luxe-light-card', () => {
     const missing = await mount({ entity: 'light.ghost' }, makeMockHass());
     expect(missing.shadowRoot?.querySelector('.value')?.textContent?.trim()).toBe('Unavailable');
     expect(missing.getCardSize()).toBe(2);
-    expect(missing.getGridOptions()).toEqual({ rows: 2, columns: 4 });
+    expect(missing.getGridOptions()).toEqual({ rows: 'auto', columns: 6 });
   });
 });

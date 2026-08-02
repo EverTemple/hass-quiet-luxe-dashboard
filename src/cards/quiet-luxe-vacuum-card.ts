@@ -9,6 +9,7 @@ import {
 import '../elements/ql-chip';
 import type { TranslationKey } from '../i18n/locales/en';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -61,8 +62,8 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
     return 2;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 2, columns: 4 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   private onRoomTap(room: VacuumRoomConfig): void {
@@ -159,7 +160,7 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
     const rooms = config.rooms ?? [];
     return html`
       <div class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}">
-        <p class="eyebrow">${name}</p>
+        <p class="eyebrow ql-clamp-2">${name}</p>
         <div class="row">
           <p class="status ${status.cls}">${status.text}</p>
           ${Number.isFinite(battery)

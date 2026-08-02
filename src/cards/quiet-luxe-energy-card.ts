@@ -8,6 +8,7 @@ import {
 } from 'lit';
 import { t } from '../i18n/translate';
 import { formatEnergy, formatPower, ringDasharray } from './energy-format';
+import { contentGrid, COLUMNS_FULL, COLUMNS_THIRD, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -62,8 +63,8 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
     return this.form() === 'ring' ? 2 : 1;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return this.form() === 'ring' ? { rows: 2, columns: 3 } : { rows: 1, columns: 4 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(this.form() === 'ring' ? COLUMNS_THIRD : COLUMNS_FULL);
   }
 
   private powerWatts(): number | undefined {
@@ -149,7 +150,7 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
     if (this.form() === 'ring') {
       return html`
         <div class="${cardClass} ring">
-          ${config.name === undefined ? nothing : html`<p class="eyebrow">${config.name}</p>`}
+          ${config.name === undefined ? nothing : html`<p class="eyebrow ql-clamp-1">${config.name}</p>`}
           <svg viewBox="0 0 48 48" role="img" aria-label=${config.name ?? config.power_entity}>
             <circle class="track" cx="24" cy="24" r=${RING_RADIUS}></circle>
             <circle

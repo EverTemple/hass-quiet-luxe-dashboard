@@ -5,6 +5,7 @@ import {
   detectClimateDeviceType,
   type ClimateDeviceType,
 } from './climate-device-type';
+import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -51,8 +52,8 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     return 2;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 2, columns: 4 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_HALF);
   }
 
   deviceType(): ClimateDeviceType {
@@ -202,7 +203,7 @@ export class QuietLuxeClimateCard extends QlBaseCard {
         class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}"
         data-device=${this.deviceType()}
       >
-        <p class="eyebrow">${label}</p>
+        <p class="eyebrow ql-clamp-2">${label}</p>
         <p class="value">${this.valueText()}</p>
         <div class="row">
           <p class="status ${status.cls}">${status.text}</p>

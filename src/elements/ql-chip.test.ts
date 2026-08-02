@@ -54,4 +54,11 @@ describe('ql-chip', () => {
     expect(cssText).toContain('var(--ql-touch-min, 56px)');
     expect(cssText).toContain('var(--ql-radius-chip, 999px)');
   });
+  it('reads an active device chip against the base, not the card surface', () => {
+    /* --ql-surface-card is a near-transparent white in dark mode: as a text
+       colour it made the active chip label invisible on the champagne fill. */
+    const css = QlChip.styles.toString();
+    expect(css).toContain("variant='device'][active]");
+    expect(css).not.toContain('color: var(--ql-surface-card');
+  });
 });

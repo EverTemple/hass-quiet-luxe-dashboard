@@ -1,6 +1,7 @@
 import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-slider';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 
@@ -33,8 +34,8 @@ export class QuietLuxeLightCard extends QlBaseCard {
     return 2;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 2, columns: 4 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_HALF);
   }
 
   static override styles: CSSResultGroup = [
@@ -134,7 +135,7 @@ export class QuietLuxeLightCard extends QlBaseCard {
       <div class="ql-card ${available ? '' : 'ql-unavailable'}">
         <button class="head" aria-pressed=${String(on)} @click=${this.onToggle}>
           <span class="bulb ${on ? 'on' : ''}"></span>
-          <span class="eyebrow">${label}</span>
+          <span class="eyebrow ql-clamp-2">${label}</span>
         </button>
         <p class="value">${available ? `${pct}%` : t(this.locale(), 'common.unavailable')}</p>
         <ql-slider

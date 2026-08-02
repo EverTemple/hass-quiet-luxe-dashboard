@@ -8,6 +8,7 @@ import {
   type TemplateResult,
 } from 'lit';
 import { t } from '../i18n/translate';
+import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 import {
@@ -56,8 +57,8 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     return 3;
   }
 
-  getGridOptions(): { rows: number; columns: number } {
-    return { rows: 3, columns: 4 };
+  getGridOptions(): QlGridOptions {
+    return contentGrid(COLUMNS_FULL);
   }
 
   protected override willUpdate(changed: PropertyValues): void {
@@ -119,6 +120,7 @@ export class QuietLuxeTasksCard extends QlBaseCard {
       .task {
         display: flex;
         align-items: baseline;
+        min-width: 0;
         gap: var(--ql-space-s, 8px);
         padding: 4px 0;
         font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
@@ -158,7 +160,7 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     if (availability !== 'available') {
       return html`
         <div class="ql-card ql-unavailable">
-          <p class="eyebrow">${name}</p>
+          <p class="eyebrow ql-clamp-2">${name}</p>
           <p class="empty">${t(locale, 'common.unavailable')}</p>
         </div>
       `;
@@ -166,7 +168,7 @@ export class QuietLuxeTasksCard extends QlBaseCard {
     const openCount = this.items.filter((item) => item.status !== 'completed').length;
     return html`
       <div class="ql-card">
-        <p class="eyebrow">${name}</p>
+        <p class="eyebrow ql-clamp-2">${name}</p>
         ${this.items.map((item) => {
           const completed = item.status === 'completed';
           return html`
@@ -176,7 +178,7 @@ export class QuietLuxeTasksCard extends QlBaseCard {
                 .checked=${completed}
                 @change=${(): void => this.onToggle(item)}
               />
-              <span class="summary">${item.summary}</span>
+              <span class="summary ql-clamp-2">${item.summary}</span>
               ${!completed && isDueSoon(item.due)
                 ? html`<span class="due">${item.due}</span>`
                 : nothing}
