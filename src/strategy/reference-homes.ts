@@ -60,7 +60,6 @@ export const TUNGCHUNG_CONFIG: HomeConfig = validateHomeConfig({
   room_order: [
     'living_room',
     'dining_room',
-    'master_bedroom',
     'steven_bedroom',
     'parents_room',
     'parking',
