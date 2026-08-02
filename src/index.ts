@@ -20,6 +20,7 @@ import './elements/ql-timer-dial';
 import './elements/ql-section-eyebrow';
 import './elements/ql-header-home';
 import './elements/ql-header-room';
+import './elements/ql-header-view';
 import './cards/quiet-luxe-room-card';
 import './cards/quiet-luxe-climate-card';
 import './cards/quiet-luxe-climate-dial-card';
@@ -304,6 +305,36 @@ export {
   type ClimateSheetControl,
   type ClimateSheetGroup,
 } from './cards/climate-sheet';
+export { QlHeaderView } from './elements/ql-header-view';
+export {
+  clampedSpan,
+  columnsForWidth,
+  contentBandWidth,
+  estimatedCardHeight,
+  exceedsHeightBudget,
+  haColumnsForWidth,
+  medianCardHeight,
+  orderTallestFirst,
+  trackWidth,
+  COLUMN_GUTTER_PX,
+  COLUMN_MAX_WIDTH_PX,
+  COLUMN_MIN_WIDTH_PX,
+  CONTENT_BAND_PX,
+  HEIGHT_BUDGET_FACTOR,
+  MAX_COLUMNS,
+  NARROW_GUTTER_PX,
+  REGION_SPAN,
+  ROW_GAP_PX,
+} from './strategy/layout';
+export { layoutCssVariables } from './theme/inject-theme';
+export {
+  columnSection,
+  headingCard,
+  sectionOf,
+  viewHeaderSection,
+  type HeadingGroup,
+  type ViewHeaderOptions,
+} from './strategy/sections/heading';
 
 // Self-sufficiency: the bundle carries its own Latin webfaces and --ql-* tokens,
 // so a HACS-only install renders correctly with no files copied into /config.

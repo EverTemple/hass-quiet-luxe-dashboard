@@ -1,14 +1,19 @@
 import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-header-home';
 import '../elements/ql-header-room';
+import '../elements/ql-header-view';
 import type { QlHeaderPerson, QlHeaderVariant } from '../elements/ql-header-home';
 import { contentGrid, type QlGridOptions } from './grid-options';
 import { navigate } from './navigate';
 import { QlBaseCard } from './ql-base-card';
 
+export type HeaderCardForm = 'home' | 'room' | 'view';
+
+const FORMS: ReadonlyArray<HeaderCardForm> = ['home', 'room', 'view'];
+
 export interface HeaderCardConfig {
   readonly type: string;
-  readonly form: 'home' | 'room';
+  readonly form: HeaderCardForm;
   readonly name: string;
   /** Strategy sets false for the guest tier — never a greeting on kiosks. */
   readonly show_greeting?: boolean;
@@ -18,6 +23,11 @@ export interface HeaderCardConfig {
   readonly temperature_entity?: string;
   readonly humidity_entity?: string;
   readonly back_path?: string;
+  /** `view` form only. */
+  readonly back_label?: string;
+  readonly subtitle?: string;
+  readonly action_label?: string;
+  readonly action_path?: string;
 }
 
 export const VARIANT_IPAD_MIN_PX = 768;
@@ -80,8 +90,8 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
   }
 
   setConfig(config: HeaderCardConfig): void {
-    if (config.form !== 'home' && config.form !== 'room') {
-      throw new Error('quiet-luxe-header-card: "form" must be "home" or "room"');
+    if (!FORMS.includes(config.form)) {
+      throw new Error(`quiet-luxe-header-card: "form" must be one of ${FORMS.join(', ')}`);
     }
     if (typeof config.name !== 'string' || config.name === '') {
       throw new Error('quiet-luxe-header-card: "name" is required');
@@ -156,8 +166,20 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
     return stats;
   }
 
+  /** Static caption wins; a room falls back to its own live micro-stats. */
+  viewSubtitle(): string {
+    return this.config?.subtitle ?? this.roomStats().join(' · ');
+  }
+
   private readonly onBack = (): void => {
     const path = this.config?.back_path;
+    if (path !== undefined) {
+      navigate(path);
+    }
+  };
+
+  private readonly onAction = (): void => {
+    const path = this.config?.action_path;
     if (path !== undefined) {
       navigate(path);
     }
@@ -176,6 +198,20 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
     const config = this.config;
     if (config === undefined) {
       return html``;
+    }
+    if (config.form === 'view') {
+      return html`
+        <ql-header-view
+          .variant=${variantForWidth(this.viewportWidth)}
+          .heading=${config.name}
+          .subtitle=${this.viewSubtitle()}
+          .backLabel=${config.back_label ?? ''}
+          .actionLabel=${config.action_label ?? ''}
+          .locale=${this.locale()}
+          @ql-back=${this.onBack}
+          @ql-action=${this.onAction}
+        ></ql-header-view>
+      `;
     }
     if (config.form === 'room') {
       return html`

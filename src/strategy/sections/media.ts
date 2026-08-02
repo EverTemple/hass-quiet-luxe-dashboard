@@ -1,5 +1,6 @@
 import { isUsable } from '../availability';
 import { viewUrl } from '../config';
+import { REGION_SPAN } from '../layout';
 import {
   isSection,
   PATHS,
@@ -54,15 +55,19 @@ export function mediaViewSections(ctx: StrategyContext): ReadonlyArray<LovelaceS
   if (players.length === 0) {
     return [];
   }
-  const hero = sectionOf(headingCard(ctx.locale, 'section.music'), [
-    { type: 'custom:quiet-luxe-media-card', entity: players[0], form: 'player' },
-  ]);
+  /* now playing 1 · zones 2 · groups 1 (Figma 04 Desktop, Media 108:3536). */
+  const hero = sectionOf(
+    headingCard(ctx.locale, 'section.music'),
+    [{ type: 'custom:quiet-luxe-media-card', entity: players[0], form: 'player' }],
+    REGION_SPAN.mediaNowPlaying,
+  );
   const speakers = sectionOf(
     headingCard(ctx.locale, 'section.speakers'),
     players.slice(1).map((entity) => ({ type: 'custom:quiet-luxe-media-card', entity, form: 'bar' })),
+    REGION_SPAN.mediaZones,
   );
   const groups = ctx.home.media_rich
-    ? sectionOf(headingCard(ctx.locale, 'section.groups'), sonosGroupRows(ctx))
+    ? sectionOf(headingCard(ctx.locale, 'section.groups'), sonosGroupRows(ctx), REGION_SPAN.mediaIdle)
     : null;
   return [hero, speakers, groups].filter(isSection);
 }

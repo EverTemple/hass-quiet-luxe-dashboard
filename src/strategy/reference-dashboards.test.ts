@@ -33,8 +33,9 @@ function cardTypes(dashboard: LovelaceDashboardConfig): ReadonlyArray<string> {
 
 function carBrand(dashboard: LovelaceDashboardConfig): unknown {
   const carView = dashboard.views.find((view) => view.path === 'car');
-  return carView?.sections[0]?.cards.find((card) => card.type === 'custom:quiet-luxe-car-card')
-    ?.brand;
+  return carView?.sections
+    .flatMap((section) => section.cards)
+    .find((card) => card.type === 'custom:quiet-luxe-car-card')?.brand;
 }
 
 describe('reference-home dashboards (spec §2 matrix)', () => {

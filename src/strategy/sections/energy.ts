@@ -1,6 +1,7 @@
 import { t } from '../../i18n/translate';
 import { exists } from '../availability';
 import { viewUrl, type EnergyConfig } from '../config';
+import { REGION_SPAN } from '../layout';
 import {
   isSection,
   PATHS,
@@ -56,8 +57,11 @@ export function energyViewSections(ctx: StrategyContext): ReadonlyArray<Lovelace
       power_entity: entity,
       name: `L${index + 1}`,
     }));
+  /* now 1 · charts 2 (Figma 04 Desktop, Energy 108:3710). The chart is the one
+     card that needs width; the rings and strips read fine in one track. */
   const chart = ctx.hasApexcharts ? [apexchartsHistoryCard(ctx, energy)] : [];
-  return [sectionOf(headingCard(ctx.locale, 'section.energy'), [strip, ...rings, ...chart])].filter(
-    isSection,
-  );
+  return [
+    sectionOf(headingCard(ctx.locale, 'section.energy'), [strip, ...rings], REGION_SPAN.energyNow),
+    sectionOf(headingCard(ctx.locale, 'energy.history'), chart, REGION_SPAN.energyCharts),
+  ].filter(isSection);
 }

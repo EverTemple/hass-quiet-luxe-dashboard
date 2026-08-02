@@ -1,11 +1,12 @@
 import type { TranslationKey } from '../../i18n/locales/en';
 import { t } from '../../i18n/translate';
 import { roomName } from '../labels';
+import { MAX_COLUMNS, orderTallestFirst, REGION_SPAN } from '../layout';
 import { adminSection } from '../sections/admin';
 import { carCard } from '../sections/car';
 import { climateCards } from '../sections/climate';
 import { energyViewSections } from '../sections/energy';
-import { sectionOf } from '../sections/heading';
+import { sectionOf, viewHeaderSection } from '../sections/heading';
 import { mediaViewSections } from '../sections/media';
 import { orderedAreas } from '../sections/rooms';
 import { securityViewSections } from '../sections/security';
@@ -17,18 +18,34 @@ import {
   type StrategyContext,
 } from '../types';
 
+/** Views that hold a single card keep a narrow band; the card is not a grid. */
+const SINGLE_CARD_MAX_COLUMNS = 2;
+
+/**
+ * Every non-Home view opens with the `header/view` band and runs the same grid
+ * contract: up to 4 tracks, dense placement, sections carrying their own spans.
+ */
 function view(
   ctx: StrategyContext,
   key: TranslationKey,
   path: string,
   icon: string,
   sections: ReadonlyArray<LovelaceSectionConfig>,
-  maxColumns = 3,
+  maxColumns = MAX_COLUMNS,
 ): LovelaceViewConfig | null {
   if (sections.length === 0) {
     return null;
   }
-  return { title: t(ctx.locale, key), path, icon, type: 'sections', max_columns: maxColumns, sections };
+  const title = t(ctx.locale, key);
+  return {
+    title,
+    path,
+    icon,
+    type: 'sections',
+    max_columns: maxColumns,
+    dense_section_placement: true,
+    sections: [viewHeaderSection(ctx, { title }), ...sections],
+  };
 }
 
 export function mediaView(ctx: StrategyContext): LovelaceViewConfig | null {
@@ -43,13 +60,19 @@ export function energyView(ctx: StrategyContext): LovelaceViewConfig | null {
   return view(ctx, 'view.energy', PATHS.energy, 'mdi:lightning-bolt-outline', energyViewSections(ctx));
 }
 
-/** All Climates (spec §6): devices grouped by room; area names are proper nouns. */
+/**
+ * All Climates (spec §6): devices grouped by room; area names are proper nouns.
+ * One span-1 column per area, free flow across the four tracks, and each
+ * column's cards ordered tallest → shortest so the height it cannot fill is
+ * spent at the bottom edge (packing rule 3).
+ */
 export function climatesView(ctx: StrategyContext): LovelaceViewConfig | null {
   const sections = orderedAreas(ctx)
     .map((area) =>
       sectionOf(
         { type: 'heading', heading: roomName(ctx.home, area) },
-        climateCards(ctx, area.area_id, undefined, 'full'),
+        orderTallestFirst(climateCards(ctx, area.area_id, undefined, 'full')),
+        REGION_SPAN.climatesArea,
       ),
     )
     .filter(isSection);
@@ -59,23 +82,38 @@ export function climatesView(ctx: StrategyContext): LovelaceViewConfig | null {
 export function carView(ctx: StrategyContext): LovelaceViewConfig | null {
   const card = carCard(ctx);
   const sections: ReadonlyArray<LovelaceSectionConfig> =
-    card === null ? [] : [{ type: 'grid', cards: [card] }];
-  return view(ctx, 'view.car', PATHS.car, 'mdi:car-outline', sections, 2);
+    card === null
+      ? []
+      : [{ type: 'grid', column_span: SINGLE_CARD_MAX_COLUMNS, cards: [card] }];
+  return view(ctx, 'view.car', PATHS.car, 'mdi:car-outline', sections, SINGLE_CARD_MAX_COLUMNS);
 }
 
 export function adminView(ctx: StrategyContext): LovelaceViewConfig | null {
-  const sections = [adminSection(ctx)].filter(isSection);
-  return view(ctx, 'view.admin', PATHS.admin, 'mdi:tune', sections, 2);
+  const section = adminSection(ctx);
+  const sections =
+    section === null
+      ? []
+      : [{ ...section, column_span: SINGLE_CARD_MAX_COLUMNS }];
+  return view(ctx, 'view.admin', PATHS.admin, 'mdi:tune', sections, SINGLE_CARD_MAX_COLUMNS);
 }
 
 /** Language page always exists (spec §5) — kiosk-friendly full-page switcher. */
 export function languageView(ctx: StrategyContext): LovelaceViewConfig {
+  const title = t(ctx.locale, 'view.language');
   return {
-    title: t(ctx.locale, 'view.language'),
+    title,
     path: PATHS.language,
     icon: 'mdi:translate',
     type: 'sections',
-    max_columns: 2,
-    sections: [{ type: 'grid', cards: [{ type: 'custom:quiet-luxe-language-card' }] }],
+    max_columns: SINGLE_CARD_MAX_COLUMNS,
+    dense_section_placement: true,
+    sections: [
+      viewHeaderSection(ctx, { title }),
+      {
+        type: 'grid',
+        column_span: SINGLE_CARD_MAX_COLUMNS,
+        cards: [{ type: 'custom:quiet-luxe-language-card' }],
+      },
+    ],
   };
 }

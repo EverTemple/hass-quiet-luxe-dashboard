@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { QlHeaderHome } from '../elements/ql-header-home';
 import type { QlHeaderRoom } from '../elements/ql-header-room';
+import type { QlHeaderView } from '../elements/ql-header-view';
 import { makeEntity, makeMockHass } from '../testing/mock-hass';
 import { QuietLuxeHeaderCard, variantForWidth } from './quiet-luxe-header-card';
 
@@ -36,7 +37,7 @@ describe('quiet-luxe-header-card', () => {
   it('rejects malformed config loudly', () => {
     const card = document.createElement('quiet-luxe-header-card') as QuietLuxeHeaderCard;
     expect(() => card.setConfig({ type: 'x', form: 'nope', name: 'X' } as never)).toThrowError(
-      /"form" must be "home" or "room"/,
+      /"form" must be one of home, room, view/,
     );
     expect(() => card.setConfig({ type: 'x', form: 'home', name: '' } as never)).toThrowError(
       /"name" is required/,
@@ -124,5 +125,58 @@ describe('quiet-luxe-header-card', () => {
       ?.querySelector('ql-header-room')
       ?.dispatchEvent(new CustomEvent('ql-back', { bubbles: true, composed: true }));
     expect(window.location.pathname).toBe('/quiet-luxe/home');
+  });
+
+  it('view form: title, back label and a room subtitle built from live stats', async () => {
+    const card = makeCard({
+      type: 'custom:quiet-luxe-header-card',
+      form: 'view',
+      name: 'Living Room',
+      back_path: '/quiet-luxe/home',
+      back_label: 'Home',
+      temperature_entity: 'sensor.room_temp',
+      humidity_entity: 'sensor.room_humidity',
+      aqi_entity: 'sensor.aqi',
+    });
+    await card.updateComplete;
+    const header = card.shadowRoot?.querySelector('ql-header-view') as QlHeaderView;
+    expect(header.heading).toBe('Living Room');
+    expect(header.backLabel).toBe('Home');
+    expect(header.subtitle).toBe('24.5° · 61% · AQI 42');
+  });
+
+  it('view form: a static subtitle wins over the entity stats', async () => {
+    const card = makeCard({
+      type: 'custom:quiet-luxe-header-card',
+      form: 'view',
+      name: 'All climates',
+      subtitle: '9 devices · 5 running',
+      temperature_entity: 'sensor.room_temp',
+    });
+    await card.updateComplete;
+    expect(card.viewSubtitle()).toBe('9 devices · 5 running');
+  });
+
+  it('view form: ql-back goes to back_path and ql-action to action_path', async () => {
+    const card = makeCard({
+      type: 'custom:quiet-luxe-header-card',
+      form: 'view',
+      name: 'Living Room',
+      back_path: '/quiet-luxe/home',
+      action_label: 'All climates',
+      action_path: '/quiet-luxe/climates',
+    });
+    await card.updateComplete;
+    const header = card.shadowRoot?.querySelector('ql-header-view');
+    header?.dispatchEvent(new CustomEvent('ql-action', { bubbles: true, composed: true }));
+    expect(window.location.pathname).toBe('/quiet-luxe/climates');
+    header?.dispatchEvent(new CustomEvent('ql-back', { bubbles: true, composed: true }));
+    expect(window.location.pathname).toBe('/quiet-luxe/home');
+  });
+
+  /* The header band owns its whole section at every span. */
+  it('always takes the full width of the section it sits in', () => {
+    const card = makeCard({ type: 'custom:quiet-luxe-header-card', form: 'view', name: 'X' });
+    expect(card.getGridOptions()).toEqual({ columns: 'full', rows: 'auto' });
   });
 });

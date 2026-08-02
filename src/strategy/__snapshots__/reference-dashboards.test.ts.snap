@@ -5,6 +5,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
   "title": "Subang Jaya",
   "views": [
     {
+      "dense_section_placement": true,
       "icon": "mdi:home-variant-outline",
       "max_columns": 4,
       "path": "home",
@@ -240,22 +241,44 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-main_living",
       "sections": [
         {
           "cards": [
             {
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
               "aqi_entity": "sensor.main_living_aqi",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
+              "form": "view",
               "humidity_entity": "sensor.main_living_humidity",
               "name": "Main Living",
               "temperature_entity": "sensor.main_living_temp",
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.main_living_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -269,38 +292,28 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "name": "Pendant",
               "type": "custom:quiet-luxe-light-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
-            {
-              "heading": "Climate",
-              "type": "heading",
-            },
-            {
-              "entity": "climate.main_living_ac",
-              "type": "custom:quiet-luxe-climate-card",
-            },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
             {
               "heading": "Covers",
               "type": "heading",
             },
             {
               "entity": "cover.main_living_shade",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "name": "Shade",
               "type": "custom:quiet-luxe-cover-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
+            {
+              "heading": "Switches",
+              "type": "heading",
+            },
+            {
+              "entity": "switch.living_fan_rf",
+              "name": "Ceiling Fan",
+              "type": "custom:quiet-luxe-device-cutout-card",
+            },
             {
               "heading": "Music",
               "type": "heading",
@@ -308,9 +321,15 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             {
               "entity": "media_player.living_sonos",
               "form": "bar",
+              "grid_options": {
+                "columns": "full",
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 2,
+          "row_span": 3,
           "type": "grid",
         },
         {
@@ -342,20 +361,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-door-motion",
             },
           ],
-          "type": "grid",
-        },
-        {
-          "cards": [
-            {
-              "heading": "Switches",
-              "type": "heading",
-            },
-            {
-              "entity": "switch.living_fan_rf",
-              "name": "Ceiling Fan",
-              "type": "custom:quiet-luxe-device-cutout-card",
-            },
-          ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -364,22 +370,23 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-side_living",
       "sections": [
         {
           "cards": [
             {
-              "aqi_entity": undefined,
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
-              "humidity_entity": undefined,
+              "form": "view",
               "name": "Side Living",
-              "temperature_entity": undefined,
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
           "type": "grid",
         },
         {
@@ -390,9 +397,14 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "fan.side_living_fan",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -401,22 +413,41 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-master_bedroom",
       "sections": [
         {
           "cards": [
             {
-              "aqi_entity": undefined,
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
-              "humidity_entity": undefined,
+              "form": "view",
               "name": "Master Bedroom",
-              "temperature_entity": undefined,
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.master_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -430,34 +461,22 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "name": "Master Lamp",
               "type": "custom:quiet-luxe-light-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
-            {
-              "heading": "Climate",
-              "type": "heading",
-            },
-            {
-              "entity": "climate.master_ac",
-              "type": "custom:quiet-luxe-climate-card",
-            },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
             {
               "heading": "Covers",
               "type": "heading",
             },
             {
               "entity": "cover.master_curtain",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "name": "Master Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
           ],
+          "column_span": 2,
+          "row_span": 3,
           "type": "grid",
         },
       ],
@@ -466,10 +485,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:music",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "media",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Media",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -482,6 +515,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -501,6 +535,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
         {
@@ -522,6 +557,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -529,10 +565,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:shield-home-outline",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "security",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Security",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -550,7 +600,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-camera-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
           "type": "grid",
         },
         {
@@ -572,6 +622,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-door-motion",
             },
           ],
+          "column_span": 4,
           "type": "grid",
         },
       ],
@@ -579,10 +630,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:lightning-bolt-outline",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "energy",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Energy",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -614,6 +679,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-energy-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -621,10 +687,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:thermostat",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "climates",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "All climates",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -636,6 +716,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -649,6 +730,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -662,6 +744,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -669,10 +752,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:car-outline",
       "max_columns": 2,
       "path": "car",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Car",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -686,6 +783,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-car-card",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],
@@ -693,10 +791,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:tune",
       "max_columns": 2,
       "path": "admin",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Admin",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -716,6 +828,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-network-flow",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],
@@ -723,6 +836,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:translate",
       "max_columns": 2,
       "path": "language",
@@ -730,9 +844,23 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
         {
           "cards": [
             {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Language",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
               "type": "custom:quiet-luxe-language-card",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],
@@ -748,6 +876,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
   "title": "Tung Chung",
   "views": [
     {
+      "dense_section_placement": true,
       "icon": "mdi:home-variant-outline",
       "max_columns": 4,
       "path": "home",
@@ -928,22 +1057,23 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-bedroom",
       "sections": [
         {
           "cards": [
             {
-              "aqi_entity": undefined,
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
-              "humidity_entity": undefined,
+              "form": "view",
               "name": "Bedroom",
-              "temperature_entity": undefined,
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
           "type": "grid",
         },
         {
@@ -957,11 +1087,6 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "name": "Lamp",
               "type": "custom:quiet-luxe-light-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
             {
               "heading": "Switches",
               "type": "heading",
@@ -972,6 +1097,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-device-cutout-card",
             },
           ],
+          "column_span": 2,
+          "row_span": 3,
           "type": "grid",
         },
       ],
@@ -980,22 +1107,43 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-living",
       "sections": [
         {
           "cards": [
             {
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
               "aqi_entity": "sensor.living_aqi",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
-              "humidity_entity": undefined,
+              "form": "view",
               "name": "Living Room",
               "temperature_entity": "sensor.living_temp",
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -1009,38 +1157,19 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "name": "Living Ceiling",
               "type": "custom:quiet-luxe-light-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
-            {
-              "heading": "Climate",
-              "type": "heading",
-            },
-            {
-              "entity": "climate.living_ac",
-              "type": "custom:quiet-luxe-climate-card",
-            },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
             {
               "heading": "Covers",
               "type": "heading",
             },
             {
               "entity": "cover.living_curtain",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "name": "Living Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
             {
               "heading": "Music",
               "type": "heading",
@@ -1048,9 +1177,15 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             {
               "entity": "media_player.lg_tv",
               "form": "bar",
+              "grid_options": {
+                "columns": "full",
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 2,
+          "row_span": 3,
           "type": "grid",
         },
         {
@@ -1077,6 +1212,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-door-motion",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -1085,10 +1221,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:music",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "media",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Media",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1101,6 +1251,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -1108,10 +1259,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:shield-home-outline",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "security",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Security",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1124,7 +1289,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-camera-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
           "type": "grid",
         },
         {
@@ -1146,6 +1311,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-door-motion",
             },
           ],
+          "column_span": 4,
           "type": "grid",
         },
       ],
@@ -1153,10 +1319,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:thermostat",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "climates",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "All climates",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1168,6 +1348,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -1175,10 +1356,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:car-outline",
       "max_columns": 2,
       "path": "car",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Car",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1192,6 +1387,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-car-card",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],
@@ -1199,10 +1395,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:tune",
       "max_columns": 2,
       "path": "admin",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Admin",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1216,6 +1426,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-network-flow",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],
@@ -1223,6 +1434,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:translate",
       "max_columns": 2,
       "path": "language",
@@ -1230,9 +1442,23 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
         {
           "cards": [
             {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Language",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
               "type": "custom:quiet-luxe-language-card",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],
@@ -1248,6 +1474,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
   "title": "Xiamen",
   "views": [
     {
+      "dense_section_placement": true,
       "icon": "mdi:home-variant-outline",
       "max_columns": 4,
       "path": "home",
@@ -1447,22 +1674,23 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-bedroom",
       "sections": [
         {
           "cards": [
             {
-              "aqi_entity": undefined,
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
-              "humidity_entity": undefined,
+              "form": "view",
               "name": "Bedroom",
-              "temperature_entity": undefined,
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
           "type": "grid",
         },
         {
@@ -1473,9 +1701,14 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             },
             {
               "entity": "climate.bedroom_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -1484,22 +1717,43 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-living",
       "sections": [
         {
           "cards": [
             {
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
               "aqi_entity": "sensor.living_aqi",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
-              "humidity_entity": undefined,
+              "form": "view",
               "name": "Living Room",
               "temperature_entity": "sensor.living_temp",
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
+              "heading": "Climate",
+              "type": "heading",
+            },
+            {
+              "entity": "climate.living_ac",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
+              "type": "custom:quiet-luxe-climate-card",
+            },
+          ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -1513,38 +1767,19 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "name": "Living Ceiling",
               "type": "custom:quiet-luxe-light-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
-            {
-              "heading": "Climate",
-              "type": "heading",
-            },
-            {
-              "entity": "climate.living_ac",
-              "type": "custom:quiet-luxe-climate-card",
-            },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
             {
               "heading": "Covers",
               "type": "heading",
             },
             {
               "entity": "cover.living_curtain",
+              "grid_options": {
+                "columns": 12,
+                "rows": "auto",
+              },
               "name": "Living Curtain",
               "type": "custom:quiet-luxe-cover-card",
             },
-          ],
-          "type": "grid",
-        },
-        {
-          "cards": [
             {
               "heading": "Music",
               "type": "heading",
@@ -1552,9 +1787,15 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
             {
               "entity": "media_player.tcl_tv",
               "form": "bar",
+              "grid_options": {
+                "columns": "full",
+                "rows": "auto",
+              },
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 2,
+          "row_span": 3,
           "type": "grid",
         },
         {
@@ -1581,6 +1822,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-door-motion",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -1589,22 +1831,23 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
-      "max_columns": 2,
+      "dense_section_placement": true,
+      "max_columns": 4,
       "path": "room-storage",
       "sections": [
         {
           "cards": [
             {
-              "aqi_entity": undefined,
+              "action_label": "All climates",
+              "action_path": "/quiet-luxe/climates",
+              "back_label": "Home",
               "back_path": "/quiet-luxe/home",
-              "form": "room",
-              "humidity_entity": undefined,
+              "form": "view",
               "name": "Storage",
-              "temperature_entity": undefined,
               "type": "custom:quiet-luxe-header-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
           "type": "grid",
         },
         {
@@ -1619,6 +1862,8 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-light-card",
             },
           ],
+          "column_span": 2,
+          "row_span": 3,
           "type": "grid",
         },
       ],
@@ -1627,10 +1872,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:music",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "media",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Media",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1643,6 +1902,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-media-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -1650,10 +1910,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:shield-home-outline",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "security",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Security",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1666,7 +1940,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-camera-card",
             },
           ],
-          "column_span": 2,
+          "column_span": 4,
           "type": "grid",
         },
         {
@@ -1688,6 +1962,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:ql-row-door-motion",
             },
           ],
+          "column_span": 4,
           "type": "grid",
         },
       ],
@@ -1695,10 +1970,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:thermostat",
-      "max_columns": 3,
+      "max_columns": 4,
       "path": "climates",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "All climates",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1710,6 +1999,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
         {
@@ -1723,6 +2013,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-climate-card",
             },
           ],
+          "column_span": 1,
           "type": "grid",
         },
       ],
@@ -1730,10 +2021,24 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:car-outline",
       "max_columns": 2,
       "path": "car",
       "sections": [
+        {
+          "cards": [
+            {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Car",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
         {
           "cards": [
             {
@@ -1747,6 +2052,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "type": "custom:quiet-luxe-car-card",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],
@@ -1754,6 +2060,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
       "type": "sections",
     },
     {
+      "dense_section_placement": true,
       "icon": "mdi:translate",
       "max_columns": 2,
       "path": "language",
@@ -1761,9 +2068,23 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
         {
           "cards": [
             {
+              "back_label": "Home",
+              "back_path": "/quiet-luxe/home",
+              "form": "view",
+              "name": "Language",
+              "type": "custom:quiet-luxe-header-card",
+            },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
+            {
               "type": "custom:quiet-luxe-language-card",
             },
           ],
+          "column_span": 2,
           "type": "grid",
         },
       ],

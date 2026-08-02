@@ -1,6 +1,7 @@
 import { isUsable } from '../availability';
 import { LABEL_PRIMARY_CAMERA } from '../registry';
 import { viewUrl } from '../config';
+import { REGION_SPAN } from '../layout';
 import {
   isSection,
   PATHS,
@@ -99,9 +100,11 @@ export function cameraWallCards(ctx: StrategyContext): ReadonlyArray<LovelaceCar
 
 export function securityViewSections(ctx: StrategyContext): ReadonlyArray<LovelaceSectionConfig> {
   return [
-    /* Two view columns, so the wall is 2-up on a tablet and full width on a
-       phone — the largest the cameras can be without leaving the grid. */
-    sectionOf(headingCard(ctx.locale, 'section.cameras'), cameraWallCards(ctx), 2),
-    sectionOf(headingCard(ctx.locale, 'section.doors'), doorMotionRows(ctx)),
+    /* Every band spans the whole content width (Figma 04 Desktop, Security
+       107:3184): the cameras run 4 across at 1440+, 3 across at 1024, 2 on a
+       tablet and 1 on a phone, because HA clamps the span to the tracks the
+       view actually has. The door rows and sensors follow the same band. */
+    sectionOf(headingCard(ctx.locale, 'section.cameras'), cameraWallCards(ctx), REGION_SPAN.securityBand),
+    sectionOf(headingCard(ctx.locale, 'section.doors'), doorMotionRows(ctx), REGION_SPAN.securityBand),
   ].filter(isSection);
 }
