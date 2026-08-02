@@ -154,3 +154,39 @@ describe('formatDue', () => {
     expect(formatDue('not-a-date', 'en', now)).toBeUndefined();
   });
 });
+
+describe('due dates across timezones', () => {
+  /**
+   * A date-only due string parses as UTC midnight while every comparison here
+   * is local, so west of Greenwich "2026-08-02" used to read as today. The
+   * suite ran in UTC+8 and never saw it; these cases pin both hemispheres.
+   */
+  const inZone = <T>(zone: string, run: () => T): T => {
+    const original = process.env.TZ;
+    process.env.TZ = zone;
+    try {
+      return run();
+    } finally {
+      /* Assigning undefined would leave the literal string "undefined" behind
+         and silently move every later test to UTC. */
+      if (original === undefined) {
+        delete process.env.TZ;
+      } else {
+        process.env.TZ = original;
+      }
+    }
+  };
+
+  for (const zone of ['America/Los_Angeles', 'America/New_York', 'UTC', 'Asia/Hong_Kong']) {
+    it(`reads a date-only due date on the local calendar in ${zone}`, () => {
+      inZone(zone, () => {
+        const now = new Date(2026, 7, 1, 12, 0);
+        expect(formatDue('2026-08-01', 'en', now)).toBe('Due today');
+        expect(formatDue('2026-08-02', 'en', now)).toBe('Tomorrow');
+        expect(formatDue('2026-08-05', 'en', now)).toBe('Wednesday');
+        expect(isDueSoon('2026-08-01', now)).toBe(true);
+        expect(isDueSoon('2026-08-02', now)).toBe(false);
+      });
+    });
+  }
+});

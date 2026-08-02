@@ -100,6 +100,23 @@ export function formatAgendaTime(item: AgendaItem, locale: Locale): string {
   return `${weekday} ${hours}:${minutes}`;
 }
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * A to-do due date is usually date-only, and JS parses that form as UTC
+ * midnight while every comparison below is local — so west of Greenwich every
+ * due date landed a day early ("Tomorrow" rendered as "Due today"). Date-only
+ * values are therefore parsed as local midnight; timestamps keep their offset.
+ */
+function parseDue(due: string): Date {
+  const match = DATE_ONLY.exec(due);
+  if (match === null) {
+    return new Date(due);
+  }
+  const [year, month, day] = due.split('-').map(Number);
+  return new Date(year ?? 0, (month ?? 1) - 1, day ?? 1);
+}
+
 /**
  * Human due label for a task row (Figma `card/schedule-v2` tasks view):
  * "Due today" / "Tomorrow" for the two dates people actually plan around, a
@@ -114,7 +131,7 @@ export function formatDue(
   if (due === undefined) {
     return undefined;
   }
-  const dueDate = new Date(due);
+  const dueDate = parseDue(due);
   if (Number.isNaN(dueDate.getTime())) {
     return undefined;
   }
@@ -139,5 +156,5 @@ export function isDueSoon(due: string | undefined, now: Date = new Date()): bool
     return false;
   }
   const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  return new Date(due).getTime() < endOfToday.getTime();
+  return parseDue(due).getTime() < endOfToday.getTime();
 }
