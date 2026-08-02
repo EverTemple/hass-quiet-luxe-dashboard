@@ -3,7 +3,9 @@ import type { QlRingDial } from '../elements/ql-ring-dial';
 import { STEPPER_COMMIT_MS, type QlStepper } from '../elements/ql-stepper';
 import { makeEntity, makeMockHass, type MockHass } from '../testing/mock-hass';
 import type { HassEntity } from '../types/home-assistant';
+import { QUICK_ADJUST_COMMIT_DELAY_MS } from './quick-adjust';
 import { QuietLuxeClimateDialCard, type ClimateDialCardConfig } from './quiet-luxe-climate-dial-card';
+import '../elements/ql-quick-adjust';
 
 /** The live Tung Chung devices, at the masks and attributes they actually report. */
 const SENSIBO = (): HassEntity =>
@@ -204,13 +206,73 @@ describe('quiet-luxe-climate-dial-card', () => {
     ]);
   });
 
-  it('keeps the card to a dial and a mode row, with the rest behind More controls', async () => {
+  it('carries the dial, the mode row and the fan row, with the rest behind More controls', async () => {
     const card = await mount(SENSIBO());
-    // No fan row, no swing, no preset on the card itself.
-    expect(card.shadowRoot?.querySelectorAll('ql-preset-row')).toHaveLength(1);
+    // Mode and fan on the card; swing, humidity and preset in the sheet.
+    expect(card.shadowRoot?.querySelectorAll('ql-preset-row')).toHaveLength(2);
     expect(card.shadowRoot?.querySelector('ql-toggle')).toBeNull();
     expect(card.shadowRoot?.querySelector('.more')).not.toBeNull();
     expect(card.shadowRoot?.querySelector('ql-sheet')).toBeNull();
+  });
+
+  it('flanks the dial with a minus and a plus', async () => {
+    const card = await mount(SENSIBO());
+    const glyphs = [...(card.shadowRoot?.querySelectorAll('ql-quick-adjust') ?? [])];
+    expect(glyphs.map((glyph) => glyph.getAttribute('dir'))).toEqual(['minus', 'plus']);
+  });
+
+  it('drives the entity’s own step from a quick-adjust press, as one call', async () => {
+    vi.useFakeTimers();
+    const card = await mount(SENSIBO());
+    const plus = card.shadowRoot?.querySelectorAll('ql-quick-adjust')[1];
+    // Three rapid taps are one intention, not three round trips to the device.
+    for (let tap = 0; tap < 3; tap += 1) {
+      plus?.dispatchEvent(
+        new CustomEvent('ql-adjust', { detail: { direction: 1 }, bubbles: true, composed: true }),
+      );
+    }
+    vi.advanceTimersByTime(QUICK_ADJUST_COMMIT_DELAY_MS);
+    expect(calls(card)).toEqual([
+      ['climate', 'set_temperature', { entity_id: 'climate.steven_bedroom', temperature: 26 }],
+    ]);
+    vi.useRealTimers();
+  });
+
+  it('disables the glyph that would push the setpoint past its band', async () => {
+    const card = await mount(
+      makeEntity('climate.steven_bedroom', 'cool', {
+        ...SENSIBO().attributes,
+        temperature: 30,
+        max_temp: 30,
+      }),
+    );
+    const glyphs = [...(card.shadowRoot?.querySelectorAll('ql-quick-adjust') ?? [])];
+    expect(glyphs[0]?.hasAttribute('disabled')).toBe(false);
+    expect(glyphs[1]?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('drives the fan row from the entity’s own fan_modes', async () => {
+    const card = await mount(SENSIBO());
+    const fanRow = card.shadowRoot?.querySelectorAll('ql-preset-row')[1];
+    fanRow?.dispatchEvent(
+      new CustomEvent('ql-change', { detail: { value: 'high' }, bubbles: true, composed: true }),
+    );
+    expect(calls(card)).toEqual([
+      ['climate', 'set_fan_mode', { entity_id: 'climate.steven_bedroom', fan_mode: 'high' }],
+    ]);
+  });
+
+  it('draws no fan row for a device that reports no fan modes', async () => {
+    const card = await mount(
+      makeEntity('climate.plain', 'heat', {
+        hvac_modes: ['heat', 'cool', 'off'],
+        temperature: 21,
+        min_temp: 7,
+        max_temp: 35,
+        supported_features: 1,
+      }),
+    );
+    expect(card.shadowRoot?.querySelectorAll('ql-preset-row')).toHaveLength(1);
   });
 
   it('opens the sheet with every group the Sensibo supports', async () => {
@@ -269,7 +331,9 @@ describe('quiet-luxe-climate-dial-card', () => {
     card.shadowRoot?.querySelector<HTMLButtonElement>('.more')?.click();
     await card.updateComplete;
     expect(card.shadowRoot?.querySelector('ql-sheet')).not.toBeNull();
-    card.shadowRoot?.querySelector('ql-sheet-button')?.dispatchEvent(new Event('click', { bubbles: true }));
+    card.shadowRoot
+      ?.querySelector('ql-sheet-button[emphasis="primary"]')
+      ?.dispatchEvent(new Event('click', { bubbles: true }));
     await card.updateComplete;
     expect(card.shadowRoot?.querySelector('ql-sheet')).toBeNull();
   });
@@ -281,32 +345,56 @@ describe('quiet-luxe-climate-dial-card', () => {
     expect(dial(card)?.disabled).toBe(true);
   });
 
-  it('draws the compact dial without a mode row or a sheet in a room', async () => {
+  /* The compact card used to be a read-mostly tile: a smaller ring and nothing
+     else. It now carries the same controls as the full card at a smaller
+     diameter, which is the only thing "compact" should ever have meant. */
+  it('gives the compact dial the same full control at a smaller diameter', async () => {
     const card = await mount(SENSIBO(), { form: 'compact' });
     expect(dial(card)?.size).toBe('compact');
-    expect(card.shadowRoot?.querySelector('ql-preset-row')).toBeNull();
-    expect(card.shadowRoot?.querySelector('.more')).toBeNull();
+    expect(card.shadowRoot?.querySelectorAll('ql-preset-row')).toHaveLength(2);
+    expect(card.shadowRoot?.querySelectorAll('ql-quick-adjust')).toHaveLength(2);
+    expect(card.shadowRoot?.querySelector('.more')).not.toBeNull();
   });
 
-  it('opens HA’s own more-info from the card’s name', async () => {
+  it('opens the control sheet from the card’s name', async () => {
     const card = await mount(SENSIBO());
-    const info = card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info');
-    expect(info?.dataset.qlInfo).toBe('climate.steven_bedroom');
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.click();
+    await card.updateComplete;
+    expect(card.shadowRoot?.querySelector('ql-sheet')).not.toBeNull();
+  });
+
+  it('puts the dial itself inside the sheet, so one surface carries everything', async () => {
+    const card = await mount(SENSIBO());
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.more')?.click();
+    await card.updateComplete;
+    const dials = [...(card.shadowRoot?.querySelectorAll('ql-ring-dial') ?? [])];
+    expect(dials.map((node) => node.getAttribute('size'))).toEqual(['full', 'sheet']);
+    expect(card.shadowRoot?.querySelectorAll('ql-quick-adjust')).toHaveLength(4);
+  });
+
+  it('keeps HA’s own more-info one tap away, from inside the sheet', async () => {
+    const card = await mount(SENSIBO());
     let fired = '';
     card.addEventListener('hass-more-info', (event) => {
       fired = (event as CustomEvent<{ entityId: string }>).detail.entityId;
     });
-    info?.click();
+    card.shadowRoot?.querySelector<HTMLButtonElement>('.more')?.click();
+    await card.updateComplete;
+    card.shadowRoot
+      ?.querySelector('ql-sheet-button[emphasis="secondary"]')
+      ?.dispatchEvent(new Event('click', { bubbles: true }));
     expect(fired).toBe('climate.steven_bedroom');
   });
 });
 
 describe('quiet-luxe-climate-dial-card sizing', () => {
-  it('gives the full dial the whole view column and the compact one half', async () => {
+  /* The compact card is 292px at its narrowest and half a view column is about
+     171px, so neither form can share a column any more. */
+  it('gives both forms the whole view column', async () => {
     const full = await mount(SENSIBO());
     expect(full.getGridOptions()).toEqual({ columns: 12, rows: 'auto' });
     const compact = await mount(SENSIBO(), { form: 'compact' });
-    expect(compact.getGridOptions()).toEqual({ columns: 6, rows: 'auto' });
+    expect(compact.getGridOptions()).toEqual({ columns: 12, rows: 'auto' });
   });
 
   it('never pins a row count, so the dial is never clipped', async () => {

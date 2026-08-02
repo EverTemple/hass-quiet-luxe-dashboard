@@ -2,25 +2,34 @@ import { describe, expect, it } from 'vitest';
 import { makeEntity } from '../testing/mock-hass';
 import {
   ANGLE_SERVICE,
+  MAX_SWEEP,
   TIMER_MAX_MINUTES,
   TIMER_PRESETS,
   TIMER_SERVICE,
   airflowCall,
   autoPresetOf,
+  deviceBearing,
   dialButtonsFor,
   fanCapabilities,
   fanSpeedStep,
   hvacCall,
+  isMinSweep,
   nightModeCall,
+  normaliseSweep,
   oscillationCall,
   powerCall,
   presetCall,
   speedCall,
+  sweepAim,
+  sweepAimDrag,
+  sweepBearing,
   sweepFromFront,
   sweepHandleDrag,
   sweepNudge,
+  sweepRotate,
   timerCall,
   timerLabel,
+  unwrapBearing,
 } from './fan-capabilities';
 import type { FanEntities } from './fan-capabilities';
 
@@ -242,17 +251,168 @@ describe('sweepNudge', () => {
     });
   });
 
-  it('never lets a handle cross its partner', () => {
-    expect(sweepNudge({ low: 180, high: 185, span: 5 }, 'low', 5)).toEqual({
+  it('pins a handle at the 30 degree floor rather than crossing its partner', () => {
+    expect(sweepNudge({ low: 180, high: 210, span: 30 }, 'low', 5)).toEqual({
       low: 180,
-      high: 185,
-      span: 5,
+      high: 210,
+      span: 30,
     });
-    expect(sweepNudge({ low: 180, high: 185, span: 5 }, 'high', -5)).toEqual({
+    expect(sweepNudge({ low: 180, high: 210, span: 30 }, 'high', -5)).toEqual({
       low: 180,
-      high: 185,
-      span: 5,
+      high: 210,
+      span: 30,
     });
+  });
+
+  it('narrows only as far as the floor when a keypress overshoots it', () => {
+    expect(sweepNudge({ low: 175, high: 210, span: 35 }, 'low', 20)).toEqual({
+      low: 180,
+      high: 210,
+      span: 30,
+    });
+  });
+
+  it('still widens freely away from the floor', () => {
+    expect(sweepNudge({ low: 180, high: 210, span: 30 }, 'low', -5)).toEqual({
+      low: 175,
+      high: 210,
+      span: 35,
+    });
+  });
+});
+
+describe('normaliseSweep', () => {
+  it('leaves a sweep at or above the floor untouched', () => {
+    expect(normaliseSweep({ low: 135, high: 225, span: 90 })).toEqual({
+      low: 135,
+      high: 225,
+      span: 90,
+    });
+  });
+
+  it('widens a device-reported sweep below the floor about its midpoint', () => {
+    expect(normaliseSweep({ low: 180, high: 190, span: 10 })).toEqual({
+      low: 170,
+      high: 200,
+      span: 30,
+    });
+  });
+
+  it('slides a widened sweep inside the hardware range instead of clipping it', () => {
+    expect(normaliseSweep({ low: 5, high: 10, span: 5 })).toEqual({
+      low: 5,
+      high: 35,
+      span: 30,
+    });
+    expect(normaliseSweep({ low: 350, high: 355, span: 5 })).toEqual({
+      low: 325,
+      high: 355,
+      span: 30,
+    });
+  });
+
+  it('caps a sweep wider than the hardware arc', () => {
+    expect(normaliseSweep({ low: 5, high: 355, span: 350 }).span).toBe(MAX_SWEEP);
+  });
+});
+
+describe('isMinSweep', () => {
+  it('is true on the floor and false above it', () => {
+    expect(isMinSweep({ low: 180, high: 210, span: 30 })).toBe(true);
+    expect(isMinSweep({ low: 180, high: 211, span: 31 })).toBe(false);
+  });
+});
+
+describe('sweepRotate', () => {
+  const base = { low: 135, high: 225, span: 90 };
+
+  it('slides both edges, keeping the span', () => {
+    expect(sweepRotate(base, 20)).toEqual({ low: 155, high: 245, span: 90 });
+    expect(sweepRotate(base, -20)).toEqual({ low: 115, high: 205, span: 90 });
+  });
+
+  it('stops cleanly on the lower hardware limit', () => {
+    expect(sweepRotate(base, -200)).toEqual({ low: 5, high: 95, span: 90 });
+  });
+
+  it('stops cleanly on the upper hardware limit', () => {
+    expect(sweepRotate(base, 200)).toEqual({ low: 265, high: 355, span: 90 });
+  });
+
+  it('never wraps or inverts the pair at a limit', () => {
+    const rotated = sweepRotate(base, 10_000);
+    expect(rotated.low).toBeLessThan(rotated.high);
+    expect(rotated.high).toBeLessThanOrEqual(355);
+    expect(rotated.span).toBe(90);
+  });
+
+  it('cannot move a full-width sweep at all', () => {
+    const full = { low: 5, high: 355, span: 350 };
+    expect(sweepRotate(full, 40)).toEqual(full);
+    expect(sweepRotate(full, -40)).toEqual(full);
+  });
+});
+
+describe('sweepBearing and sweepAim', () => {
+  it('reads the bisector', () => {
+    expect(sweepBearing({ low: 135, high: 225, span: 90 })).toBe(180);
+  });
+
+  it('re-aims without changing the span', () => {
+    const aimed = sweepAim({ low: 135, high: 225, span: 90 }, 120);
+    expect(aimed).toEqual({ low: 75, high: 165, span: 90 });
+  });
+
+  it('stops on the limit rather than clipping the span it was told to keep', () => {
+    const aimed = sweepAim({ low: 135, high: 225, span: 90 }, 20);
+    expect(aimed.span).toBe(90);
+    expect(aimed.low).toBe(5);
+  });
+});
+
+describe('unwrapBearing', () => {
+  it('leaves a nearby bearing alone', () => {
+    expect(unwrapBearing(180, 190)).toBe(190);
+  });
+
+  it('runs past 360 rather than jumping back across the bottom seam', () => {
+    expect(unwrapBearing(355, 5)).toBe(365);
+  });
+
+  it('runs below 0 rather than jumping forward across the seam', () => {
+    expect(unwrapBearing(5, 355)).toBe(-5);
+  });
+
+  it('accumulates across repeated samples', () => {
+    expect(unwrapBearing(unwrapBearing(350, 10), 30)).toBe(390);
+  });
+});
+
+describe('sweepAimDrag', () => {
+  const base = { low: 135, high: 225, span: 90 };
+
+  it('aims the wedge at the pointer, keeping the span', () => {
+    const { angle } = sweepAimDrag(base, 180, -100, 0);
+    expect(angle).toEqual({ low: 45, high: 135, span: 90 });
+  });
+
+  it('stops on the limit when dragged across the bottom seam', () => {
+    // Sweeping clockwise past straight down: the raw bearing reads ~1, which
+    // unwraps to ~361 rather than flipping the fan to the other side.
+    const { angle, bearing } = sweepAimDrag({ low: 265, high: 355, span: 90 }, 310, -2, 100);
+    expect(bearing).toBeGreaterThan(355);
+    expect(angle).toEqual({ low: 265, high: 355, span: 90 });
+  });
+});
+
+describe('deviceBearing', () => {
+  it('maps screen up to the device front', () => {
+    expect(deviceBearing(0, -100)).toBe(180);
+  });
+
+  it('maps the horizontals to 90 and 270', () => {
+    expect(deviceBearing(-100, 0)).toBe(90);
+    expect(deviceBearing(100, 0)).toBe(270);
   });
 });
 
@@ -278,11 +438,11 @@ describe('sweepHandleDrag', () => {
     expect(sweepHandleDrag({ low: 10, high: 350, span: 340 }, 'high', 2, 100).high).toBe(355);
   });
 
-  it('keeps the minimum span when a handle is dragged past its partner', () => {
+  it('pins at the 30 degree floor when a handle is dragged past its partner', () => {
     const dragged = sweepHandleDrag(base, 'low', 100, 0);
     expect(dragged.high).toBe(225);
-    expect(dragged.low).toBe(220);
-    expect(dragged.span).toBe(5);
+    expect(dragged.low).toBe(195);
+    expect(dragged.span).toBe(30);
   });
 });
 

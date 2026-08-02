@@ -146,11 +146,28 @@ export interface ClimateSheetOptions {
   readonly disabled: boolean;
   readonly emit: ClimateSheetEmit;
   readonly onClose: () => void;
+  /**
+   * The dial block, when the entity has a setpoint to point at. Passed in
+   * rather than built here so the card keeps sole ownership of the service
+   * calls; a device with nothing to aim (a mode-only purifier, a dehumidifier)
+   * simply omits it and the sheet opens on its groups.
+   */
+  readonly dial?: TemplateResult;
+  /** Opens HA's own more-info dialog, if the card offers that route. */
+  readonly onDetails?: () => void;
 }
 
 /**
- * Every control the device supports, grouped as the design groups them. Each
- * change applies straight away, so the footer carries a single "Done" that
+ * Everything the device can be told, in one sheet (Figma `modal/climate-dial`,
+ * 106:8971): the dial with its quick-adjust glyphs, then the mode row, the
+ * setpoint steppers, fan, swing, humidity and presets — each present only if
+ * the device reports it.
+ *
+ * This is deliberately one surface rather than two. The card used to send you
+ * to a controls modal that had no dial in it, so setting a temperature and
+ * changing a fan speed were different places; here they are the same place.
+ *
+ * Each change applies straight away, so the footer carries a single "Done" that
  * dismisses rather than a Cancel/Confirm pair that would imply staged edits.
  */
 export function renderClimateSheet(options: ClimateSheetOptions): TemplateResult {
@@ -163,6 +180,7 @@ export function renderClimateSheet(options: ClimateSheetOptions): TemplateResult
       @ql-sheet-close=${options.onClose}
     >
       <div class="ql-sheet-body">
+        ${options.dial ?? nothing}
         ${options.groups.map(
           (group) => html`
             <div class="ql-sheet-group">
@@ -174,6 +192,13 @@ export function renderClimateSheet(options: ClimateSheetOptions): TemplateResult
           `,
         )}
       </div>
+      ${options.onDetails === undefined
+        ? nothing
+        : html`
+            <ql-sheet-button slot="footer" emphasis="secondary" @click=${options.onDetails}>
+              ${t(locale, 'common.show_details')}
+            </ql-sheet-button>
+          `}
       <ql-sheet-button slot="footer" emphasis="primary" @click=${options.onClose}>
         ${t(locale, 'common.done')}
       </ql-sheet-button>

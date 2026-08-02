@@ -187,4 +187,13 @@ export const zhHant: TranslationTable = {
   'climate.set_to': '設定為',
   'climate.heating': '製熱中',
   'climate.cooling': '製冷中',
+  'air.good': '良好',
+  'air.fair': '普通',
+  'air.poor': '不佳',
+  'air.very_poor': '極差',
+  'fan.sweep_aim': '擺動方向',
+  'fan.aim_hint': '拖曳扇形以調整方向',
+  'fan.span_held': '角度維持於',
+  'fan.min_span': '最小角度',
+  'fan.release_to_set': '放開即設定',
 };

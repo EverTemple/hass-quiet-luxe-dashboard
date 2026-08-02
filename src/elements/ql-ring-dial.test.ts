@@ -35,9 +35,31 @@ describe('ql-ring-dial', () => {
     expect(customElements.get('ql-ring-dial')).toBe(QlRingDial);
   });
 
-  it('draws the Figma geometry for both sizes', () => {
-    expect(DIAL_GEOMETRY.full).toEqual({ size: 220, stroke: 14, radius: 103, grip: 18, ticks: true });
-    expect(DIAL_GEOMETRY.compact).toEqual({ size: 136, stroke: 10, radius: 63, grip: 14, ticks: false });
+  it('draws the Figma geometry for all three sizes', () => {
+    expect(DIAL_GEOMETRY.full).toEqual({
+      size: 220,
+      stroke: 14,
+      radius: 103,
+      box: 198,
+      grip: 16,
+      ticks: true,
+    });
+    expect(DIAL_GEOMETRY.compact).toEqual({
+      size: 136,
+      stroke: 10,
+      radius: 63,
+      box: 136,
+      grip: 14,
+      ticks: false,
+    });
+    expect(DIAL_GEOMETRY.sheet).toEqual({
+      size: 220,
+      stroke: 14,
+      radius: 103,
+      box: 244,
+      grip: 20,
+      ticks: true,
+    });
   });
 
   it('draws the track over the full 270° sweep', async () => {
@@ -55,7 +77,22 @@ describe('ql-ring-dial', () => {
     const el = await mount({ value: 23 });
     const arc = el.shadowRoot?.querySelector('.arc');
     expect(arc).not.toBeNull();
-    expect(arc?.getAttribute('stroke')).toContain('url(#ql-dial-ramp-220-cool)');
+    const stroke = arc?.getAttribute('stroke') ?? '';
+    expect(stroke).toMatch(/^url\(#ql-dial-ramp-\d+\)$/);
+    expect(el.shadowRoot?.querySelector('linearGradient')?.id).toBe(
+      stroke.slice('url(#'.length, -1),
+    );
+  });
+
+  /* Two dials for the same entity can be on screen at once — a card's, and the
+     sheet's over the top of it — and a shared gradient id would make the second
+     one paint with the first one's ramp. */
+  it('scopes each dial gradient to its own instance', async () => {
+    const first = await mount({ value: 23 });
+    const second = await mount({ value: 23 });
+    expect(first.shadowRoot?.querySelector('linearGradient')?.id).not.toBe(
+      second.shadowRoot?.querySelector('linearGradient')?.id,
+    );
   });
 
   it('ticks the full dial and leaves the compact one clean', async () => {

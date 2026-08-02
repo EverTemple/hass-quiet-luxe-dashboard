@@ -1,6 +1,15 @@
 import { css, html, nothing, type CSSResultGroup, type TemplateResult } from 'lit';
 import { t } from '../i18n/translate';
+import type { TranslationKey } from '../i18n/locales/en';
 import type { Locale } from '../i18n/types';
+import {
+  ambientTemperature,
+  climateScale,
+  dialMode,
+  dialSetpoints,
+  type DialMode,
+  type DialSetpoints,
+} from './climate-dial';
 import {
   climateActivity,
   detectClimateDeviceType,
@@ -8,9 +17,21 @@ import {
 } from './climate-device-type';
 import { climateSheetCall, climateSheetGroups, type ClimateControlId } from './climate-sheet';
 import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
+import { fireMoreInfo } from './more-info';
 import { QlBaseCard } from './ql-base-card';
+import { adjustSetpoints, QUICK_ADJUST_COMMIT_DELAY_MS, type AdjustDirection } from './quick-adjust';
 import { registerCard } from './register';
+import { climateDialStyles, renderClimateDial } from './render-climate-dial';
 import { climateSheetStyles, renderClimateSheet } from './render-climate-sheet';
+
+/** The eyebrow over the sheet's dial, which names what the device is doing. */
+const SHEET_MODE_LABELS: Readonly<Record<DialMode, TranslationKey>> = {
+  heat: 'climate.heating',
+  cool: 'climate.cooling',
+  heat_cool: 'hvac.auto',
+  off: 'hvac.off',
+  other: 'state.active',
+};
 
 export interface ClimateCardConfig {
   readonly type: string;
@@ -34,12 +55,17 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     config: { attribute: false },
     armed: { state: true },
     sheetOpen: { state: true },
+    /** The setpoint the user is moving, shown before the device confirms it. */
+    draft: { state: true },
   };
 
   declare config?: ClimateCardConfig;
   declare armed: boolean;
   declare sheetOpen: boolean;
+  declare draft?: DialSetpoints;
   private disarmTimer?: number;
+  /** Collapses a burst of quick-adjust taps into one service call. */
+  private commitTimer?: number;
 
   constructor() {
     super();
@@ -69,10 +95,28 @@ export class QuietLuxeClimateCard extends QlBaseCard {
   override disconnectedCallback(): void {
     super.disconnectedCallback();
     window.clearTimeout(this.disarmTimer);
+    window.clearTimeout(this.commitTimer);
+  }
+
+  /** The device answered with what the gesture asked for: stop overriding it. */
+  protected override updated(changed: Map<string, unknown>): void {
+    if (!changed.has('hass') || this.draft === undefined) {
+      return;
+    }
+    const live = dialSetpoints(this.entity(this.config?.entity ?? ''));
+    const settled =
+      live.kind === this.draft.kind &&
+      live.value === this.draft.value &&
+      live.low === this.draft.low &&
+      live.high === this.draft.high;
+    if (settled) {
+      this.draft = undefined;
+    }
   }
 
   static override styles: CSSResultGroup = [
     QlBaseCard.qlCardStyles,
+    climateDialStyles,
     climateSheetStyles,
     css`
       .eyebrow {
@@ -206,23 +250,87 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     this.sheetOpen = false;
   };
 
-  /**
-   * The whole control surface lives behind one button. A dehumidifier's four
-   * vendor modes and a 40–70 humidity band do not fit a half-column card
-   * legibly, and the sheet gives every device the same full-width room.
-   */
-  private renderMore(locale: Locale, disabled: boolean): TemplateResult | typeof nothing {
-    if (climateSheetGroups(this.entity(this.config?.entity ?? '')).length === 0) {
-      return nothing;
+  /** HA's own dialog, still one tap away from inside the sheet. */
+  private readonly openDetails = (): void => {
+    this.sheetOpen = false;
+    fireMoreInfo(this, this.config?.entity ?? '');
+  };
+
+  private readonly onDialInput = (
+    event: CustomEvent<{ value: number; low: number; high: number }>,
+  ): void => {
+    const committed = dialSetpoints(this.entity(this.config?.entity ?? ''));
+    this.draft =
+      committed.kind === 'range'
+        ? { kind: 'range', low: event.detail.low, high: event.detail.high }
+        : { kind: 'single', value: event.detail.value };
+  };
+
+  private readonly onDialChange = (
+    event: CustomEvent<{ value: number; low: number; high: number }>,
+  ): void => {
+    this.onDialInput(event);
+    const committed = dialSetpoints(this.entity(this.config?.entity ?? ''));
+    if (committed.kind === 'range') {
+      this.onControl('temp_low', event.detail.low);
+      this.onControl('temp_high', event.detail.high);
+      return;
     }
-    return html`
-      <button class="more" type="button" ?disabled=${disabled} @click=${this.openSheet}>
-        ${t(locale, 'control.more')}
-        <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M6 3.5 10.5 8 6 12.5" />
-        </svg>
-      </button>
-    `;
+    this.onControl('temperature', event.detail.value);
+  };
+
+  private readonly onQuickAdjust = (direction: AdjustDirection): void => {
+    const entity = this.entity(this.config?.entity ?? '');
+    const scale = climateScale(entity);
+    const next = adjustSetpoints(scale, this.draft ?? dialSetpoints(entity), direction);
+    if (next === undefined) {
+      return;
+    }
+    this.draft = next;
+    window.clearTimeout(this.commitTimer);
+    this.commitTimer = window.setTimeout(this.commitDraft, QUICK_ADJUST_COMMIT_DELAY_MS);
+  };
+
+  private readonly commitDraft = (): void => {
+    const draft = this.draft;
+    if (draft === undefined) {
+      return;
+    }
+    if (draft.kind === 'range') {
+      this.onControl('temp_low', draft.low ?? 0);
+      this.onControl('temp_high', draft.high ?? 0);
+      return;
+    }
+    this.onControl('temperature', draft.value ?? 0);
+  };
+
+  /**
+   * The dial block for the sheet, when the entity has a setpoint to aim. A
+   * purifier or exhaust whose climate entity is only an on/off and a mode has
+   * nothing for a dial to point at, and its sheet opens on its groups.
+   */
+  private renderSheetDial(locale: Locale, offline: boolean): TemplateResult | undefined {
+    const entity = this.entity(this.config?.entity ?? '');
+    const setpoints = this.draft ?? dialSetpoints(entity);
+    if (setpoints.kind === 'none') {
+      return undefined;
+    }
+    const mode = offline ? 'off' : dialMode(entity);
+    const ambient = ambientTemperature(entity);
+    return renderClimateDial({
+      size: 'sheet',
+      scale: climateScale(entity),
+      setpoints,
+      mode,
+      locale,
+      disabled: offline,
+      modeLabel: t(locale, SHEET_MODE_LABELS[mode]),
+      ambientText: ambient === undefined ? '' : `${t(locale, 'climate.now')} ${ambient.toFixed(1)}°`,
+      heroText: ambient === undefined ? '—' : `${ambient.toFixed(1)}°`,
+      onAdjust: this.onQuickAdjust,
+      onInput: this.onDialInput,
+      onChange: this.onDialChange,
+    });
   }
 
   private callToggle(): void {
@@ -295,6 +403,8 @@ export class QuietLuxeClimateCard extends QlBaseCard {
     const locale = this.locale();
     const label = this.nameOf(entityId, this.config.name);
     const status = this.statusLine();
+    const offline = availability !== 'available';
+    const hasSheet = climateSheetGroups(this.entity(entityId)).length > 0;
     return html`
       <div
         class="ql-card ${availability === 'available' ? '' : 'ql-unavailable'}"
@@ -304,8 +414,8 @@ export class QuietLuxeClimateCard extends QlBaseCard {
           class="ql-info"
           type="button"
           data-ql-info=${entityId}
-          aria-label=${`${label} — ${t(locale, 'common.show_details')}`}
-          @click=${this.onMoreInfo}
+          aria-label=${`${label} — ${t(locale, hasSheet ? 'control.more' : 'common.show_details')}`}
+          @click=${hasSheet ? this.openSheet : this.onMoreInfo}
         >
           <span class="eyebrow ql-clamp-2">${label}</span>
           <span class="value">${this.valueText()}</span>
@@ -315,22 +425,23 @@ export class QuietLuxeClimateCard extends QlBaseCard {
           <button
             class="power"
             aria-label=${t(locale, 'common.power')}
-            ?disabled=${availability !== 'available'}
+            ?disabled=${offline}
             @click=${this.onPowerTap}
           >
             ⏻
           </button>
         </div>
-        ${this.renderMore(locale, availability !== 'available')}
         ${this.sheetOpen
           ? renderClimateSheet({
               open: this.sheetOpen,
               heading: label,
               groups: climateSheetGroups(this.entity(entityId)),
               locale,
-              disabled: availability !== 'available',
+              disabled: offline,
               emit: this.onControl,
               onClose: this.closeSheet,
+              dial: this.renderSheetDial(locale, offline),
+              onDetails: this.openDetails,
             })
           : nothing}
       </div>

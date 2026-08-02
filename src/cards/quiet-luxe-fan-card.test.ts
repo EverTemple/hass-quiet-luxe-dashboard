@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { QuietLuxeFanCard, type FanCardConfig } from './quiet-luxe-fan-card';
 import { makeEntity, makeMockHass, sensorEntity, type MockHass } from '../testing/mock-hass';
+import type { QlAirQuality } from '../elements/ql-air-quality';
 import type { QlDialButton } from '../elements/ql-dial-button';
 import type { QlPresetRow } from '../elements/ql-preset-row';
 import type { QlSweepDial } from '../elements/ql-sweep-dial';
@@ -48,11 +49,15 @@ const FULL_CONFIG: FanCardConfig = {
   climate_entity: 'climate.tp09',
   night_mode_entity: 'switch.tp09_night_mode',
   temperature_entity: 'sensor.tp09_temperature',
-  aqi_entity: 'sensor.tp09_pm_2_5',
+  pm25_entity: 'sensor.tp09_pm_2_5',
+  pm10_entity: 'sensor.tp09_pm_10',
+  voc_entity: 'sensor.tp09_volatile_organic_compounds_index',
+  no2_entity: 'sensor.tp09_nitrogen_dioxide_index',
   platform: 'dyson_local',
   form: 'full',
 };
 
+/** The live TP09's own air sensors and readings (probed 2026-08-03). */
 async function mount(
   config: Partial<FanCardConfig> = {},
   entities = [
@@ -61,6 +66,9 @@ async function mount(
     makeEntity('switch.tp09_night_mode', 'off'),
     sensorEntity('sensor.tp09_temperature', '21.9', { device_class: 'temperature' }),
     sensorEntity('sensor.tp09_pm_2_5', '12', { device_class: 'pm25' }),
+    sensorEntity('sensor.tp09_pm_10', '1', { device_class: 'pm10' }),
+    sensorEntity('sensor.tp09_volatile_organic_compounds_index', '7.8', { device_class: 'aqi' }),
+    sensorEntity('sensor.tp09_nitrogen_dioxide_index', '0.2', { device_class: 'aqi' }),
   ],
 ): Promise<{ card: QuietLuxeFanCard; hass: MockHass }> {
   const card = document.createElement('quiet-luxe-fan-card') as QuietLuxeFanCard;
@@ -119,11 +127,14 @@ describe('quiet-luxe-fan-card config', () => {
     expect(() => card.setConfig({ type: 'x', entity: 'climate.tp09' })).toThrow(/must be a fan/);
   });
 
-  it('defaults to the compact form and sizes accordingly', () => {
+  /* Half a view column leaves 139px inside the card's padding, which cannot
+     hold even two 64px dials — the grid collapsed to one column and the card
+     grew nine rows tall. Both forms take a whole column now. */
+  it('defaults to the compact form and takes a whole view column either way', () => {
     const card = document.createElement('quiet-luxe-fan-card') as QuietLuxeFanCard;
     card.setConfig({ type: 'x', entity: 'fan.tp09' });
     expect(card.form()).toBe('compact');
-    expect(card.getGridOptions()).toEqual({ columns: 6, rows: 'auto' });
+    expect(card.getGridOptions()).toEqual({ columns: 12, rows: 'auto' });
     card.setConfig({ type: 'x', entity: 'fan.tp09', form: 'full' });
     expect(card.getGridOptions()).toEqual({ columns: 12, rows: 'auto' });
   });
@@ -136,7 +147,9 @@ describe('quiet-luxe-fan-card header', () => {
     const numerals = [...(card.shadowRoot?.querySelectorAll('.numeral') ?? [])].map((n) =>
       n.textContent?.trim(),
     );
-    expect(numerals).toEqual(['21.9°', '12']);
+    // One numeral now: the air quality is a set of readings, not a headline.
+    expect(numerals).toEqual(['21.9°']);
+    expect(card.shadowRoot?.querySelector('ql-air-quality')).not.toBeNull();
   });
 
   it('falls back to the climate entity’s reading with no temperature sensor', async () => {
@@ -144,14 +157,51 @@ describe('quiet-luxe-fan-card header', () => {
     expect(card.shadowRoot?.querySelector('.numeral')?.textContent?.trim()).toBe('24.2°');
   });
 
-  it('tones the status dot from the air-quality reading', async () => {
+  it('reads out every air sensor the device has, not one summary numeral', async () => {
     const { card } = await mount();
-    expect(card.shadowRoot?.querySelector('ql-status-dot')?.getAttribute('status')).toBe('good');
+    const readout = card.shadowRoot?.querySelector<QlAirQuality>('ql-air-quality');
+    expect(readout?.readings.map((reading) => `${reading.label} ${reading.text}`)).toEqual([
+      'PM2.5 12',
+      'PM10 1',
+      'VOC 7.8',
+      'NO₂ 0.2',
+    ]);
+  });
+
+  /* The live TP09 as probed: particulates clean, VOC at 7.8. A single AQI
+     numeral would have called that air "good". */
+  it('summarises to the worst pollutant, not the first', async () => {
+    const { card } = await mount();
+    const readout = card.shadowRoot?.querySelector<QlAirQuality>('ql-air-quality');
+    expect(readout?.readings[0]?.band).toBe('good');
+    expect(readout?.bandLabel).toBe('Very poor');
+  });
+
+  it('honours a per-home threshold override', async () => {
+    const { card } = await mount({ air_quality_thresholds: { voc: { poor: 9 } } });
+    const readout = card.shadowRoot?.querySelector<QlAirQuality>('ql-air-quality');
+    expect(readout?.bandLabel).toBe('Poor');
+  });
+
+  it('degrades to the one sensor a device actually reports', async () => {
+    const { card } = await mount({
+      pm10_entity: undefined,
+      voc_entity: undefined,
+      no2_entity: undefined,
+    });
+    const readout = card.shadowRoot?.querySelector<QlAirQuality>('ql-air-quality');
+    expect(readout?.readings).toHaveLength(1);
+    expect(readout?.bandLabel).toBe('Good');
   });
 
   it('omits the air-quality block when the device has no such sensor', async () => {
-    const { card } = await mount({ aqi_entity: undefined });
-    expect(card.shadowRoot?.querySelector('.air')).toBeNull();
+    const { card } = await mount({
+      pm25_entity: undefined,
+      pm10_entity: undefined,
+      voc_entity: undefined,
+      no2_entity: undefined,
+    });
+    expect(card.shadowRoot?.querySelector('ql-air-quality')).toBeNull();
   });
 
   it('appends the room only when one is configured', async () => {
@@ -232,15 +282,30 @@ describe('quiet-luxe-fan-card layout', () => {
     const cssText = QuietLuxeFanCard.styles.toString();
     expect(cssText).toContain('container-type: inline-size');
     expect(cssText).toContain('@container (max-width: 303px)');
-    expect(cssText).toContain('@container (max-width: 223px)');
-    expect(cssText).toContain('@container (max-width: 143px)');
+    expect(cssText).toContain('@container (max-width: 207px)');
+    expect(cssText).toContain('@container (max-width: 135px)');
+  });
+
+  /*
+   * The nine dials read three across and three down whenever three 64px targets
+   * and their gaps fit — 3*64 + 2*8 = 208px of content box. A single tall
+   * column is what left the dead space beside the Climate section.
+   */
+  it('keeps three dials across down to the width three thumb targets need', () => {
+    const cssText = QuietLuxeFanCard.styles.toString().replace(/\s+/g, ' ');
+    expect(cssText).toContain('.grid { display: grid; grid-template-columns: repeat(3,');
+    const twoAcross = cssText.indexOf('@container (max-width: 207px)');
+    const oneAcross = cssText.indexOf('@container (max-width: 135px)');
+    expect(twoAcross).toBeGreaterThan(-1);
+    // Two-across is declared before one-across, so the narrower query wins.
+    expect(oneAcross).toBeGreaterThan(twoAcross);
   });
 
   /* Live at 1680 the card sat in a ~140px column and the header clamped "TP09"
-     to "T…" so the fixed-width AIR QUALITY label could keep its row. */
+     to "T…" so the fixed-width air readout could keep its row. */
   it('stacks the header readings before the device name can be clamped away', () => {
     const cssText = QuietLuxeFanCard.styles.toString().replace(/\s+/g, ' ');
-    const narrow = cssText.slice(cssText.indexOf('@container (max-width: 223px)'));
+    const narrow = cssText.slice(cssText.indexOf('@container (max-width: 255px)'));
     expect(narrow).toContain('.header { flex-direction: column; align-items: flex-start; }');
   });
 });
@@ -373,6 +438,81 @@ describe('quiet-luxe-fan-card oscillation sheet', () => {
     expect(card.shadowRoot?.querySelector('.readout .numeral')?.textContent?.trim()).toBe('90°');
     const caption = card.shadowRoot?.querySelector('.readout .caption')?.textContent ?? '';
     expect(caption.replace(/\s+/g, ' ').trim()).toBe('Start -45° · End +45° from front');
+  });
+
+  /** The wedge body is the aim target; the readout says so while it is held. */
+  it('says what the gesture is doing while the wedge is being aimed', async () => {
+    const { card } = await mount();
+    await openSheet(card, 'Oscillation');
+    card.shadowRoot?.querySelector('ql-sweep-dial')?.dispatchEvent(
+      new CustomEvent('ql-input', {
+        detail: { angle: { low: 100, high: 190, span: 90 }, drag: 'aim' },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+    await card.updateComplete;
+    const caption = card.shadowRoot?.querySelector('.readout .caption')?.textContent ?? '';
+    expect(caption.replace(/\s+/g, ' ').trim()).toBe('Drag the wedge to aim · span held at 90°');
+    expect(card.shadowRoot?.querySelector('.readout .numeral')?.textContent?.trim()).toBe('90°');
+  });
+
+  /* A handle that stops moving reads as broken unless the sheet says why. */
+  it('holds the readout at the floor and says so, in the accent', async () => {
+    const { card } = await mount();
+    await openSheet(card, 'Oscillation');
+    card.shadowRoot?.querySelector('ql-sweep-dial')?.dispatchEvent(
+      new CustomEvent('ql-input', {
+        detail: { angle: { low: 180, high: 210, span: 30 }, drag: 'low' },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+    await card.updateComplete;
+    const numeral = card.shadowRoot?.querySelector('.readout .numeral');
+    const caption = card.shadowRoot?.querySelector('.readout .caption');
+    expect(numeral?.textContent?.trim()).toBe('30°');
+    expect(numeral?.classList.contains('locked')).toBe(true);
+    expect(caption?.classList.contains('locked')).toBe(true);
+    expect(caption?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Minimum span 30° · release to set',
+    );
+  });
+
+  it('returns to the plain reading once the gesture ends', async () => {
+    const { card } = await mount();
+    await openSheet(card, 'Oscillation');
+    const dial = card.shadowRoot?.querySelector('ql-sweep-dial');
+    const detail = { angle: { low: 180, high: 210, span: 30 }, drag: 'low' };
+    dial?.dispatchEvent(new CustomEvent('ql-input', { detail, bubbles: true, composed: true }));
+    await card.updateComplete;
+    dial?.dispatchEvent(new CustomEvent('ql-change', { detail, bubbles: true, composed: true }));
+    await card.updateComplete;
+    const caption = card.shadowRoot?.querySelector('.readout .caption');
+    expect(caption?.classList.contains('locked')).toBe(false);
+    expect(caption?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Start 0° · End +30° from front',
+    );
+  });
+
+  /* The device remembers sweeps set by Dyson's own app, which can be narrower
+     than this control will set. It is widened on read, not silently accepted. */
+  it('widens a device sweep that arrives below the floor', async () => {
+    const { card } = await mount({}, [
+      makeEntity('fan.tp09', 'on', {
+        ...dysonFan().attributes,
+        angle_low: 180,
+        angle_high: 190,
+      }),
+      dysonClimate(),
+      makeEntity('switch.tp09_night_mode', 'off'),
+    ]);
+    await openSheet(card, 'Oscillation');
+    expect(card.shadowRoot?.querySelector<QlSweepDial>('ql-sweep-dial')?.angle).toEqual({
+      low: 170,
+      high: 200,
+      span: 30,
+    });
   });
 
   /**

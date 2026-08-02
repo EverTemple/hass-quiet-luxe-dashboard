@@ -9,7 +9,7 @@ export type QlDialState = 'off' | 'on' | 'auto';
  * surface + hairline, on is a champagne fill with a dark glyph and the on-glow,
  * auto is a champagne outline. Emits `ql-change` {state}; never calls hass.
  *
- * The button is 92px tall including its label and the dial itself carries a
+ * The button is 84px tall including its label and the dial itself carries a
  * 64px hit area extended to `--ql-touch-min` by the host padding, so a dial in
  * a dense grid still meets the 56px minimum.
  */
@@ -47,7 +47,10 @@ export class QlDialButton extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--ql-space-s, 8px);
+      /* A dial and its label are one unit, so they sit closer to each other
+         than the grid's own rows do to one another. It also buys back 12px a
+         row, which is three rows' worth in the 3x3 grid. */
+      gap: var(--ql-space-xs, 4px);
       width: 100%;
       min-width: 0;
       padding: 0;

@@ -19,6 +19,11 @@ function dysonContext(overrides: { readonly fanAttributes?: Record<string, unkno
         mockRegEntity('climate.tp09', { device_id: DYSON_DEVICE, platform: 'dyson_local' }),
         mockRegEntity('sensor.tp09_temperature', { device_id: DYSON_DEVICE }),
         mockRegEntity('sensor.tp09_pm_2_5', { device_id: DYSON_DEVICE }),
+        mockRegEntity('sensor.tp09_pm_10', { device_id: DYSON_DEVICE }),
+        mockRegEntity('sensor.tp09_volatile_organic_compounds_index', {
+          device_id: DYSON_DEVICE,
+        }),
+        mockRegEntity('sensor.tp09_nitrogen_dioxide_index', { device_id: DYSON_DEVICE }),
         mockRegEntity('switch.tp09_night_mode', {
           device_id: DYSON_DEVICE,
           entity_category: 'config',
@@ -40,6 +45,13 @@ function dysonContext(overrides: { readonly fanAttributes?: Record<string, unkno
       makeEntity('climate.tp09', 'cool', { hvac_modes: ['off', 'cool', 'heat'] }),
       sensorEntity('sensor.tp09_temperature', '21.9', { device_class: 'temperature' }),
       sensorEntity('sensor.tp09_pm_2_5', '12', { device_class: 'pm25' }),
+      sensorEntity('sensor.tp09_pm_10', '1', { device_class: 'pm10' }),
+      /* Both gas indices report device_class: aqi with no unit, so only the
+         entity id tells them apart. Verified on the live TP09. */
+      sensorEntity('sensor.tp09_volatile_organic_compounds_index', '7.8', {
+        device_class: 'aqi',
+      }),
+      sensorEntity('sensor.tp09_nitrogen_dioxide_index', '0.2', { device_class: 'aqi' }),
       makeEntity('switch.tp09_night_mode', 'off'),
       sensorEntity('sensor.tp09_filter_life', '68'),
     ],
@@ -112,8 +124,32 @@ describe('fanCardConfig companions', () => {
       climate_entity: 'climate.tp09',
       night_mode_entity: 'switch.tp09_night_mode',
       temperature_entity: 'sensor.tp09_temperature',
-      aqi_entity: 'sensor.tp09_pm_2_5',
+      pm25_entity: 'sensor.tp09_pm_2_5',
+      pm10_entity: 'sensor.tp09_pm_10',
+      voc_entity: 'sensor.tp09_volatile_organic_compounds_index',
+      no2_entity: 'sensor.tp09_nitrogen_dioxide_index',
     });
+  });
+
+  /* PM2.5 and PM10 carry their own device classes; VOC and NO2 both report
+     `aqi`, so the id is the only thing that separates them. */
+  it('tells the two aqi-classed gas indices apart by their entity ids', () => {
+    const config = fanCardConfig(dysonContext(), 'fan.tp09', 'full');
+    expect(config.voc_entity).toBe('sensor.tp09_volatile_organic_compounds_index');
+    expect(config.no2_entity).toBe('sensor.tp09_nitrogen_dioxide_index');
+  });
+
+  it('emits no air keys at all for a fan with no air sensors', () => {
+    const ctx = makeContext({
+      snapshot: {
+        areas: [mockArea(AREA, 'Bedroom')],
+        devices: [mockDevice('d', AREA)],
+        entities: [mockRegEntity('fan.bare', { device_id: 'd' })],
+      },
+      entities: [makeEntity('fan.bare', 'on', { supported_features: 51 })],
+    });
+    const config = fanCardConfig(ctx, 'fan.bare', 'compact');
+    expect(Object.keys(config).some((key) => key.endsWith('_entity'))).toBe(false);
   });
 
   /**

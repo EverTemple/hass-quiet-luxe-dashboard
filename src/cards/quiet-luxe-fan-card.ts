@@ -1,9 +1,9 @@
 import { css, html, nothing, type CSSResultGroup, type TemplateResult } from 'lit';
+import '../elements/ql-air-quality';
 import '../elements/ql-dial-button';
 import '../elements/ql-preset-row';
 import '../elements/ql-sheet';
 import '../elements/ql-sheet-button';
-import '../elements/ql-status-dot';
 import '../elements/ql-sweep-dial';
 import '../elements/ql-timer-dial';
 import '../elements/ql-toggle';
@@ -12,6 +12,14 @@ import type { QlPresetOption } from '../elements/ql-preset-row';
 import { t } from '../i18n/translate';
 import type { Locale } from '../i18n/types';
 import type { HassEntity } from '../types/home-assistant';
+import {
+  airReadings,
+  BAND_KEYS,
+  resolveThresholds,
+  summaryBand,
+  type AirQualityThresholdOverride,
+  type AirReading,
+} from './air-quality';
 import type { ServiceCall } from './device-controls';
 import {
   ANGLE_SPANS,
@@ -21,6 +29,7 @@ import {
   type OscillationAngle,
 } from './supported-features';
 import {
+  MIN_SWEEP,
   TIMER_PRESETS,
   airflowCall,
   autoPresetOf,
@@ -28,7 +37,9 @@ import {
   fanCapabilities,
   fanSpeedStep,
   hvacCall,
+  isMinSweep,
   nightModeCall,
+  normaliseSweep,
   oscillationCall,
   powerCall,
   presetCall,
@@ -43,10 +54,10 @@ import {
   type FanEntities,
   type ServiceRegistry,
 } from './fan-capabilities';
-import { COLUMNS_FULL, COLUMNS_HALF, contentGrid, type QlGridOptions } from './grid-options';
+import { COLUMNS_FULL, contentGrid, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
-import { formatSensorValue, sensorStatus } from './sensor-format';
+import { formatSensorValue } from './sensor-format';
 
 export interface FanCardConfig {
   readonly type: string;
@@ -55,7 +66,18 @@ export interface FanCardConfig {
   readonly climate_entity?: string;
   readonly night_mode_entity?: string;
   readonly temperature_entity?: string;
-  readonly aqi_entity?: string;
+  /** The air sensors this device publishes; each is drawn only if present. */
+  readonly pm25_entity?: string;
+  readonly pm10_entity?: string;
+  readonly voc_entity?: string;
+  readonly no2_entity?: string;
+  /**
+   * Per-home band boundaries. Dyson publishes none, so the defaults in
+   * `air-quality.ts` are corroborated or community-derived and every one of
+   * them is stated there with its confidence. A home that prefers WHO guideline
+   * values, or its own local standard, says so here.
+   */
+  readonly air_quality_thresholds?: AirQualityThresholdOverride;
   readonly name?: string;
   readonly area?: string;
   readonly form?: FanCardForm;
@@ -105,6 +127,7 @@ export class QuietLuxeFanCard extends QlBaseCard {
     draftStep: { state: true },
     draftAuto: { state: true },
     timerMinutes: { state: true },
+    sweepDrag: { state: true },
   };
 
   declare config?: FanCardConfig;
@@ -114,6 +137,8 @@ export class QuietLuxeFanCard extends QlBaseCard {
   private draftDirection: AirflowDirection = 'front';
   private draftStep = 0;
   private draftAuto = false;
+  /** Which part of the sweep dial is under a finger, if any. */
+  private sweepDrag?: string;
   /**
    * The timer is write-only: `dyson_local.set_timer` sets it, and no entity or
    * attribute reports what is left. What the card knows is what this session
@@ -139,8 +164,20 @@ export class QuietLuxeFanCard extends QlBaseCard {
     return this.form() === 'full' ? 4 : 2;
   }
 
+  /**
+   * Both forms take a whole view column.
+   *
+   * A dial is a fixed 64px thumb target, so three across need 208px of content
+   * box and four need 272px. Half a view column is about 171px, which leaves
+   * 139px inside the card's padding — not enough for two dials, let alone
+   * three, so the grid collapsed to a single column and the card grew to nine
+   * rows tall. That is the dead space beside the Climate section: a 800px
+   * ladder of dials standing next to a 440px thermostat. The container queries
+   * below still do the reflowing; this just stops the card being handed a box
+   * no arrangement of thumb targets can fit.
+   */
   getGridOptions(): QlGridOptions {
-    return contentGrid(this.form() === 'full' ? COLUMNS_FULL : COLUMNS_HALF);
+    return contentGrid(COLUMNS_FULL);
   }
 
   static override styles: CSSResultGroup = [
@@ -168,18 +205,11 @@ export class QuietLuxeFanCard extends QlBaseCard {
         gap: var(--ql-space-xs, 4px);
         min-width: 0;
       }
+      /* The readout owns its own layout, including how it re-aligns when the
+         card is narrow; the card only says how much room it may take. */
       .air {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: var(--ql-space-xs, 4px);
         flex: 0 0 auto;
-      }
-      .air-label {
-        display: flex;
-        align-items: center;
-        gap: var(--ql-space-xs, 4px);
-        white-space: nowrap;
+        min-width: 0;
       }
       .eyebrow {
         color: var(--ql-ink-muted, #8c8578);
@@ -201,42 +231,54 @@ export class QuietLuxeFanCard extends QlBaseCard {
         font-variant-numeric: tabular-nums;
       }
       /* The dials sit on a fluid track rather than fixed 92/72px columns so a
-         narrow phone column and a wide desktop card both distribute evenly. */
+         narrow phone column and a wide desktop card both distribute evenly.
+
+         The nine dials of the full grid read 3 across and 3 down. That is the
+         shape the design draws and the shape that keeps the card square-ish; a
+         single 9-tall column is what produced the dead space beside the Climate
+         section, because a 88px-tall dial stacked nine times is 800px of card
+         next to a 440px thermostat. The row gap is tighter than the column gap
+         because a dial and its label are already a vertical unit. */
       .grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: var(--ql-space-l, 16px);
+        column-gap: var(--ql-space-l, 16px);
+        row-gap: var(--ql-space-m, 12px);
         justify-items: center;
       }
       .grid.compact {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
       /* A dial is a fixed 64px because it is a thumb target, so it cannot be
-         squeezed — the row wraps instead. Below these widths the dials would
-         overlap each other and their labels would collide. The query measures
-         the card's content box, so the thresholds are n*64 + (n-1)*16 minus a
-         pixel: 304 for four across, 224 for three, 144 for two. */
+         squeezed — the row wraps instead. The query measures the card's own
+         content box, never the viewport, so the same card reflows correctly in
+         a phone column and in a desktop one. The column gap closes to 8px
+         before a column is dropped, which is what lets three dials survive down
+         to 3*64 + 2*8 = 208px instead of giving up at 224. */
       @container (max-width: 303px) {
         .grid.compact {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
-      @container (max-width: 223px) {
-        .grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+      @container (max-width: 255px) {
+        .grid,
+        .grid.compact {
+          column-gap: var(--ql-space-s, 8px);
         }
-        /* The AIR QUALITY label cannot shrink, so sharing a row with it clamped
-           the device name down to one letter ("T…") in a desktop grid column.
-           Below this width the two readings stack instead. */
+        /* The AIR QUALITY readout cannot shrink, so sharing a row with it
+           clamped the device name down to one letter ("T…") in a desktop grid
+           column. Below this width the two readings stack instead. */
         .header {
           flex-direction: column;
           align-items: flex-start;
         }
-        .air {
-          align-items: flex-start;
+      }
+      @container (max-width: 207px) {
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
-      @container (max-width: 143px) {
+      @container (max-width: 135px) {
         .grid,
         .grid.compact {
           grid-template-columns: minmax(0, 1fr);
@@ -246,6 +288,12 @@ export class QuietLuxeFanCard extends QlBaseCard {
         color: var(--ql-ink-muted, #8c8578);
         font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
         letter-spacing: 0.02em;
+      }
+      /* The floor is the one moment the readout stops answering the finger, so
+         it says so in the accent rather than going quiet. */
+      .numeral.locked,
+      .caption.locked {
+        color: var(--ql-accent-champagne, #b08d57);
       }
       .readout {
         display: flex;
@@ -583,10 +631,29 @@ export class QuietLuxeFanCard extends QlBaseCard {
     this.closeSheet();
   };
 
-  private renderOscillationSheet(locale: Locale): TemplateResult {
-    const angle = this.draftAngle ?? this.liveAngle();
+  /**
+   * The readout over the dial, which says three different things.
+   *
+   * At rest it states the sweep's two edges. While the wedge is being aimed the
+   * edges are moving together and naming them is noise, so it says what the
+   * gesture is doing and that the span is being held. On the floor it says why
+   * the number has stopped changing — otherwise a handle that refuses to move
+   * reads as a control that has broken.
+   */
+  private oscillationCaption(locale: Locale, angle: OscillationAngle): string {
+    if (this.sweepDrag !== undefined && isMinSweep(angle)) {
+      return `${t(locale, 'fan.min_span')} ${String(MIN_SWEEP)}° · ${t(locale, 'fan.release_to_set')}`;
+    }
+    if (this.sweepDrag === 'aim') {
+      return `${t(locale, 'fan.aim_hint')} · ${t(locale, 'fan.span_held')} ${String(angle.span)}°`;
+    }
     const { start, end } = sweepFromFront(angle);
     const signed = (value: number): string => `${value > 0 ? '+' : ''}${String(value)}°`;
+    return `${t(locale, 'fan.start_short')} ${signed(start)} · ${t(locale, 'fan.end_short')} ${signed(end)} ${t(locale, 'fan.from_front')}`;
+  }
+
+  private renderOscillationSheet(locale: Locale): TemplateResult {
+    const angle = normaliseSweep(this.draftAngle ?? this.liveAngle());
     const presets: ReadonlyArray<QlPresetOption> = [
       { value: 'off', label: t(locale, 'common.off') },
       ...ANGLE_SPANS.map((span) => ({ value: String(span), label: `${String(span)}°` })),
@@ -595,6 +662,11 @@ export class QuietLuxeFanCard extends QlBaseCard {
       this.fanEntity()?.attributes.oscillating === true
         ? (nearestSpan(angle)?.toString() ?? '')
         : 'off';
+    const locked = this.sweepDrag !== undefined && isMinSweep(angle);
+    const onSweep = (event: CustomEvent<{ angle: OscillationAngle; drag?: string }>): void => {
+      this.draftAngle = event.detail.angle;
+      this.sweepDrag = event.type === 'ql-change' ? undefined : event.detail.drag;
+    };
     return html`
       <ql-sheet
         .open=${true}
@@ -603,10 +675,9 @@ export class QuietLuxeFanCard extends QlBaseCard {
         @ql-sheet-close=${this.closeSheet}
       >
         <div class="readout">
-          <span class="numeral">${String(angle.span)}°</span>
-          <span class="caption">
-            ${t(locale, 'fan.start_short')} ${signed(start)} ·
-            ${t(locale, 'fan.end_short')} ${signed(end)} ${t(locale, 'fan.from_front')}
+          <span class="numeral ${locked ? 'locked' : ''}">${String(angle.span)}°</span>
+          <span class="caption ${locked ? 'locked' : ''}">
+            ${this.oscillationCaption(locale, angle)}
           </span>
         </div>
         <ql-sweep-dial
@@ -614,12 +685,9 @@ export class QuietLuxeFanCard extends QlBaseCard {
           .frontLabel=${t(locale, 'fan.forward')}
           .startLabel=${t(locale, 'fan.sweep_start')}
           .endLabel=${t(locale, 'fan.sweep_end')}
-          @ql-input=${(e: CustomEvent<{ angle: OscillationAngle }>): void => {
-            this.draftAngle = e.detail.angle;
-          }}
-          @ql-change=${(e: CustomEvent<{ angle: OscillationAngle }>): void => {
-            this.draftAngle = e.detail.angle;
-          }}
+          .aimLabel=${t(locale, 'fan.sweep_aim')}
+          @ql-input=${onSweep}
+          @ql-change=${onSweep}
         ></ql-sweep-dial>
         <ql-preset-row
           .options=${presets}
@@ -858,8 +926,8 @@ export class QuietLuxeFanCard extends QlBaseCard {
       config.temperature_entity !== undefined
         ? this.entity(config.temperature_entity)?.state
         : this.entity(config.climate_entity ?? '')?.attributes.current_temperature?.toString();
-    const aqi =
-      config.aqi_entity === undefined ? undefined : this.entity(config.aqi_entity)?.state;
+    const readings = this.airReadings();
+    const band = summaryBand(readings);
     return html`
       <div class="header">
         <button
@@ -872,19 +940,43 @@ export class QuietLuxeFanCard extends QlBaseCard {
           <span class="eyebrow ql-clamp-1">${eyebrow}</span>
           <span class="numeral">${formatSensorValue('temp', temperature)}</span>
         </button>
-        ${aqi === undefined
+        ${readings.length === 0
           ? nothing
           : html`
-              <span class="air">
-                <span class="air-label">
-                  <ql-status-dot .status=${sensorStatus('aqi', aqi)}></ql-status-dot>
-                  <span class="eyebrow">${t(locale, 'fan.air_quality')}</span>
-                </span>
-                <span class="numeral">${formatSensorValue('aqi', aqi)}</span>
-              </span>
+              <ql-air-quality
+                class="air"
+                .readings=${readings}
+                .bandLabel=${band === undefined ? '' : t(locale, BAND_KEYS[band])}
+                .groupLabel=${t(locale, 'fan.air_quality')}
+              ></ql-air-quality>
             `}
       </div>
     `;
+  }
+
+  /**
+   * What the device actually publishes about the air, banded.
+   *
+   * The card used to show one big AQI numeral, which said less than the device
+   * knows: a purifier reporting clean particulates and a VOC spike reads as a
+   * single number that is true of neither. Each sensor the device has is drawn;
+   * each sensor it does not have is absent rather than blank.
+   */
+  private airReadings(): ReadonlyArray<AirReading> {
+    const config = this.config;
+    if (config === undefined) {
+      return [];
+    }
+    return airReadings(
+      {
+        pm25: config.pm25_entity,
+        pm10: config.pm10_entity,
+        voc: config.voc_entity,
+        no2: config.no2_entity,
+      },
+      (entityId) => this.entity(entityId),
+      resolveThresholds(config.air_quality_thresholds),
+    );
   }
 
   protected override render(): TemplateResult {

@@ -185,6 +185,15 @@ export const en = {
   'climate.set_to': 'Set to',
   'climate.heating': 'Heating',
   'climate.cooling': 'Cooling',
+  'air.good': 'Good',
+  'air.fair': 'Fair',
+  'air.poor': 'Poor',
+  'air.very_poor': 'Very poor',
+  'fan.sweep_aim': 'Sweep direction',
+  'fan.aim_hint': 'Drag the wedge to aim',
+  'fan.span_held': 'span held at',
+  'fan.min_span': 'Minimum span',
+  'fan.release_to_set': 'release to set',
 } as const;
 
 export type TranslationKey = keyof typeof en;
