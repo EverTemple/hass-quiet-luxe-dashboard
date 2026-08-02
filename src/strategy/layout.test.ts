@@ -124,9 +124,9 @@ describe('span clamping', () => {
 
 describe('climate packing', () => {
   it('reads a height off the card type, and its form when it has one', () => {
-    expect(estimatedCardHeight(card('custom:quiet-luxe-fan-card'))).toBe(404);
-    expect(estimatedCardHeight(card('custom:quiet-luxe-fan-card', 'compact'))).toBe(184);
-    expect(estimatedCardHeight(card('custom:quiet-luxe-climate-card'))).toBe(108);
+    expect(estimatedCardHeight(card('custom:quiet-luxe-fan-card'))).toBe(382);
+    expect(estimatedCardHeight(card('custom:quiet-luxe-fan-card', 'compact'))).toBe(190);
+    expect(estimatedCardHeight(card('custom:quiet-luxe-climate-card'))).toBe(130);
   });
 
   it('falls back rather than throwing on a card it has never seen', () => {
@@ -141,13 +141,13 @@ describe('climate packing', () => {
         card('custom:quiet-luxe-fan-card'),
         card('custom:quiet-luxe-climate-dial-card'),
       ]),
-    ).toBe(394);
+    ).toBe(382);
     expect(
       medianCardHeight([
         card('custom:quiet-luxe-climate-card'),
         card('custom:quiet-luxe-cover-card'),
       ]),
-    ).toBe(140);
+    ).toBe(157);
   });
 
   /* Packing rule 3: the deficit lands at the bottom edge, never mid-grid. */
@@ -159,8 +159,8 @@ describe('climate packing', () => {
       { type: 'custom:quiet-luxe-climate-card', entity: 'climate.second' },
     ];
     expect(orderTallestFirst(grid).map((entry) => entry.type)).toEqual([
-      'custom:quiet-luxe-fan-card',
       'custom:quiet-luxe-climate-dial-card',
+      'custom:quiet-luxe-fan-card',
       'custom:quiet-luxe-climate-card',
       'custom:quiet-luxe-climate-card',
     ]);
@@ -173,7 +173,7 @@ describe('climate packing', () => {
     expect(grid[0]?.type).toBe('custom:quiet-luxe-climate-card');
   });
 
-  /* Packing rule 4: the Dyson card at 404 against a 108 median has to reflow. */
+  /* Packing rule 4: the Dyson card at 382 against a 130 median has to reflow. */
   it('flags a card more than twice its grid median', () => {
     const grid = [
       card('custom:quiet-luxe-fan-card'),
@@ -195,5 +195,31 @@ describe('climate packing', () => {
 
   it('says nothing about an empty grid', () => {
     expect(exceedsHeightBudget(card('custom:quiet-luxe-fan-card'), [])).toBe(false);
+  });
+
+  /**
+   * The two v0.7.0 branches meet here: the height budget was written expecting
+   * the Dyson card to reflow, and the reflow (3×3 dials, whole card 382px)
+   * arrived separately. This is the composed grid the live All Climates view
+   * actually emits for Steven Bedroom — thermostat, Dyson, dehumidifier.
+   */
+  it('composes the Dyson reflow with the height budget on the real column', () => {
+    const column = [
+      card('custom:quiet-luxe-climate-dial-card', 'full'),
+      card('custom:quiet-luxe-fan-card', 'full'),
+      card('custom:quiet-luxe-climate-card'),
+    ];
+    /* 464 / 382 / 130 → median 382, budget 764. Nothing in the column exceeds
+       it; before the reflow the Dyson's dial ladder alone was ~800px. */
+    expect(medianCardHeight(column)).toBe(382);
+    for (const entry of column) {
+      expect(exceedsHeightBudget(entry, column), entry.type).toBe(false);
+    }
+    /* Tallest first, so the deficit is spent at the column's bottom edge. */
+    expect(orderTallestFirst(column).map((entry) => entry.type)).toEqual([
+      'custom:quiet-luxe-climate-dial-card',
+      'custom:quiet-luxe-fan-card',
+      'custom:quiet-luxe-climate-card',
+    ]);
   });
 });

@@ -129,29 +129,44 @@ export const REGION_SPAN = {
 export const ROOM_CONTROLS_ROW_SPAN = 3;
 
 /**
- * Rendered heights at a 390px track, read off the Figma demonstration screens.
- * Approximate by design: the only thing they decide is the ORDER cards are
- * emitted in, and being 10px out never changes a comparison.
+ * Rendered heights at a 390px track.
+ *
+ * MEASURED, not drawn: read off the live Tung Chung instance (HA 2026.7.1) at a
+ * 1680px viewport — four 390px tracks — across Home, both room views, All
+ * Climates, Media, Energy and Security on 2026-08-03. The earlier figures came
+ * from the Figma demonstration screens, and the climate work invalidated two of
+ * them the moment the branches met: the compact dial card gained the mode and
+ * fan rows (190 drawn → 402 rendered) and the Dyson card's dials reflowed 3×3
+ * (a ~800px ladder → 382 for the whole card). With the drawn numbers, the
+ * All-Climates column emitted the fan card above a thermostat 82px taller than
+ * it — the exact inversion packing rule 3 exists to prevent.
+ *
+ * Still approximate by design: the only thing they decide is the ORDER cards
+ * are emitted in, and being 10px out never changes a comparison. Entries with
+ * no live instance to measure keep their drawn value and are marked.
  */
 const CARD_HEIGHT_PX: Readonly<Record<string, number>> = {
-  'custom:quiet-luxe-climate-dial-card': 394,
-  'custom:quiet-luxe-climate-dial-card#compact': 190,
-  'custom:quiet-luxe-fan-card': 404,
-  'custom:quiet-luxe-fan-card#compact': 184,
-  'custom:quiet-luxe-climate-card': 108,
-  'custom:quiet-luxe-camera-card': 225,
-  'custom:quiet-luxe-cover-card': 172,
+  'custom:quiet-luxe-climate-dial-card': 464,
+  'custom:quiet-luxe-climate-dial-card#compact': 402,
+  'custom:quiet-luxe-fan-card': 382,
+  'custom:quiet-luxe-fan-card#compact': 190,
+  'custom:quiet-luxe-climate-card': 130,
+  'custom:quiet-luxe-camera-card': 190,
+  'custom:quiet-luxe-cover-card': 184,
+  'custom:quiet-luxe-room-card': 192,
+  'custom:quiet-luxe-schedule-card': 140,
+  'custom:quiet-luxe-media-card#player': 178,
+  'custom:quiet-luxe-media-card#bar': 68,
+  'custom:ql-row-door-motion': 57,
+  /* Not present on the instance these were measured on — Figma values. */
   'custom:quiet-luxe-light-card': 108,
   'custom:quiet-luxe-media-card': 50,
-  'custom:quiet-luxe-media-card#player': 178,
-  'custom:quiet-luxe-media-card#bar': 84,
   'custom:quiet-luxe-energy-card': 64,
   'custom:quiet-luxe-energy-card#ring': 140,
   'custom:quiet-luxe-sensor-tile': 84,
   'custom:quiet-luxe-device-cutout-card': 108,
-  'custom:ql-row-door-motion': 38,
   'custom:ql-row-presence': 38,
-  heading: 16,
+  heading: 26,
 };
 
 const DEFAULT_CARD_HEIGHT_PX = 108;
