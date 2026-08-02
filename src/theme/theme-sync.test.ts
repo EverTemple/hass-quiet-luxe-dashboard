@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { load } from 'js-yaml';
 import { describe, expect, it } from 'vitest';
+import { FONT_BODY_STACK, FONT_DISPLAY_STACK } from '../fonts/font-stacks';
 import { colorCssVariables, dimensionCssVariables } from '../tokens/css';
 import { COLORS, DIMENSIONS, SHADOW_CARD_LIGHT } from '../tokens/palette';
 
@@ -52,6 +53,14 @@ describe('themes/quiet-luxe.yaml', () => {
     for (const [cssVar, value] of Object.entries(dimensionCssVariables())) {
       expect(theme[cssVar.slice(2)]).toBe(value);
     }
+  });
+
+  it('carries the same font stacks as the injected stylesheet', () => {
+    // HA applies theme variables as inline styles on <html>, which outrank the
+    // injected :root rules — so a stale stack here would silently drop the CJK
+    // system-font fallbacks for anyone who installs the theme.
+    expect(theme['ql-font-display']).toBe(FONT_DISPLAY_STACK);
+    expect(theme['ql-font-body']).toBe(FONT_BODY_STACK);
   });
 
   it('applies shape and depth tokens', () => {

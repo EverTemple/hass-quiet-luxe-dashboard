@@ -89,6 +89,23 @@ describe('bundle entry', () => {
     );
   });
 
+  it('installs its own Latin webfaces on import (zero-file-copy install)', () => {
+    const fonts = document.getElementById(bundle.INLINE_FONT_STYLE_ID);
+    expect(fonts?.textContent).toContain('@font-face');
+    expect(fonts?.textContent).toContain('data:font/woff2;base64,');
+  });
+
+  it('survives the optional font stylesheet failing to load', () => {
+    // The test environment cannot fetch the resolved stylesheet URL, which is
+    // the same failure path a flat HACS install takes (404 on fonts.css): the
+    // link removes itself rather than lingering dead in <head>, and the inlined
+    // faces still carry the typography.
+    expect(document.getElementById('quiet-luxe-fonts')).toBeNull();
+    expect(document.getElementById(bundle.INLINE_FONT_STYLE_ID)?.textContent).toContain(
+      '@font-face',
+    );
+  });
+
   it('re-exports the Plan 3b public API', () => {
     expect(bundle.QuietLuxeMediaCard).toBeDefined();
     expect(bundle.QuietLuxeCameraCard).toBeDefined();

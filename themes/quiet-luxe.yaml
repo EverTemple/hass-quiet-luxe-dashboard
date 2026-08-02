@@ -4,8 +4,11 @@ quiet-luxe:
   # Shape & type (mode-independent)
   ha-card-border-radius: "18px"
   ha-card-border-width: "1px"
-  ql-font-display: "Marcellus, 'Noto Serif TC', 'Noto Serif SC', serif"
-  ql-font-body: "Outfit, 'Noto Sans TC', 'Noto Sans SC', sans-serif"
+  # LOCKED to src/fonts/font-stacks.ts (src/theme/theme-sync.test.ts enforces).
+  # HA applies these as inline styles on <html>, outranking the :root rules the
+  # bundle injects, so the CJK system-font fallbacks must be repeated here.
+  ql-font-display: "Marcellus, 'Noto Serif TC', 'Songti TC', 'Source Han Serif TC', 'Noto Serif CJK TC', 'PMingLiU', 'Noto Serif SC', 'Songti SC', 'Source Han Serif SC', 'Noto Serif CJK SC', 'SimSun', serif"
+  ql-font-body: "Outfit, 'Noto Sans TC', 'PingFang TC', 'PingFang HK', 'Hiragino Sans TC', 'Hiragino Sans CNS', 'Microsoft JhengHei', 'Noto Sans CJK TC', 'Source Han Sans TC', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif"
   # ql-* dimension passthrough (HA exposes each key as --<key>)
   ql-radius-card: "18px"
   ql-radius-chip: "999px"

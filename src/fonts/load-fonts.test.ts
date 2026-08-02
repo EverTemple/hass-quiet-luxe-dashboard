@@ -48,4 +48,29 @@ describe('injectFontStylesheet', () => {
     injectFontStylesheet(doc, LOCAL_MODULE_URL);
     expect(doc.querySelectorAll('#quiet-luxe-fonts')).toHaveLength(1);
   });
+
+  it('stays off the render-critical path until the sheet loads', () => {
+    const doc = freshDocument();
+    injectFontStylesheet(doc, LOCAL_MODULE_URL);
+    const link = doc.getElementById('quiet-luxe-fonts') as HTMLLinkElement;
+    expect(link.media).toBe('print');
+    link.dispatchEvent(new doc.defaultView!.Event('load'));
+    expect(link.media).toBe('all');
+  });
+
+  it('drops the link silently when the optional stylesheet is absent', () => {
+    const doc = freshDocument();
+    const errors: unknown[] = [];
+    const original = console.error;
+    console.error = (...args: unknown[]): void => void errors.push(args);
+    try {
+      injectFontStylesheet(doc, HACS_MODULE_URL);
+      const link = doc.getElementById('quiet-luxe-fonts') as HTMLLinkElement;
+      expect(() => link.dispatchEvent(new doc.defaultView!.Event('error'))).not.toThrow();
+      expect(doc.getElementById('quiet-luxe-fonts')).toBeNull();
+    } finally {
+      console.error = original;
+    }
+    expect(errors).toHaveLength(0);
+  });
 });

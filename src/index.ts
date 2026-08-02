@@ -1,5 +1,6 @@
 import { version } from '../package.json';
 import { injectFontStylesheet } from './fonts/load-fonts';
+import { injectInlineFonts } from './fonts/inline-fonts';
 import './elements/ql-canvas';
 import './elements/ql-status-dot';
 import './elements/ql-badge';
@@ -77,6 +78,13 @@ export { navigate } from './cards/navigate';
 export { registerCard, type CustomCardEntry } from './cards/register';
 export * from './tokens/palette';
 export { colorCssVariables, cssVariableBlock, dimensionCssVariables } from './tokens/css';
+export { INLINE_FONT_CSS, INLINE_FONT_STYLE_ID, injectInlineFonts } from './fonts/inline-fonts';
+export {
+  FONT_BODY_STACK,
+  FONT_BODY_STACK_HANS,
+  FONT_DISPLAY_STACK,
+  FONT_DISPLAY_STACK_HANS,
+} from './fonts/font-stacks';
 export { resolveLocale } from './i18n/resolve';
 export { t } from './i18n/translate';
 export { SUPPORTED_LOCALES, type Locale } from './i18n/types';
@@ -180,6 +188,10 @@ export {
   type RegistrySnapshot,
 } from './strategy/registry';
 
+// The bundle carries its own Latin webfaces, so a HACS-only install renders in
+// the right typefaces with no files copied into /config. The /local font
+// stylesheet stays an optional CJK upgrade.
+injectInlineFonts(document);
 injectFontStylesheet(document, import.meta.url);
 
 console.info(

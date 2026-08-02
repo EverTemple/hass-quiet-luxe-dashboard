@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
+import { inlineFontsPlugin } from './scripts/inline-fonts-plugin';
 
 export default defineConfig({
+  plugins: [inlineFontsPlugin()],
   build: {
     target: 'es2021',
     outDir: 'dist',
