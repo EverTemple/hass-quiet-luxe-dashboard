@@ -46,6 +46,21 @@ describe('quiet-luxe-sensor-tile', () => {
     expect(tile.shadowRoot?.querySelector<QlStatusDot>('ql-status-dot')?.status).toBe('good');
   });
 
+  /**
+   * The label wrapped as "TEMPERATU / RE" on the live room view because the
+   * card's own `display: block` outranked the clamp's `-webkit-box`. The class
+   * is the whole contract, so assert it is still on the element.
+   */
+  it('clamps the eyebrow to one line and declares no display of its own', async () => {
+    const tile = await mount(
+      { entity: 'sensor.living_temp', metric: 'temp' },
+      makeMockHass([sensorEntity('sensor.living_temp', '21.4')]),
+    );
+    expect(tile.shadowRoot?.querySelector('.eyebrow')?.classList.contains('ql-clamp-1')).toBe(true);
+    const sheet = QuietLuxeSensorTile.styles.toString();
+    expect(/\.eyebrow\s*\{[^}]*display\s*:/.test(sheet), 'eyebrow must not set display').toBe(false);
+  });
+
   it('config name overrides the metric label', async () => {
     const tile = await mount(
       { entity: 'sensor.uv', metric: 'uv', name: 'UV Index' },
@@ -70,7 +85,7 @@ describe('quiet-luxe-sensor-tile', () => {
     const missing = await mount({ entity: 'sensor.ghost', metric: 'humidity' }, makeMockHass());
     expect(missing.shadowRoot?.querySelector('.value')?.textContent?.trim()).toBe('—');
     expect(missing.getCardSize()).toBe(1);
-    expect(missing.getGridOptions()).toEqual({ rows: 'auto', columns: 4 });
+    expect(missing.getGridOptions()).toEqual({ rows: 'auto', columns: 6 });
   });
 
   it('the identity region opens HA’s more-info dialog for the tile entity', async () => {

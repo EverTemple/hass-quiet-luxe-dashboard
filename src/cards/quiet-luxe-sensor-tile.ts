@@ -2,7 +2,7 @@ import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-status-dot';
 import type { TranslationKey } from '../i18n/locales/en';
 import { t } from '../i18n/translate';
-import { contentGrid, COLUMNS_THIRD, type QlGridOptions } from './grid-options';
+import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 import {
@@ -55,8 +55,18 @@ export class QuietLuxeSensorTile extends QlBaseCard {
     return 1;
   }
 
+  /**
+   * Half a view track, not a third.
+   *
+   * A third of a track is 109–119px on every breakpoint the dashboard runs at
+   * (measured on the live room view at 390 / 1180 / 1680 / 2000). Inside 12px
+   * padding and beside the status dot the eyebrow gets 67–77px, and
+   * "TEMPERATURE" at 11px with the design's 0.14em tracking is ~89px — so the
+   * longest metric label could never fit, at any width. Half a track is
+   * 171–187px and every label fits at the tracking the design asks for.
+   */
   getGridOptions(): QlGridOptions {
-    return contentGrid(COLUMNS_THIRD);
+    return contentGrid(COLUMNS_HALF);
   }
 
   static override styles: CSSResultGroup = [
@@ -81,8 +91,11 @@ export class QuietLuxeSensorTile extends QlBaseCard {
         justify-content: space-between;
         gap: var(--ql-space-s, 8px);
       }
+      /* No display declaration here: the element carries ql-clamp-1, and a
+         display of the same specificity declared later silently defeats the
+         clamp's -webkit-box, letting a long label wrap mid-word instead of
+         ellipsing on one line. */
       .eyebrow {
-        display: block;
         margin: 0;
         color: var(--ql-ink-muted, #8c8578);
         font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
