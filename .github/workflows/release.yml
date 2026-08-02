@@ -45,4 +45,4 @@ jobs:
         run: >
           gh release create "v${{ inputs.version }}"
           --title "v${{ inputs.version }}" --generate-notes
-          dist/quiet-luxe.zip
+          dist/quiet-luxe.js dist/quiet-luxe.zip

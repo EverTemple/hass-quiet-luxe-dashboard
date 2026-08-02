@@ -8,18 +8,22 @@ Design source of truth: Figma file `vaDrJjhYuziE1lVvNvJqwP`.
 
 ## Install (per instance)
 
-> This repo is private — HACS requires public repos, so installation is
-> manual from the GitHub release asset. If this repo is ever made public,
-> HACS custom-repository install works via `hacs.json` (`zip_release`).
+### HACS (recommended)
 
-1. Download `quiet-luxe.zip` from the latest GitHub release
-   (`gh release download v0.1.0 -p quiet-luxe.zip` or the Releases page).
-2. Extract it into `/config/www/quiet-luxe/` on the instance (File editor
-   add-on, Samba, or SSH) so that `/config/www/quiet-luxe/quiet-luxe.js`
-   and `/config/www/quiet-luxe/fonts/fonts.css` exist.
-3. Register the resource: Settings → Dashboards → ⋮ (top right) →
-   Resources → Add resource → URL `/local/quiet-luxe/quiet-luxe.js`, type
-   **JavaScript module**.
+1. HACS → ⋮ (top right) → **Custom repositories** → Repository
+   `https://github.com/EverTemple/hass-quiet-luxe-dashboard`, type
+   **Dashboard** → Add.
+2. Search for **Quiet Luxe** in HACS and install it. HACS places the bundle
+   at `/config/www/community/hass-quiet-luxe-dashboard/quiet-luxe.js` and
+   auto-registers the dashboard resource
+   (`/hacsfiles/hass-quiet-luxe-dashboard/quiet-luxe.js`) — no manual
+   resource step needed on storage-mode dashboards.
+3. **Fonts (one-time):** HACS plugin folders are flat, so the font tree
+   ships separately. Download `quiet-luxe.zip` from the latest GitHub
+   release, and copy its `fonts/` folder to `/config/www/quiet-luxe/fonts/`
+   (File editor add-on, Samba, or SSH) so that
+   `/config/www/quiet-luxe/fonts/fonts.css` exists. The bundle loads fonts
+   from `/local/quiet-luxe/fonts/fonts.css` when installed via HACS.
 4. Copy `themes/quiet-luxe.yaml` into your `config/themes/` directory (ensure
    `frontend: themes: !include_dir_merge_named themes` in `configuration.yaml`),
    reload themes, then select the **quiet-luxe** theme in your user profile
@@ -29,6 +33,18 @@ Design source of truth: Figma file `vaDrJjhYuziE1lVvNvJqwP`.
    open its raw configuration editor, and paste your per-home strategy config
    (see "Dashboard strategy" below).
 
+### Manual (alternative)
+
+1. Download `quiet-luxe.zip` from the latest GitHub release
+   (`gh release download -p quiet-luxe.zip` or the Releases page).
+2. Extract it into `/config/www/quiet-luxe/` on the instance so that
+   `/config/www/quiet-luxe/quiet-luxe.js`
+   and `/config/www/quiet-luxe/fonts/fonts.css` exist.
+3. Register the resource: Settings → Dashboards → ⋮ (top right) →
+   Resources → Add resource → URL `/local/quiet-luxe/quiet-luxe.js`, type
+   **JavaScript module**.
+4. Continue with the theme and dashboard steps (4–5) above.
+
 Fonts (Marcellus, Outfit, Noto Sans/Serif TC+SC) are bundled and served from
 your HA instance — no external font CDN is contacted at runtime.
 
@@ -36,9 +52,9 @@ your HA instance — no external font CDN is contacted at runtime.
 
 - `npm install` then `npm run test` / `npm run lint` / `npm run typecheck`
 - `npm run build` → `dist/quiet-luxe.js` + `dist/fonts/`
-- `dist/` is never committed; releases attach `quiet-luxe.zip` (bundle +
-  woff2 fonts) as a GitHub release asset used for the manual install above
-  (and by HACS `zip_release` if the repo is ever made public).
+- `dist/` is never committed; releases attach `quiet-luxe.js` (installed by
+  HACS via `hacs.json` `filename`) and `quiet-luxe.zip` (bundle + woff2
+  fonts, used for the manual install and the HACS fonts step above).
 
 ## Repository docs
 
