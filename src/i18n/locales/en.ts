@@ -160,6 +160,17 @@ export const en = {
   'hvac.auto': 'Auto',
   'hvac.dry': 'Dry',
   'hvac.fan_only': 'Fan',
+  'common.save': 'Save',
+  'room.background': 'Room background',
+  'room.image_url': 'Image path or URL',
+  'room.image_hint': 'Files in config/www are served from /local',
+  'room.edit_background': 'Change background',
+  'room.remove_photo': 'Remove photo',
+  'room.save_failed': 'Could not save the background',
+  'schedule.tasks': 'Tasks',
+  'schedule.nothing_scheduled': 'Nothing scheduled',
+  'tasks.due_today': 'Due today',
+  'tasks.due_tomorrow': 'Tomorrow',
 } as const;
 
 export type TranslationKey = keyof typeof en;

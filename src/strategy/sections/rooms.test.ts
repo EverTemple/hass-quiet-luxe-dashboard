@@ -79,6 +79,18 @@ describe('roomPhoto', () => {
     expect(roomPhoto(ctx.home, mockArea('bedroom', 'Bedroom'))).toBeUndefined();
     expect(roomCardFor(ctx, mockArea('bedroom', 'Bedroom')).image).toBeUndefined();
   });
+
+  /* The card's picker writes the AREA picture, which a YAML override would
+     then beat — so a pinned room is never offered a control that cannot win. */
+  it('withholds area_id from rooms whose photo is pinned in YAML', () => {
+    const ctx = makeContext({
+      home: { rooms: { living: { photo: '/local/custom.jpg' } } },
+      snapshot,
+      entities,
+    });
+    expect(roomCardFor(ctx, mockArea('living', 'Living Room')).area_id).toBeUndefined();
+    expect(roomCardFor(ctx, mockArea('bedroom', 'Bedroom')).area_id).toBe('bedroom');
+  });
 });
 
 describe('roomCardFor / roomsSection', () => {
@@ -88,8 +100,10 @@ describe('roomCardFor / roomsSection', () => {
       type: 'custom:quiet-luxe-room-card',
       name: 'Living Room',
       image: '/local/quiet-luxe/rooms/living.jpg',
+      area_id: 'living',
       navigation_path: '/quiet-luxe/room-living',
       temperature_entity: 'sensor.living_temp',
+      humidity_entity: undefined,
       aqi_entity: undefined,
       lights_entity: 'light.living_ceiling',
       chips: [

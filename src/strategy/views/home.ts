@@ -3,7 +3,6 @@ import { carSection } from '../sections/car';
 import { climateSection } from '../sections/climate';
 import { energySection } from '../sections/energy';
 import { mediaSection } from '../sections/media';
-import { presenceSection } from '../sections/presence';
 import { roomsSection } from '../sections/rooms';
 import { scheduleSection } from '../sections/schedule';
 import { securitySection } from '../sections/security';
@@ -34,7 +33,9 @@ export function headerCardConfig(ctx: StrategyContext): LovelaceCardConfig {
  * layout collapses max_columns: 4 to a single column on phones; the rooms grid
  * spans 2 of 4 columns (≈ the iPad 64% left zone), the rest fill the rail.
  * Section order follows the mobile priority (Decision 10): rooms → climate →
- * music → cameras/energy → schedule → presence → vacuum/car glance.
+ * music → cameras/energy → schedule → vacuum/car glance. Presence is not a
+ * section: it lives in the header's top-left cluster (Figma header/home-v2),
+ * and a second copy at the bottom of the view was pure duplication.
  */
 export function homeView(ctx: StrategyContext): LovelaceViewConfig {
   const header: LovelaceSectionConfig = {
@@ -50,7 +51,6 @@ export function homeView(ctx: StrategyContext): LovelaceViewConfig {
     securitySection(ctx),
     energySection(ctx),
     scheduleSection(ctx),
-    presenceSection(ctx),
     vacuumSection(ctx),
     carSection(ctx),
   ].filter(isSection);

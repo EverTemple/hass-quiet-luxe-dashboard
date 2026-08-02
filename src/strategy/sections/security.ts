@@ -22,16 +22,43 @@ export function orderedCameras(ctx: StrategyContext): ReadonlyArray<string> {
     .sort((a, b) => primaryRank(a) - primaryRank(b));
 }
 
-/** Home glance: two thumbnails, primary camera first (spec §6). */
+/**
+ * The camera's own motion sensor, when the integration ships one on the same
+ * device — it is what promotes the card to state=motion.
+ */
+export function motionCompanion(ctx: StrategyContext, cameraId: string): string | undefined {
+  const motions = new Set(ctx.registry.all('binary_sensor', 'motion'));
+  return ctx.registry.siblings(cameraId).find((id) => motions.has(id));
+}
+
+function cameraCard(
+  ctx: StrategyContext,
+  entity: string,
+  size: 'm' | 'l',
+): LovelaceCardConfig {
+  const motion = motionCompanion(ctx, entity);
+  return {
+    type: 'custom:quiet-luxe-camera-card',
+    entity,
+    size,
+    ...(motion === undefined ? {} : { motion_entity: motion }),
+  };
+}
+
+/**
+ * Home glance: two cameras at the room-card footprint, primary first (spec §6).
+ * The section spans two view columns so the pair sits 2-up exactly like the
+ * Rooms grid — the old glance thumbnails were too small to read.
+ */
 export function securitySection(ctx: StrategyContext): LovelaceSectionConfig | null {
   const cards = orderedCameras(ctx)
     .slice(0, 2)
-    .map((entity) => ({
-      type: 'custom:quiet-luxe-camera-card',
-      entity,
-      form: 'glance',
-    }));
-  return sectionOf(headingCard(ctx.locale, 'section.cameras', viewUrl(ctx.home, PATHS.security)), cards);
+    .map((entity) => cameraCard(ctx, entity, 'm'));
+  return sectionOf(
+    headingCard(ctx.locale, 'section.cameras', viewUrl(ctx.home, PATHS.security)),
+    cards,
+    2,
+  );
 }
 
 function motionRow(ctx: StrategyContext, entity: string): LovelaceCardConfig {
@@ -66,15 +93,15 @@ export function doorMotionRows(
 export function cameraWallCards(ctx: StrategyContext): ReadonlyArray<LovelaceCardConfig> {
   const useWebrtc = ctx.home.camera_engine === 'webrtc' && ctx.hasWebrtcCard;
   return orderedCameras(ctx).map((entity) =>
-    useWebrtc
-      ? { type: 'custom:webrtc-camera', entity }
-      : { type: 'custom:quiet-luxe-camera-card', entity, form: 'full' },
+    useWebrtc ? { type: 'custom:webrtc-camera', entity } : cameraCard(ctx, entity, 'l'),
   );
 }
 
 export function securityViewSections(ctx: StrategyContext): ReadonlyArray<LovelaceSectionConfig> {
   return [
-    sectionOf(headingCard(ctx.locale, 'section.cameras'), cameraWallCards(ctx)),
+    /* Two view columns, so the wall is 2-up on a tablet and full width on a
+       phone — the largest the cameras can be without leaving the grid. */
+    sectionOf(headingCard(ctx.locale, 'section.cameras'), cameraWallCards(ctx), 2),
     sectionOf(headingCard(ctx.locale, 'section.doors'), doorMotionRows(ctx)),
   ].filter(isSection);
 }

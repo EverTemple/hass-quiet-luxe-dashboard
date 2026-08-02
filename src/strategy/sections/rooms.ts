@@ -54,12 +54,18 @@ export function roomCardFor(ctx: StrategyContext, area: AreaEntry): LovelaceCard
     label,
   }));
   const photo = roomPhoto(ctx.home, area);
+  /* The card's picker writes the AREA's picture, which a YAML `rooms.<id>.photo`
+     would then override — so a pinned room is not offered the control at all
+     rather than accepting an edit it would silently discard. */
+  const pinnedInYaml = ctx.home.rooms?.[areaId]?.photo !== undefined;
   return {
     type: 'custom:quiet-luxe-room-card',
     name: roomName(ctx.home, area),
     ...(photo === undefined ? {} : { image: photo }),
+    ...(pinnedInYaml ? {} : { area_id: areaId }),
     navigation_path: viewUrl(ctx.home, roomPath(areaId)),
     temperature_entity: registry.inArea(areaId, 'sensor', 'temperature')[0],
+    humidity_entity: registry.inArea(areaId, 'sensor', 'humidity')[0],
     aqi_entity: registry.inArea(areaId, 'sensor', 'aqi')[0],
     lights_entity: registry.inArea(areaId, 'light')[0],
     chips,

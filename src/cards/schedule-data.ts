@@ -100,6 +100,39 @@ export function formatAgendaTime(item: AgendaItem, locale: Locale): string {
   return `${weekday} ${hours}:${minutes}`;
 }
 
+/**
+ * Human due label for a task row (Figma `card/schedule-v2` tasks view):
+ * "Due today" / "Tomorrow" for the two dates people actually plan around, a
+ * localized short weekday inside the coming week, and a localized date beyond
+ * it. Returns undefined when the item has no due date, so the row shows none.
+ */
+export function formatDue(
+  due: string | undefined,
+  locale: Locale,
+  now: Date = new Date(),
+): string | undefined {
+  if (due === undefined) {
+    return undefined;
+  }
+  const dueDate = new Date(due);
+  if (Number.isNaN(dueDate.getTime())) {
+    return undefined;
+  }
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDue = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+  const days = Math.round((startOfDue.getTime() - startOfToday.getTime()) / 86_400_000);
+  if (days <= 0) {
+    return t(locale, 'tasks.due_today');
+  }
+  if (days === 1) {
+    return t(locale, 'tasks.due_tomorrow');
+  }
+  if (days < 7) {
+    return new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(dueDate);
+  }
+  return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(dueDate);
+}
+
 /** Due highlight rule: overdue or due today (spec §6 "due highlights"). */
 export function isDueSoon(due: string | undefined, now: Date = new Date()): boolean {
   if (due === undefined) {

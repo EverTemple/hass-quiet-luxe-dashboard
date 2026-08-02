@@ -33,7 +33,7 @@ describe('homeView', () => {
     });
   });
 
-  it('includes the Subang matrix sections: rooms, climate, music, cameras, energy, schedule, presence, car', () => {
+  it('includes the Subang matrix sections: rooms, climate, music, cameras, energy, schedule, car', () => {
     const view = homeView(subangContext());
     const headings = view.sections
       .flatMap((section) => section.cards)
@@ -46,7 +46,6 @@ describe('homeView', () => {
       'Cameras',
       'Energy',
       'Schedule',
-      'Presence',
       'Car',
     ]);
   });

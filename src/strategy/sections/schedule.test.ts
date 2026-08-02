@@ -14,17 +14,16 @@ const snapshot = {
 const entities = [makeEntity('calendar.family', 'off'), makeEntity('todo.family_tasks', '3')];
 
 describe('scheduleSection', () => {
-  it('emits schedule + tasks cards from discovered calendar/todo entities', () => {
+  /* ONE card. The schedule card and the tasks card used to be emitted side
+     by side into the same section, where they overlapped. */
+  it('emits a single schedule card carrying both sources', () => {
     const section = scheduleSection(makeContext({ home: { calendar: 'google' }, snapshot, entities }));
+    expect(section?.cards).toHaveLength(2);
     expect(section?.cards[1]).toEqual({
       type: 'custom:quiet-luxe-schedule-card',
       calendars: ['calendar.family'],
-      todo_entity: 'todo.family_tasks',
       days: 7,
-    });
-    expect(section?.cards[2]).toEqual({
-      type: 'custom:quiet-luxe-tasks-card',
-      entity: 'todo.family_tasks',
+      todo_entity: 'todo.family_tasks',
     });
   });
 
@@ -36,18 +35,18 @@ describe('scheduleSection', () => {
     expect(scheduleSection(makeContext({ home: { calendar: 'google' } }))).toBeNull();
   });
 
-  /* A schedule card with no calendars is a segmented control over nothing, and
-     it collided with the tasks card beside it. */
-  it('emits only the tasks card when the home has no calendars', () => {
+  /* Tung Chung: a to-do list and no calendar integration. The card opens on
+     Tasks and offers no Schedule segment. */
+  it('emits a todo-only schedule card when the home has no calendars', () => {
     const ctx = makeContext({
       home: { calendar: 'google' },
       snapshot: { areas: [], devices: [], entities: [mockRegEntity('todo.shopping_list')] },
       entities: [makeEntity('todo.shopping_list', '0')],
     });
     const section = scheduleSection(ctx);
-    expect(section?.cards.map((card) => card.type)).toEqual([
-      'heading',
-      'custom:quiet-luxe-tasks-card',
+    expect(section?.cards).toEqual([
+      { type: 'heading', heading: 'Schedule' },
+      { type: 'custom:quiet-luxe-schedule-card', todo_entity: 'todo.shopping_list' },
     ]);
   });
 });

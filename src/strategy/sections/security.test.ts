@@ -4,6 +4,7 @@ import { makeContext, mockArea, mockDevice, mockRegEntity } from '../../testing/
 import {
   cameraWallCards,
   doorMotionRows,
+  motionCompanion,
   orderedCameras,
   securitySection,
   securityViewSections,
@@ -14,7 +15,7 @@ const snapshot = {
   devices: [mockDevice('dev-motion', 'living')],
   entities: [
     mockRegEntity('camera.back', {}),
-    mockRegEntity('camera.front', { labels: ['ql-primary-camera'] }),
+    mockRegEntity('camera.front', { labels: ['ql-primary-camera'], device_id: 'dev-motion' }),
     mockRegEntity('camera.side', {}),
     mockRegEntity('binary_sensor.front_door', {}),
     mockRegEntity('binary_sensor.hall_motion', { device_id: 'dev-motion' }),
@@ -31,16 +32,31 @@ const entities = [
 ];
 
 describe('orderedCameras / securitySection', () => {
-  it('puts the ql-primary-camera first and shows two glance thumbs', () => {
+  /* The glance used to be a 60x34 thumbnail nobody could read. It is now a
+     room-card footprint, two per row in a two-column section. */
+  it('puts the ql-primary-camera first and shows two room-sized cards', () => {
     const ctx = makeContext({ snapshot, entities });
     expect(orderedCameras(ctx)).toEqual(['camera.front', 'camera.back', 'camera.side']);
     const section = securitySection(ctx);
-    expect(section?.cards).toHaveLength(3); // heading + 2 thumbs
+    expect(section?.cards).toHaveLength(3); // heading + 2 cards
+    expect(section?.column_span).toBe(2);
     expect(section?.cards[1]).toEqual({
       type: 'custom:quiet-luxe-camera-card',
       entity: 'camera.front',
-      form: 'glance',
+      size: 'm',
+      motion_entity: 'binary_sensor.hall_motion',
     });
+    expect(section?.cards[2]).toEqual({
+      type: 'custom:quiet-luxe-camera-card',
+      entity: 'camera.back',
+      size: 'm',
+    });
+  });
+
+  it('wires the camera to a motion sensor only when they share a device', () => {
+    const ctx = makeContext({ snapshot, entities });
+    expect(motionCompanion(ctx, 'camera.front')).toBe('binary_sensor.hall_motion');
+    expect(motionCompanion(ctx, 'camera.back')).toBeUndefined();
   });
 
   it('returns null when there are no cameras', () => {
@@ -88,13 +104,19 @@ describe('cameraWallCards / securityViewSections', () => {
     expect(cameraWallCards(ctx)[0]).toEqual({ type: 'custom:webrtc-camera', entity: 'camera.front' });
   });
 
-  it('falls back to snapshot full cards otherwise', () => {
+  it('falls back to large snapshot cards otherwise', () => {
     const ctx = makeContext({ home: { camera_engine: 'webrtc' }, snapshot, entities });
     expect(cameraWallCards(ctx)[0]).toEqual({
       type: 'custom:quiet-luxe-camera-card',
       entity: 'camera.front',
-      form: 'full',
+      size: 'l',
+      motion_entity: 'binary_sensor.hall_motion',
     });
+  });
+
+  it('gives the camera wall two view columns so the cards can be large', () => {
+    const sections = securityViewSections(makeContext({ snapshot, entities }));
+    expect(sections[0]?.column_span).toBe(2);
   });
 
   it('view sections cover the wall and the door/motion list; empty home yields none', () => {

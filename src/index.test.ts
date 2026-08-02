@@ -28,7 +28,6 @@ const CARD_TAGS = [
   'quiet-luxe-camera-card',
   'quiet-luxe-energy-card',
   'quiet-luxe-schedule-card',
-  'quiet-luxe-tasks-card',
   'quiet-luxe-car-card',
   'quiet-luxe-vacuum-card',
   'quiet-luxe-device-cutout-card',
@@ -133,7 +132,6 @@ describe('bundle entry', () => {
     expect(bundle.QuietLuxeCameraCard).toBeDefined();
     expect(bundle.QuietLuxeEnergyCard).toBeDefined();
     expect(bundle.QuietLuxeScheduleCard).toBeDefined();
-    expect(bundle.QuietLuxeTasksCard).toBeDefined();
     expect(bundle.QuietLuxeCarCard).toBeDefined();
     expect(bundle.QuietLuxeVacuumCard).toBeDefined();
     expect(bundle.QuietLuxeDeviceCutoutCard).toBeDefined();

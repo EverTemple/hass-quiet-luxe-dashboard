@@ -9,6 +9,12 @@ async function mount(props: Partial<QlHeaderHome>): Promise<QlHeaderHome> {
   return el;
 }
 
+const HOUSEHOLD = [
+  { name: 'Steven', home: true },
+  { name: 'Mei', home: true },
+  { name: 'Sam', home: false },
+];
+
 describe('ql-header-home', () => {
   it('mobile variant renders a localized time-of-day greeting with the user name', async () => {
     const el = await mount({
@@ -46,27 +52,83 @@ describe('ql-header-home', () => {
         homeName: 'Tung Chung',
         userName: 'Steven',
         hour: 9,
-        presence: 'Steven & Mei home',
+        people: HOUSEHOLD,
       });
       const text = el.shadowRoot?.textContent ?? '';
-      expect(el.shadowRoot?.querySelector('h1')?.textContent?.trim()).toBe('Tung Chung');
-      expect(text).not.toContain('Good morning');
-      expect(text).not.toContain('Steven,');
+      expect(el.shadowRoot?.querySelector('h1')?.textContent?.trim()).toBe('Good morning');
+      expect(text).not.toContain('Good morning, Steven');
       el.remove();
     }
   });
 
-  it('renders meta and champagne presence, and a chip slot on ipad/desktop', async () => {
+  /* v2 leads with presence: avatars, who is home, then the home name as an
+     eyebrow — all above the greeting, on every breakpoint. */
+  it('puts the presence cluster first, before the greeting', async () => {
+    for (const variant of ['mobile', 'ipad', 'desktop'] as const) {
+      const el = await mount({ variant, homeName: 'Subang Jaya', people: HOUSEHOLD, hour: 19 });
+      const root = el.shadowRoot;
+      const cluster = root?.querySelector('.presence-cluster');
+      const greeting = root?.querySelector('h1');
+      expect(cluster).not.toBeNull();
+      expect(greeting).not.toBeNull();
+      /* DOCUMENT_POSITION_FOLLOWING: the greeting comes after the cluster. */
+      expect(
+        (cluster?.compareDocumentPosition(greeting as Node) ?? 0) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(root?.querySelector('.presence')?.textContent).toBe('Steven, Mei home');
+      expect(root?.querySelector('.home-name')?.textContent).toBe('Subang Jaya');
+      expect(root?.querySelectorAll('.avatar')).toHaveLength(3);
+      el.remove();
+    }
+  });
+
+  it('marks away people apart from the ones at home', async () => {
+    const el = await mount({ variant: 'mobile', homeName: 'Home', people: HOUSEHOLD });
+    const away = [...(el.shadowRoot?.querySelectorAll('.avatar') ?? [])].map((node) =>
+      node.classList.contains('away'),
+    );
+    expect(away).toEqual([false, false, true]);
+    el.remove();
+  });
+
+  it('says nobody is home, and drops the cluster when the home has no people', async () => {
+    const empty = await mount({ variant: 'mobile', homeName: 'Home', people: [] });
+    expect(empty.presenceLabel()).toBe('');
+    expect(empty.shadowRoot?.querySelector('.presence')).toBeNull();
+    empty.remove();
+
+    const away = await mount({
+      variant: 'mobile',
+      homeName: 'Home',
+      people: [{ name: 'Mei', home: false }],
+    });
+    expect(away.presenceLabel()).toBe('Nobody home');
+    expect(away.shadowRoot?.querySelector('.presence')?.textContent).toBe('Nobody home');
+    away.remove();
+  });
+
+  it('uses a person’s picture when there is one', async () => {
+    const el = await mount({
+      variant: 'mobile',
+      people: [{ name: 'Steven', home: true, picture: '/api/image/steven.png' }],
+    });
+    expect(el.shadowRoot?.querySelector<HTMLImageElement>('img.avatar')?.getAttribute('src')).toBe(
+      '/api/image/steven.png',
+    );
+    el.remove();
+  });
+
+  it('renders meta and a chip slot on ipad/desktop', async () => {
     const el = await mount({
       variant: 'ipad',
       homeName: 'Xiamen',
       meta: 'Fri 1 Aug · 29° · AQI 42',
-      presence: 'Steven home',
+      people: HOUSEHOLD,
     });
     expect(el.shadowRoot?.querySelector('.meta')?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
       'Fri 1 Aug · 29° · AQI 42',
     );
-    expect(el.shadowRoot?.querySelector('.presence')?.textContent).toBe('Steven home');
     expect(el.shadowRoot?.querySelector("slot[name='chip']")).not.toBeNull();
     el.remove();
   });
@@ -86,7 +148,7 @@ describe('ql-header-home', () => {
     expect(metaParts('')).toEqual([]);
   });
 
-  it('keeps the home name on one line in the row variant', async () => {
+  it('keeps the greeting on one line in the row variant', async () => {
     const el = await mount({ variant: 'ipad', homeName: 'Tung Chung', meta: '26°' });
     const css = QlHeaderHome.styles.toString();
     expect(css).toContain('header.row .display');

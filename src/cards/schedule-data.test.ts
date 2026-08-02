@@ -6,6 +6,7 @@ import {
   AGENDA_REFRESH_MS,
   fetchAgenda,
   fetchTodoItems,
+  formatDue,
   formatAgendaTime,
   isDueSoon,
   updateTodoItem,
@@ -132,5 +133,24 @@ describe('constants', () => {
   it('locks the agenda defaults', () => {
     expect(AGENDA_DEFAULT_DAYS).toBe(7);
     expect(AGENDA_REFRESH_MS).toBe(900000);
+  });
+});
+
+describe('formatDue', () => {
+  const now = new Date(2026, 7, 1, 12, 0);
+
+  it('names the two dates people plan around, then falls back to weekday and date', () => {
+    expect(formatDue('2026-07-30', 'en', now)).toBe('Due today');
+    expect(formatDue('2026-08-01', 'en', now)).toBe('Due today');
+    expect(formatDue('2026-08-02', 'en', now)).toBe('Tomorrow');
+    expect(formatDue('2026-08-05', 'en', now)).toBe('Wednesday');
+    expect(formatDue('2026-09-20', 'en', now)).toBe('Sep 20');
+  });
+
+  it('is localized and safe on missing or unparseable dates', () => {
+    expect(formatDue('2026-08-01', 'zh-Hant', now)).toBe('今天到期');
+    expect(formatDue('2026-08-02', 'ms', now)).toBe('Esok');
+    expect(formatDue(undefined, 'en', now)).toBeUndefined();
+    expect(formatDue('not-a-date', 'en', now)).toBeUndefined();
   });
 });

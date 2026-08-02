@@ -1,8 +1,7 @@
 import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-header-home';
 import '../elements/ql-header-room';
-import type { QlHeaderVariant } from '../elements/ql-header-home';
-import { t } from '../i18n/translate';
+import type { QlHeaderPerson, QlHeaderVariant } from '../elements/ql-header-home';
 import { contentGrid, type QlGridOptions } from './grid-options';
 import { navigate } from './navigate';
 import { QlBaseCard } from './ql-base-card';
@@ -99,8 +98,13 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
     return contentGrid('full');
   }
 
+  /**
+   * "Saturday, Aug 2 · 28° · AQI 34" (Figma header/home-v2). The date leads
+   * because it is the one value on the dashboard nothing else carries; it is
+   * formatted through Intl, so it follows the session locale for free.
+   */
   meta(): string {
-    const parts: string[] = [];
+    const parts: string[] = [this.today()];
     const weatherId = this.config?.weather_entity;
     if (weatherId !== undefined && this.availability(weatherId) === 'available') {
       const temperature: unknown = this.entity(weatherId)?.attributes.temperature;
@@ -115,18 +119,24 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
     return parts.join(' · ');
   }
 
-  presenceLine(): string {
-    const persons = this.config?.presence_entities ?? [];
-    if (persons.length === 0) {
-      return '';
-    }
-    const names = persons
-      .filter((id) => this.entity(id)?.state === 'home')
-      .map((id) => this.nameOf(id));
-    if (names.length === 0) {
-      return t(this.locale(), 'header.nobody_home');
-    }
-    return `${names.join(' & ')} ${t(this.locale(), 'header.home_suffix')}`;
+  private today(now: Date = new Date()): string {
+    return new Intl.DateTimeFormat(this.locale(), {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+    }).format(now);
+  }
+
+  /**
+   * Resolved people for the header's presence cluster. The label itself is
+   * built inside ql-header-home so the wording lives in one place.
+   */
+  people(): ReadonlyArray<QlHeaderPerson> {
+    return (this.config?.presence_entities ?? []).map((entityId) => ({
+      name: this.nameOf(entityId),
+      picture: this.entity(entityId)?.attributes.entity_picture as string | undefined,
+      home: this.entity(entityId)?.state === 'home',
+    }));
   }
 
   roomStats(): ReadonlyArray<string> {
@@ -184,7 +194,7 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
         .homeName=${config.name}
         .userName=${greet ? (this.hass?.user?.name ?? '') : ''}
         .meta=${this.meta()}
-        .presence=${this.presenceLine()}
+        .people=${this.people()}
         .locale=${this.locale()}
       ></ql-header-home>
     `;

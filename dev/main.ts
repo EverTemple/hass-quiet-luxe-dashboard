@@ -353,17 +353,18 @@ function buildPane(mode: ThemeMode): HTMLElement {
         makeCard('quiet-luxe-camera-card', {
           type: 'custom:quiet-luxe-camera-card',
           entity: 'camera.front_door',
-          form: 'full',
+          size: 'l',
         }),
         makeCard('quiet-luxe-camera-card', {
           type: 'custom:quiet-luxe-camera-card',
           entity: 'camera.front_door',
-          form: 'glance',
+          size: 'm',
+          motion_entity: 'binary_sensor.hall_motion',
         }),
         makeCard('quiet-luxe-camera-card', {
           type: 'custom:quiet-luxe-camera-card',
           entity: 'camera.gate',
-          form: 'glance',
+          size: 'm',
         }),
       ]),
     ]),
@@ -400,9 +401,9 @@ function buildPane(mode: ThemeMode): HTMLElement {
         calendars: ['calendar.family'],
         todo_entity: 'todo.family',
       }),
-      makeCard('quiet-luxe-tasks-card', {
-        type: 'custom:quiet-luxe-tasks-card',
-        entity: 'todo.family',
+      makeCard('quiet-luxe-schedule-card', {
+        type: 'custom:quiet-luxe-schedule-card',
+        todo_entity: 'todo.family',
       }),
     ]),
     section('Car', [

@@ -19,7 +19,6 @@ const CARD_TAGS = [
   'quiet-luxe-camera-card',
   'quiet-luxe-energy-card',
   'quiet-luxe-schedule-card',
-  'quiet-luxe-tasks-card',
   'quiet-luxe-car-card',
   'quiet-luxe-vacuum-card',
   'quiet-luxe-device-cutout-card',
@@ -39,6 +38,7 @@ const CONFIG_FOR: Readonly<Record<string, Record<string, unknown>>> = {
   'quiet-luxe-energy-card': { power_entity: 'sensor.a' },
   'quiet-luxe-sensor-tile': { entity: 'sensor.a', metric: 'temp' },
   'ql-row-presence': { entities: ['person.a'] },
+  'quiet-luxe-schedule-card': { todo_entity: 'todo.a' },
 };
 
 interface GridCard extends HTMLElement {

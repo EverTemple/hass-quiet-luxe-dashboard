@@ -43,7 +43,7 @@ describe('quiet-luxe-header-card', () => {
     );
   });
 
-  it('home form: passes name, greeting user, meta, and presence to ql-header-home', async () => {
+  it('home form: passes name, greeting user, dated meta, and people to ql-header-home', async () => {
     const card = makeCard(
       {
         type: 'custom:quiet-luxe-header-card',
@@ -59,8 +59,14 @@ describe('quiet-luxe-header-card', () => {
     const header = card.shadowRoot?.querySelector('ql-header-home') as QlHeaderHome;
     expect(header.homeName).toBe('Subang Jaya');
     expect(header.userName).toBe('Steven');
-    expect(header.meta).toBe('31° · AQI 42');
-    expect(header.presence).toBe('Steven home');
+    /* The date leads the meta line (Figma header/home-v2); it is formatted
+       through Intl, so the test pins the shape rather than a fixed day. */
+    expect(header.meta.endsWith('· 31° · AQI 42')).toBe(true);
+    expect(header.meta.split(' · ')[0]).toBe(card.meta().split(' · ')[0]);
+    expect(header.people).toEqual([
+      { name: 'Steven', picture: undefined, home: true },
+      { name: 'Mei', picture: undefined, home: false },
+    ]);
   });
 
   it('suppresses the greeting when show_greeting is false (guest kiosk)', async () => {
@@ -87,7 +93,8 @@ describe('quiet-luxe-header-card', () => {
     });
     await card.updateComplete;
     const header = card.shadowRoot?.querySelector('ql-header-home') as QlHeaderHome;
-    expect(header.presence).toBe('Nobody home');
+    expect(header.people).toEqual([{ name: 'Mei', picture: undefined, home: false }]);
+    expect(header.presenceLabel()).toBe('Nobody home');
   });
 
   it('room form: renders ql-header-room with formatted stats', async () => {
