@@ -103,6 +103,16 @@ function headerSection(ctx: StrategyContext, area: AreaEntry): LovelaceSectionCo
  * across two grid rows and the short ones leave holes in the middle of the
  * page; three column-sections sit in one row, each hugging its own content.
  * Below 640px the three collapse into one stack in this order.
+ *
+ * KNOWN DEVIATION, awaiting a decision. The spec gives the room a fixed mobile
+ * priority — lights → climate → covers → media → air & sensors → switches — and
+ * one DOM order has to serve both breakpoints, so the columns decide the phone
+ * stack: climate → lights/covers/switches/music → air & sensors. The spec order
+ * interleaves climate between lights and covers and puts switches last, which
+ * needs them in separate sections, i.e. not this layout. Three columns can lead
+ * with either climate or the controls group; they cannot reproduce the spec's
+ * order. Nothing per-breakpoint is available: a strategy runs once, with no
+ * viewport, and `hui-sections-view` reads no ordering hint of ours.
  */
 export function roomView(ctx: StrategyContext, area: AreaEntry): LovelaceViewConfig {
   const areaId = area.area_id;

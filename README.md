@@ -48,10 +48,12 @@ No external font CDN is contacted at runtime, in any install mode.
 
 ## Using the cards
 
-**Tap a card's name or its reading** to open Home Assistant's own more-info
-dialog for that device. Every card and row does this, so anything a device
-supports is always reachable — including the settings, history and related
-entities the cards deliberately leave out.
+**Tap a card's name or its reading** to open everything that device can be
+told. For most cards that is Home Assistant's own more-info dialog. Climate
+devices instead open the Quiet Luxe control sheet — one surface carrying the
+dial, the modes, fan, swing, humidity and presets — and that sheet has a **Show
+details** button that hands you on to more-info. Either way the settings,
+history and related entities the cards leave out are always one tap away.
 
 **The controls on the card are the everyday ones.** Each card reads what its
 entity actually reports and draws only what that device supports, so no two
@@ -59,9 +61,9 @@ devices get the same control set:
 
 | Device | On the card |
 | --- | --- |
-| Air conditioner, heater (`climate`) | Target temperature, mode, preset, fan speed |
+| Air conditioner, heater (`climate`) | Dial with − / + either side, mode and fan-speed rows, preset |
 | Dehumidifier, humidifier (`humidifier`) | Target humidity, mode |
-| Fan, purifier (`fan`) | Speed, preset, oscillation, airflow direction, rotation |
+| Fan, purifier (`fan`) | Speed, preset, oscillation, airflow direction, rotation; air quality per pollutant, coloured by band |
 | Curtain, blind (`cover`) | Position, open/stop/close, and tilt where fitted |
 | Light | On/off, brightness |
 
