@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { QlStepper, STEPPER_COMMIT_MS } from './ql-stepper';
+import {
+  QlStepper,
+  STEPPER_COMMIT_MS,
+  STEPPER_GLYPH_BOX,
+  STEPPER_GLYPH_OFFSET,
+  STEPPER_GLYPH_THICKNESS,
+} from './ql-stepper';
 
 interface StepperProps {
   value?: number;
@@ -200,5 +206,80 @@ describe('ql-stepper', () => {
     expect(styles).toContain('var(--ql-touch-min, 56px)');
     expect(styles).toContain('var(--ql-accent-champagne, #b08d57)');
     expect(styles).toContain('prefers-reduced-motion');
+  });
+});
+
+/**
+ * The reported defect was misalignment: typed "−"/"+" are placed by the font's
+ * metrics, so they came out at different sizes and both painted below the
+ * button's centre. These assert the geometry that makes that impossible.
+ */
+describe('ql-stepper glyphs', () => {
+  function bars(button: HTMLButtonElement | null): SVGRectElement[] {
+    return [...(button?.querySelectorAll('rect') ?? [])];
+  }
+
+  it('draws both marks as vectors, never as text', async () => {
+    const el = await mount({ value: 23, min: 17, max: 30 });
+    for (const button of [minus(el), plus(el)]) {
+      expect(button?.querySelector('svg')).not.toBeNull();
+      expect(button?.textContent?.trim()).toBe('');
+    }
+  });
+
+  it('draws minus as one bar and plus as that bar plus its mirror', async () => {
+    const el = await mount({ value: 23, min: 17, max: 30 });
+    expect(bars(minus(el))).toHaveLength(1);
+    expect(bars(plus(el))).toHaveLength(2);
+  });
+
+  it('centres every bar in the 20x20 box', async () => {
+    const el = await mount({ value: 23, min: 17, max: 30 });
+    const box = STEPPER_GLYPH_BOX;
+    for (const rect of [...bars(minus(el)), ...bars(plus(el))]) {
+      const x = Number(rect.getAttribute('x'));
+      const y = Number(rect.getAttribute('y'));
+      const w = Number(rect.getAttribute('width'));
+      const h = Number(rect.getAttribute('height'));
+      expect(x + w / 2).toBeCloseTo(box / 2, 10);
+      expect(y + h / 2).toBeCloseTo(box / 2, 10);
+    }
+  });
+
+  it('gives both marks the same 20px span, so the pair reads as one', async () => {
+    const el = await mount({ value: 23, min: 17, max: 30 });
+    const spans = [...bars(minus(el)), ...bars(plus(el))].map((rect) =>
+      Math.max(Number(rect.getAttribute('width')), Number(rect.getAttribute('height'))),
+    );
+    expect(spans).toEqual([STEPPER_GLYPH_BOX, STEPPER_GLYPH_BOX, STEPPER_GLYPH_BOX]);
+  });
+
+  it('uses the Figma bar offset, thickness and corner radius', async () => {
+    const el = await mount({ value: 23, min: 17, max: 30 });
+    expect(STEPPER_GLYPH_OFFSET).toBe(9.25);
+    expect(STEPPER_GLYPH_THICKNESS).toBe(1.5);
+    const bar = bars(minus(el))[0];
+    expect(bar?.getAttribute('y')).toBe('9.25');
+    expect(bar?.getAttribute('height')).toBe('1.5');
+    expect(bar?.getAttribute('rx')).toBe('0.75');
+  });
+
+  it('paints a reached end muted and strokeless rather than dimming the row', () => {
+    const styles = QlStepper.styles.toString();
+    expect(styles).toContain('button:disabled');
+    expect(styles).toMatch(/button:disabled\s*\{[^}]*border-color:\s*transparent/);
+    expect(styles).toMatch(/button:disabled\s*\{[^}]*var\(--ql-ink-muted/);
+  });
+
+  it('centres the value column between the two buttons', () => {
+    const styles = QlStepper.styles.toString();
+    expect(styles).toMatch(/\.readout\s*\{[^}]*flex:\s*1 1 auto/);
+    expect(styles).toMatch(/\.readout\s*\{[^}]*text-align:\s*center/);
+    expect(styles).toMatch(/\.stepper\s*\{[^}]*gap:\s*var\(--ql-space-m, 12px\)/);
+  });
+
+  it('holds a fractional grid to one decimal even at a whole number', async () => {
+    const el = await mount({ value: 27, step: 0.5, unit: '°' });
+    expect(readout(el)).toBe('27.0°');
   });
 });
