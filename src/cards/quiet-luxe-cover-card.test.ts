@@ -246,3 +246,14 @@ describe('quiet-luxe-cover-card tilt', () => {
     expect(card.shadowRoot?.querySelector('.ql-controls')).toBeNull();
   });
 });
+
+describe('quiet-luxe-cover-card layout', () => {
+  /* Live at 390 the Open/Stop/Close row overflowed a half-width card and the
+     third button was clipped mid-word. Thumb targets do not shrink, so the row
+     has to wrap. */
+  it('wraps the operation row instead of clipping a button', () => {
+    const cssText = QuietLuxeCoverCard.styles.toString().replace(/\s+/g, ' ');
+    expect(cssText).toContain('flex-wrap: wrap');
+    expect(cssText).toContain('flex: 1 1 var(--ql-touch-min, 56px)');
+  });
+});

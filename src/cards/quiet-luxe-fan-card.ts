@@ -225,6 +225,16 @@ export class QuietLuxeFanCard extends QlBaseCard {
         .grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+        /* The AIR QUALITY label cannot shrink, so sharing a row with it clamped
+           the device name down to one letter ("T…") in a desktop grid column.
+           Below this width the two readings stack instead. */
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .air {
+          align-items: flex-start;
+        }
       }
       @container (max-width: 143px) {
         .grid,

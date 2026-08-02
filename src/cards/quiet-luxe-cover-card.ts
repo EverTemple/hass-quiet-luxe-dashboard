@@ -69,11 +69,15 @@ export class QuietLuxeCoverCard extends QlBaseCard {
       }
       .ops {
         display: flex;
+        /* Three 56px thumb targets plus gaps need 184px; a half-width card on a
+           phone gives ~148px, and without wrapping the third button was cut off
+           at the card edge ("Clos"). Wrapping keeps the targets full size. */
+        flex-wrap: wrap;
         gap: var(--ql-space-s, 8px);
         margin-top: var(--ql-space-m, 12px);
       }
       .ops button {
-        flex: 1;
+        flex: 1 1 var(--ql-touch-min, 56px);
         min-height: var(--ql-touch-min, 56px);
         min-width: var(--ql-touch-min, 56px);
         border-radius: var(--ql-radius-thumb, 12px);

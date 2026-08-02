@@ -235,6 +235,14 @@ describe('quiet-luxe-fan-card layout', () => {
     expect(cssText).toContain('@container (max-width: 223px)');
     expect(cssText).toContain('@container (max-width: 143px)');
   });
+
+  /* Live at 1680 the card sat in a ~140px column and the header clamped "TP09"
+     to "T…" so the fixed-width AIR QUALITY label could keep its row. */
+  it('stacks the header readings before the device name can be clamped away', () => {
+    const cssText = QuietLuxeFanCard.styles.toString().replace(/\s+/g, ' ');
+    const narrow = cssText.slice(cssText.indexOf('@container (max-width: 223px)'));
+    expect(narrow).toContain('.header { flex-direction: column; align-items: flex-start; }');
+  });
 });
 
 describe('quiet-luxe-fan-card dial state', () => {
