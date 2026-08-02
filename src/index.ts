@@ -16,6 +16,8 @@ import './elements/ql-sheet-button';
 import './elements/ql-sheet';
 import './elements/ql-sweep-dial';
 import './elements/ql-ring-dial';
+import './elements/ql-quick-adjust';
+import './elements/ql-air-quality';
 import './elements/ql-timer-dial';
 import './elements/ql-section-eyebrow';
 import './elements/ql-header-home';
@@ -57,6 +59,8 @@ export { QlPresetRow, type QlPresetOption } from './elements/ql-preset-row';
 export { QlSheet } from './elements/ql-sheet';
 export { QlSheetButton, type QlSheetButtonEmphasis } from './elements/ql-sheet-button';
 export { QlSweepDial } from './elements/ql-sweep-dial';
+export { QlQuickAdjust, type QlQuickAdjustDirection } from './elements/ql-quick-adjust';
+export { QlAirQuality } from './elements/ql-air-quality';
 export {
   QlRingDial,
   DIAL_GEOMETRY,
@@ -305,6 +309,41 @@ export {
   type ClimateSheetControl,
   type ClimateSheetGroup,
 } from './cards/climate-sheet';
+export {
+  airReadings,
+  bandFor,
+  resolveThresholds,
+  summaryBand,
+  worstBand,
+  AIR_BANDS,
+  BAND_KEYS,
+  DEFAULT_AIR_QUALITY_THRESHOLDS,
+  POLLUTANT_LABELS,
+  POLLUTANT_ORDER,
+  type AirBand,
+  type AirQualityEntities,
+  type AirQualityThresholdOverride,
+  type AirQualityThresholds,
+  type AirReading,
+  type BandThresholds,
+  type PollutantId,
+} from './cards/air-quality';
+export {
+  adjustSetpoints,
+  canAdjust,
+  nextSetpoint,
+  quickAdjustStep,
+  QUICK_ADJUST_COMMIT_DELAY_MS,
+  QUICK_ADJUST_REPEAT_DELAY_MS,
+  QUICK_ADJUST_REPEAT_INTERVAL_MS,
+  type AdjustDirection,
+} from './cards/quick-adjust';
+export {
+  renderClimateDial,
+  climateDialStyles,
+  type ClimateDialAdjust,
+  type ClimateDialOptions,
+} from './cards/render-climate-dial';
 export { QlHeaderView } from './elements/ql-header-view';
 export {
   clampedSpan,
@@ -324,6 +363,7 @@ export {
   MAX_COLUMNS,
   NARROW_GUTTER_PX,
   REGION_SPAN,
+  ROOM_CONTROLS_ROW_SPAN,
   ROW_GAP_PX,
 } from './strategy/layout';
 export { layoutCssVariables } from './theme/inject-theme';

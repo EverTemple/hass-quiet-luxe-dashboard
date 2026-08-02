@@ -12,6 +12,9 @@ const ELEMENT_TAGS = [
   'ql-section-eyebrow',
   'ql-header-home',
   'ql-header-room',
+  'ql-header-view',
+  'ql-quick-adjust',
+  'ql-air-quality',
   'ql-idle-clock',
   'ql-row-presence',
   'ql-row-door-motion',
@@ -147,5 +150,25 @@ describe('bundle entry', () => {
     expect(typeof bundle.fetchAgenda).toBe('function');
     expect(typeof bundle.fetchTodoItems).toBe('function');
     expect(typeof bundle.updateTodoItem).toBe('function');
+  });
+
+  /**
+   * Climate v2 and view chrome were built on separate branches that never
+   * touched this file at the same time, so nothing but this test notices if one
+   * side's public surface is left out of the entry point after the merge.
+   */
+  it('re-exports both v0.7.0 branches — climate v2 and the view chrome', () => {
+    expect(bundle.QlQuickAdjust).toBeDefined();
+    expect(bundle.QlAirQuality).toBeDefined();
+    expect(bundle.QlHeaderView).toBeDefined();
+    expect(typeof bundle.renderClimateDial).toBe('function');
+    expect(typeof bundle.airReadings).toBe('function');
+    expect(bundle.bandFor(bundle.DEFAULT_AIR_QUALITY_THRESHOLDS.pm25, 12)).toBe('good');
+    expect(bundle.quickAdjustStep(undefined)).toBeGreaterThan(0);
+    expect(typeof bundle.viewHeaderSection).toBe('function');
+    expect(typeof bundle.columnSection).toBe('function');
+    expect(bundle.CONTENT_BAND_PX).toBe(1632);
+    expect(bundle.ROOM_CONTROLS_ROW_SPAN).toBeGreaterThan(1);
+    expect(bundle.layoutCssVariables()['--ha-view-sections-column-min-width']).toBe('320px');
   });
 });
