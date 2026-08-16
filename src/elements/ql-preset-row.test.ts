@@ -119,4 +119,22 @@ describe('ql-preset-row', () => {
     expect(cssText).toContain('min-width: 0');
     expect(cssText).toContain('text-overflow: ellipsis');
   });
+
+  it('defaults to truncating, not wrapping', async () => {
+    const el = await mount();
+    expect(el.wrap).toBe(false);
+    expect(el.hasAttribute('wrap')).toBe(false);
+    el.remove();
+  });
+
+  it('wraps onto a second line instead of truncating when asked to', async () => {
+    const el = await mount(SWEEPS, '90');
+    el.wrap = true;
+    await el.updateComplete;
+    expect(el.hasAttribute('wrap')).toBe(true);
+    const cssText = QlPresetRow.styles.toString();
+    expect(cssText).toContain(':host([wrap]) .row');
+    expect(cssText).toMatch(/:host\(\[wrap\]\)\s*\.row\s*\{[^}]*flex-wrap:\s*wrap/);
+    el.remove();
+  });
 });

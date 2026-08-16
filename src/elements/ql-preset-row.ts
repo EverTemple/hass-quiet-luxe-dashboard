@@ -21,17 +21,23 @@ export class QlPresetRow extends LitElement {
     options: { attribute: false },
     value: { type: String },
     label: { type: String },
+    /** Wraps onto a second line instead of truncating — the fan row's need,
+     * not the default: a 2–4 segment mode row still fits one line untouched,
+     * and a shortened label reads worse than a wrapped row. */
+    wrap: { type: Boolean, reflect: true },
   };
 
   declare options: ReadonlyArray<QlPresetOption>;
   declare value: string;
   declare label: string;
+  declare wrap: boolean;
 
   constructor() {
     super();
     this.options = [];
     this.value = '';
     this.label = '';
+    this.wrap = false;
   }
 
   static override styles: CSSResult = css`
@@ -76,6 +82,20 @@ export class QlPresetRow extends LitElement {
     button:focus-visible {
       outline: 2px solid var(--ql-accent-champagne, #b08d57);
       outline-offset: 2px;
+    }
+    /* At wrap, a segment keeps its own content width rather than sharing an
+       equal column, so a row that outgrows its line drops the overflow
+       segments to a second one instead of squeezing every label to a
+       truncated stub. */
+    :host([wrap]) .row {
+      flex-wrap: wrap;
+    }
+    :host([wrap]) button {
+      flex: 1 1 auto;
+      min-width: max-content;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
     }
     @media (prefers-reduced-motion: reduce) {
       button {
