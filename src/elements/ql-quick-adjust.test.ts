@@ -61,6 +61,13 @@ describe('ql-quick-adjust', () => {
     expect(button(el).disabled).toBe(false);
   });
 
+  it('carries full ink/primary weight, not ink/muted — the dial’s primary action, not a shortcut', () => {
+    const styles = QlQuickAdjust.styles.toString();
+    const barBlock = /\.bar\s*\{[^}]*\}/.exec(styles)?.[0] ?? '';
+    expect(barBlock).toContain('var(--ql-ink-primary, #2b2620)');
+    expect(barBlock).not.toContain('var(--ql-ink-muted');
+  });
+
   it('has no chrome at rest — the halo appears only while pressed', async () => {
     const el = await mount();
     expect(el.shadowRoot?.querySelector('.halo')).toBeNull();

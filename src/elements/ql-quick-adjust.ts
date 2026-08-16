@@ -11,10 +11,11 @@ export type QlQuickAdjustDirection = 'minus' | 'plus';
  * The minimal quick-adjust glyph that flanks a climate dial
  * (Figma `control/quick-adjust`, 99:7312).
  *
- * A 56×56 hit frame carrying nothing but an 18×1.5 bar at rest — no ring, no
- * fill, no chrome. It is deliberately lighter than `ql-stepper`'s 56px filled
- * circle so that two of them either side of the dial read as marks on the card
- * rather than as a second pair of buttons competing with the ring.
+ * A 56×56 hit frame carrying nothing but an 18×2 bar at rest — no ring, no
+ * fill, no chrome. It is the dial's primary action, not a shortcut beside it,
+ * so the bar carries full `ink/primary` weight rather than `ink/muted`:
+ * heavier than every other mark on the card, without gaining a background,
+ * border or container of its own — the de-chroming elsewhere stays.
  *
  * Pressing reveals a 44px halo and turns the glyph champagne; holding repeats.
  * At the setpoint's own limit the glyph drops to `surface/border` and the
@@ -103,20 +104,20 @@ export class QlQuickAdjust extends LitElement {
     }
     .bar {
       position: absolute;
-      border-radius: 0.75px;
-      background: var(--ql-ink-muted, #8c8578);
+      border-radius: 1px;
+      background: var(--ql-ink-primary, #2b2620);
       transition: background 160ms ease;
     }
     .bar.h {
-      top: 8.25px;
+      top: 8px;
       left: 0;
       width: 18px;
-      height: 1.5px;
+      height: 2px;
     }
     .bar.v {
       top: 0;
-      left: 8.25px;
-      width: 1.5px;
+      left: 8px;
+      width: 2px;
       height: 18px;
     }
     :host([pressed]) .bar {
