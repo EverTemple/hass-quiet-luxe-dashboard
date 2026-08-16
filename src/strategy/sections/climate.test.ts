@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makeEntity } from '../../testing/mock-hass';
-import { makeContext, mockArea, mockRegEntity } from '../../testing/mock-registry';
+import { labelId, makeContext, mockArea, mockLabel, mockRegEntity } from '../../testing/mock-registry';
 import { climateCards, climateEntityIds, climateSection } from './climate';
 
 const snapshot = {
@@ -145,5 +145,87 @@ describe('climateCards routing to the dial', () => {
       entities: pending,
     });
     expect(climateCards(ctx)[0]).toMatchObject({ type: 'custom:quiet-luxe-climate-card' });
+  });
+});
+
+/**
+ * The dial card's header glyph resolves its weather entity the same way the
+ * home header does (`views/home.ts`): `registry.all('weather')[0]`.
+ */
+describe('climateCards weather_entity on the dial card', () => {
+  const dialEntity = mockRegEntity('climate.steven_bedroom', { area_id: 'bedroom' });
+  const dialState = makeEntity('climate.steven_bedroom', 'cool', {
+    supported_features: 937,
+    temperature: 23,
+    min_temp: 17,
+    max_temp: 30,
+    target_temp_step: 1,
+  });
+  const areas = [mockArea('bedroom', 'Bedroom')];
+
+  it('passes the resolved weather entity through to the dial card', () => {
+    const ctx = makeContext({
+      snapshot: { areas, devices: [], entities: [dialEntity, mockRegEntity('weather.home')] },
+      entities: [dialState, makeEntity('weather.home', 'sunny')],
+    });
+    const card = climateCards(ctx).find((c) => c.entity === 'climate.steven_bedroom');
+    expect(card).toMatchObject({ weather_entity: 'weather.home' });
+  });
+
+  it('omits weather_entity entirely rather than sending it empty or null when none exists', () => {
+    const ctx = makeContext({
+      snapshot: { areas, devices: [], entities: [dialEntity] },
+      entities: [dialState],
+    });
+    const card = climateCards(ctx).find((c) => c.entity === 'climate.steven_bedroom');
+    expect(card).not.toHaveProperty('weather_entity');
+  });
+
+  it('picks alphabetically first among several weather entities, deterministically', () => {
+    const ctx = makeContext({
+      snapshot: {
+        areas,
+        devices: [],
+        entities: [dialEntity, mockRegEntity('weather.home'), mockRegEntity('weather.zzz_backup')],
+      },
+      entities: [dialState, makeEntity('weather.home', 'sunny'), makeEntity('weather.zzz_backup', 'cloudy')],
+    });
+    const card = climateCards(ctx).find((c) => c.entity === 'climate.steven_bedroom');
+    expect(card).toMatchObject({ weather_entity: 'weather.home' });
+  });
+
+  it('prefers a ql-favorite-labelled weather entity over alphabetical order', () => {
+    const ctx = makeContext({
+      snapshot: {
+        areas,
+        devices: [],
+        labels: [mockLabel('ql-favorite')],
+        entities: [
+          dialEntity,
+          mockRegEntity('weather.home'),
+          mockRegEntity('weather.aaa_backup', { labels: [labelId('ql-favorite')] }),
+        ],
+      },
+      entities: [dialState, makeEntity('weather.home', 'sunny'), makeEntity('weather.aaa_backup', 'cloudy')],
+    });
+    const card = climateCards(ctx).find((c) => c.entity === 'climate.steven_bedroom');
+    expect(card).toMatchObject({ weather_entity: 'weather.aaa_backup' });
+  });
+
+  it('never sets weather_entity on the plain climate tile', () => {
+    const ctx = makeContext({
+      snapshot: {
+        areas,
+        devices: [],
+        entities: [mockRegEntity('climate.exhaust', { area_id: 'bedroom' }), mockRegEntity('weather.home')],
+      },
+      entities: [
+        makeEntity('climate.exhaust', 'fan_only', { supported_features: 384 }),
+        makeEntity('weather.home', 'sunny'),
+      ],
+    });
+    expect(climateCards(ctx)).toEqual([
+      { type: 'custom:quiet-luxe-climate-card', entity: 'climate.exhaust' },
+    ]);
   });
 });

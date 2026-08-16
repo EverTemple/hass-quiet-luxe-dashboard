@@ -63,6 +63,13 @@ function pairedClimateIds(
  * A `climate` entity that reports a setpoint gets the dial; one that does not —
  * a purifier or exhaust whose climate entity is only an on/off and a mode — has
  * nothing for a dial to point at and keeps the plain tile.
+ *
+ * The dial's header glyph mirrors the home header's weather icon, so it
+ * resolves the entity the same way the header card does (`home.ts`):
+ * `registry.all('weather')[0]` — favourited weather entity first, otherwise
+ * alphabetically first, same as every other single-entity registry pick. When
+ * an instance has none, the key is omitted rather than sent as `undefined` so
+ * the card can tell "no weather entity" apart from a still-loading one.
  */
 function climateCardConfig(
   ctx: StrategyContext,
@@ -72,7 +79,13 @@ function climateCardConfig(
   if (!entity.startsWith('climate.') || !hasDialSetpoint(ctx.states[entity])) {
     return { type: 'custom:quiet-luxe-climate-card', entity };
   }
-  return { type: 'custom:quiet-luxe-climate-dial-card', entity, form };
+  const weatherEntity = ctx.registry.all('weather')[0];
+  return {
+    type: 'custom:quiet-luxe-climate-dial-card',
+    entity,
+    form,
+    ...(weatherEntity === undefined ? {} : { weather_entity: weatherEntity }),
+  };
 }
 
 /**
