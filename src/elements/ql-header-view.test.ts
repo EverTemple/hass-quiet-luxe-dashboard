@@ -29,7 +29,7 @@ const query = (element: QlHeaderView, selector: string): HTMLElement | null =>
   element.shadowRoot?.querySelector(selector) ?? null;
 
 describe('ql-header-view', () => {
-  it('leads with a labelled back pill, not a bare glyph', async () => {
+  it('leads with a labelled back arrow, not a bare glyph', async () => {
     const header = await makeHeader();
     const back = query(header, 'button.back');
     expect(back?.textContent?.trim()).toBe('Home');
@@ -70,11 +70,12 @@ describe('ql-header-view', () => {
   });
 
   /*
-   * Mobile stacks pill-over-title; iPad and desktop put them in one row. The
-   * pill survives on iPad on purpose: nav/pills moves sideways between tabs and
-   * has no "you are in a drill-down" state, so it cannot double as the way out.
+   * Mobile stacks control-over-title; iPad and desktop put them in one row.
+   * The back control survives on iPad on purpose: nav/pills moves sideways
+   * between tabs and has no "you are in a drill-down" state, so it cannot
+   * double as the way out.
    */
-  it('stacks on mobile and goes inline from iPad up, keeping the back pill', async () => {
+  it('stacks on mobile and goes inline from iPad up, keeping the back control', async () => {
     const mobile = await makeHeader({ variant: 'mobile', actionLabel: 'All climates' });
     expect(query(mobile, '.top-row')?.contains(query(mobile, '.titles'))).toBe(false);
     expect(query(mobile, '.top-row')?.contains(query(mobile, 'button.action'))).toBe(true);

@@ -8,17 +8,18 @@ import type { QlHeaderVariant } from './ql-header-home';
  * wears.
  *
  * Three things the old `header/room` did not do:
- * - The back affordance is a 56px bordered pill carrying a chevron AND a label,
- *   at the very top-left. A bare 32px "←" glyph read as decoration; a pill with
- *   a destination in it reads as a control, and clears the 56px touch floor.
+ * - The back affordance sits at the very top-left and clears the 56px touch
+ *   floor, but carries no fill or border — Figma dropped the bordered pill in
+ *   favour of a bare left arrow + label. min-height/min-width stay at 56px so
+ *   the target size survives even though the visible chrome is gone.
  * - The title is `display/home` (34/40 Marcellus), so a drill-down heading
  *   ranks equal to the Home greeting instead of shrinking below it.
- * - iPad keeps the back pill. `nav/pills` moves laterally between top-level
+ * - iPad keeps the back control. `nav/pills` moves laterally between top-level
  *   tabs and has no state for "you are inside a drill-down", so the pills are
- *   siblings and the pill is the parent — not a redundancy.
+ *   siblings and the control is the parent — not a redundancy.
  *
- * mobile stacks pill-over-title (390 × 128); ipad and desktop place them inline
- * (× 60) to reclaim the vertical space.
+ * mobile stacks control-over-title (390 × 128); ipad and desktop place them
+ * inline (× 60) to reclaim the vertical space.
  */
 export class QlHeaderView extends LitElement {
   static override properties = {
@@ -108,19 +109,31 @@ export class QlHeaderView extends LitElement {
       white-space: nowrap;
       flex: none;
     }
-    /* The one filled element in the header: the way back out. */
+    /* Figma dropped the filled pill: a bare arrow + label, no fill or
+       border. The 56px touch target from the shared button rule stays. */
     .back {
       gap: var(--ql-space-xs, 4px);
-      padding: var(--ql-space-s, 8px) var(--ql-space-m, 12px) var(--ql-space-s, 8px)
-        var(--ql-space-s, 8px);
-      background: var(--ql-surface-card, #fdfbf6);
+      padding: var(--ql-space-s, 8px) 0;
+      background: none;
+      border: none;
+      border-radius: 0;
       color: var(--ql-ink-primary, #2b2620);
       font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
     }
-    .back svg {
+    .back:hover {
+      color: var(--ql-accent-champagne, #b08d57);
+    }
+    .back-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 24px;
       height: 24px;
       flex: none;
+    }
+    .back-icon svg {
+      width: 16px;
+      height: 10px;
     }
     .action {
       padding: var(--ql-space-s, 8px) var(--ql-space-m, 12px);
@@ -153,15 +166,17 @@ export class QlHeaderView extends LitElement {
     const label = this.backLabel === '' ? t(this.locale, 'view.home') : this.backLabel;
     return html`
       <button class="back" aria-label=${t(this.locale, 'common.back')} @click=${this.onBack}>
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
-          <path
-            d="M15 4 L8 12 L15 20"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <span class="back-icon">
+          <svg viewBox="0 0 16 10" aria-hidden="true" fill="none">
+            <path
+              d="M 16 5 L 0 5 M 0 5 L 5 0 M 0 5 L 5 10"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
         <span>${label}</span>
       </button>
     `;
