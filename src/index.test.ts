@@ -11,7 +11,6 @@ const ELEMENT_TAGS = [
   'ql-segmented',
   'ql-section-eyebrow',
   'ql-header-home',
-  'ql-header-room',
   'ql-header-view',
   'ql-quick-adjust',
   'ql-air-quality',
@@ -60,7 +59,6 @@ describe('bundle entry', () => {
     expect(bundle.QlBadge).toBeDefined();
     expect(bundle.QlSectionEyebrow).toBeDefined();
     expect(bundle.QlHeaderHome).toBeDefined();
-    expect(bundle.QlHeaderRoom).toBeDefined();
     expect(bundle.QuietLuxeRoomCard).toBeDefined();
     expect(bundle.QuietLuxeClimateCard).toBeDefined();
     expect(bundle.QuietLuxeLightCard).toBeDefined();

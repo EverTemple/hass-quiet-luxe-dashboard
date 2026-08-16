@@ -21,7 +21,6 @@ import './elements/ql-air-quality';
 import './elements/ql-timer-dial';
 import './elements/ql-section-eyebrow';
 import './elements/ql-header-home';
-import './elements/ql-header-room';
 import './elements/ql-header-view';
 import './cards/quiet-luxe-room-card';
 import './cards/quiet-luxe-climate-card';
@@ -76,7 +75,6 @@ export {
   type QlHeaderPerson,
   type QlHeaderVariant,
 } from './elements/ql-header-home';
-export { QlHeaderRoom } from './elements/ql-header-room';
 export {
   AREA_UPDATE_COMMAND,
   bloomOrigin,

@@ -1,15 +1,14 @@
 import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-header-home';
-import '../elements/ql-header-room';
 import '../elements/ql-header-view';
 import type { QlHeaderPerson, QlHeaderVariant } from '../elements/ql-header-home';
 import { contentGrid, type QlGridOptions } from './grid-options';
 import { navigate } from './navigate';
 import { QlBaseCard } from './ql-base-card';
 
-export type HeaderCardForm = 'home' | 'room' | 'view';
+export type HeaderCardForm = 'home' | 'view';
 
-const FORMS: ReadonlyArray<HeaderCardForm> = ['home', 'room', 'view'];
+const FORMS: ReadonlyArray<HeaderCardForm> = ['home', 'view'];
 
 export interface HeaderCardConfig {
   readonly type: string;
@@ -211,16 +210,6 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
           @ql-back=${this.onBack}
           @ql-action=${this.onAction}
         ></ql-header-view>
-      `;
-    }
-    if (config.form === 'room') {
-      return html`
-        <ql-header-room
-          .name=${config.name}
-          .stats=${this.roomStats()}
-          .locale=${this.locale()}
-          @ql-back=${this.onBack}
-        ></ql-header-room>
       `;
     }
     const greet = config.show_greeting !== false;

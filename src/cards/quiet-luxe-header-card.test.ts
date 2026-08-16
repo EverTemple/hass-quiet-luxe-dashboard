@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import type { QlHeaderHome } from '../elements/ql-header-home';
-import type { QlHeaderRoom } from '../elements/ql-header-room';
 import type { QlHeaderView } from '../elements/ql-header-view';
 import { makeEntity, makeMockHass } from '../testing/mock-hass';
 import { QuietLuxeHeaderCard, variantForWidth } from './quiet-luxe-header-card';
@@ -37,7 +36,7 @@ describe('quiet-luxe-header-card', () => {
   it('rejects malformed config loudly', () => {
     const card = document.createElement('quiet-luxe-header-card') as QuietLuxeHeaderCard;
     expect(() => card.setConfig({ type: 'x', form: 'nope', name: 'X' } as never)).toThrowError(
-      /"form" must be one of home, room, view/,
+      /"form" must be one of home, view/,
     );
     expect(() => card.setConfig({ type: 'x', form: 'home', name: '' } as never)).toThrowError(
       /"name" is required/,
@@ -96,35 +95,6 @@ describe('quiet-luxe-header-card', () => {
     const header = card.shadowRoot?.querySelector('ql-header-home') as QlHeaderHome;
     expect(header.people).toEqual([{ name: 'Mei', picture: undefined, home: false }]);
     expect(header.presenceLabel()).toBe('Nobody home');
-  });
-
-  it('room form: renders ql-header-room with formatted stats', async () => {
-    const card = makeCard({
-      type: 'custom:quiet-luxe-header-card',
-      form: 'room',
-      name: 'Living Room',
-      temperature_entity: 'sensor.room_temp',
-      humidity_entity: 'sensor.room_humidity',
-      aqi_entity: 'sensor.aqi',
-    });
-    await card.updateComplete;
-    const header = card.shadowRoot?.querySelector('ql-header-room') as QlHeaderRoom;
-    expect(header.name).toBe('Living Room');
-    expect(header.stats).toEqual(['24.5°', '61%', 'AQI 42']);
-  });
-
-  it('room form: ql-back navigates to back_path', async () => {
-    const card = makeCard({
-      type: 'custom:quiet-luxe-header-card',
-      form: 'room',
-      name: 'Living Room',
-      back_path: '/quiet-luxe/home',
-    });
-    await card.updateComplete;
-    card.shadowRoot
-      ?.querySelector('ql-header-room')
-      ?.dispatchEvent(new CustomEvent('ql-back', { bubbles: true, composed: true }));
-    expect(window.location.pathname).toBe('/quiet-luxe/home');
   });
 
   it('view form: title, back label and a room subtitle built from live stats', async () => {
