@@ -141,13 +141,19 @@ export const ROOM_CONTROLS_ROW_SPAN = 3;
  * All-Climates column emitted the fan card above a thermostat 82px taller than
  * it — the exact inversion packing rule 3 exists to prevent.
  *
+ * Remeasured 2026-08-17 after the Figma card/climate-dial-v2 alignment: the
+ * dial card lost the More button's 56px pill for a text link, taking full 464 →
+ * 444 and compact 402 → 378. The humidity readout added in the same pass costs
+ * nothing here — it draws inside the ring's fixed diameter rather than
+ * stacking below it.
+ *
  * Still approximate by design: the only thing they decide is the ORDER cards
  * are emitted in, and being 10px out never changes a comparison. Entries with
  * no live instance to measure keep their drawn value and are marked.
  */
 const CARD_HEIGHT_PX: Readonly<Record<string, number>> = {
-  'custom:quiet-luxe-climate-dial-card': 464,
-  'custom:quiet-luxe-climate-dial-card#compact': 402,
+  'custom:quiet-luxe-climate-dial-card': 444,
+  'custom:quiet-luxe-climate-dial-card#compact': 378,
   'custom:quiet-luxe-fan-card': 382,
   'custom:quiet-luxe-fan-card#compact': 190,
   'custom:quiet-luxe-climate-card': 130,
