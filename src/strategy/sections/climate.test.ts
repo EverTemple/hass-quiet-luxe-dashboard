@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { makeEntity } from '../../testing/mock-hass';
 import { labelId, makeContext, mockArea, mockLabel, mockRegEntity } from '../../testing/mock-registry';
+import type { StrategyContext } from '../types';
 import { climateCards, climateEntityIds, climateSection } from './climate';
 
 const snapshot = {
@@ -227,5 +228,94 @@ describe('climateCards weather_entity on the dial card', () => {
     expect(climateCards(ctx)).toEqual([
       { type: 'custom:quiet-luxe-climate-card', entity: 'climate.exhaust' },
     ]);
+  });
+});
+
+/**
+ * The dial's eyebrow drops the room name only where the room is already
+ * established by context — the room view's own title (`roomScopedArea`
+ * threaded from `views/room.ts`). Home and All Climates mix rooms on one
+ * screen and never pass it, so they keep the entity's full name untouched.
+ */
+describe('climateCards room-scoped dial name', () => {
+  const area = mockArea('steven_bedroom', 'Steven Bedroom');
+  const dialAttrs = {
+    supported_features: 937,
+    temperature: 23,
+    min_temp: 17,
+    max_temp: 30,
+    target_temp_step: 1,
+  } as const;
+
+  function ctxFor(friendlyName: string): StrategyContext {
+    return makeContext({
+      snapshot: {
+        areas: [area],
+        devices: [],
+        entities: [mockRegEntity('climate.dial', { area_id: 'steven_bedroom' })],
+      },
+      entities: [makeEntity('climate.dial', 'cool', { ...dialAttrs, friendly_name: friendlyName })],
+    });
+  }
+
+  it('strips the room name in a room-scoped call', () => {
+    const ctx = ctxFor('Sensibo AC Steven Bedroom');
+    const card = climateCards(ctx, 'steven_bedroom', undefined, 'compact', area).find(
+      (c) => c.entity === 'climate.dial',
+    );
+    expect(card).toMatchObject({ name: 'Sensibo AC' });
+  });
+
+  it('keeps the full name when no roomScopedArea is given (Home, All Climates)', () => {
+    const ctx = ctxFor('Sensibo AC Steven Bedroom');
+    const card = climateCards(ctx, 'steven_bedroom').find((c) => c.entity === 'climate.dial');
+    expect(card).not.toHaveProperty('name');
+  });
+
+  it('leaves a name untouched when it does not actually contain the area', () => {
+    const ctx = ctxFor('Living Room Sensibo');
+    const card = climateCards(ctx, 'steven_bedroom', undefined, 'compact', area).find(
+      (c) => c.entity === 'climate.dial',
+    );
+    expect(card).toMatchObject({ name: 'Living Room Sensibo' });
+  });
+
+  it('keeps the original name when stripping would leave nothing at all', () => {
+    // Friendly name IS the room name — the device (Sensibo skyv2) is literally
+    // named after its room, verified on climate.steven_bedroom, Tung Chung,
+    // dev/live-snapshot.json.
+    const ctx = ctxFor('Steven Bedroom');
+    const card = climateCards(ctx, 'steven_bedroom', undefined, 'compact', area).find(
+      (c) => c.entity === 'climate.dial',
+    );
+    expect(card).toMatchObject({ name: 'Steven Bedroom' });
+  });
+
+  it('keeps the original name when stripping would leave an initialism ("AC")', () => {
+    const ctx = ctxFor('AC Steven Bedroom');
+    const card = climateCards(ctx, 'steven_bedroom', undefined, 'compact', area).find(
+      (c) => c.entity === 'climate.dial',
+    );
+    expect(card).toMatchObject({ name: 'AC Steven Bedroom' });
+  });
+
+  it('never sets name on the plain (non-dial) climate tile, room-scoped or not', () => {
+    const ctx = makeContext({
+      snapshot: {
+        areas: [area],
+        devices: [],
+        entities: [mockRegEntity('climate.exhaust', { area_id: 'steven_bedroom' })],
+      },
+      entities: [
+        makeEntity('climate.exhaust', 'fan_only', {
+          supported_features: 384,
+          friendly_name: 'Exhaust Steven Bedroom',
+        }),
+      ],
+    });
+    const card = climateCards(ctx, 'steven_bedroom', undefined, 'compact', area).find(
+      (c) => c.entity === 'climate.exhaust',
+    );
+    expect(card).toEqual({ type: 'custom:quiet-luxe-climate-card', entity: 'climate.exhaust' });
   });
 });

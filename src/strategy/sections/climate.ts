@@ -2,6 +2,8 @@ import { hasDialSetpoint } from '../../cards/climate-dial';
 import { contentGrid, COLUMNS_FULL } from '../../cards/grid-options';
 import { viewUrl } from '../config';
 import { orderTallestFirst } from '../layout';
+import { areaNameVariants, entityName, stripAreaName } from '../labels';
+import type { AreaEntry } from '../registry';
 import {
   PATHS,
   type LovelaceCardConfig,
@@ -10,6 +12,28 @@ import {
 } from '../types';
 import { climatePartnerOf, fanCardConfig, isFanDevice } from './fan-device';
 import { headingCard, sectionOf } from './heading';
+
+/**
+ * A shorter name is worth it only where the room is already established by
+ * context — the room view's own title. A card that reads "AC" (or nothing at
+ * all) is worse than one repeating the room name once, so a stripped result
+ * under 3 characters is treated the same as an empty one and the untouched
+ * name is kept instead.
+ */
+const MIN_STRIPPED_NAME_LENGTH = 3;
+
+/**
+ * The dial's eyebrow inside a single-room view, with that room's own name cut
+ * off the entity's name — the room view's title already says it. Matches the
+ * resolved area (and its aliases/config override) rather than a hardcoded
+ * word list, so it degrades safely on a device whose name never mentioned the
+ * room to begin with.
+ */
+function roomScopedDialName(ctx: StrategyContext, area: AreaEntry, entityId: string): string {
+  const full = entityName(ctx, entityId);
+  const stripped = stripAreaName(full, areaNameVariants(ctx.home, area));
+  return stripped.length < MIN_STRIPPED_NAME_LENGTH ? full : stripped;
+}
 
 /** Spec climate row covers ACs, fans/purifiers, dehumidifiers (§6). */
 export const CLIMATE_DOMAINS = ['climate', 'fan', 'humidifier'] as const;
@@ -70,11 +94,16 @@ function pairedClimateIds(
  * alphabetically first, same as every other single-entity registry pick. When
  * an instance has none, the key is omitted rather than sent as `undefined` so
  * the card can tell "no weather entity" apart from a still-loading one.
+ *
+ * `roomScopedArea`, when given, is the single room the whole view is already
+ * titled with (the room view only — Home and All Climates mix rooms on one
+ * screen, so they always pass nothing here and keep the full name).
  */
 function climateCardConfig(
   ctx: StrategyContext,
   entity: string,
   form: 'compact' | 'full',
+  roomScopedArea?: AreaEntry,
 ): LovelaceCardConfig {
   if (!entity.startsWith('climate.') || !hasDialSetpoint(ctx.states[entity])) {
     return { type: 'custom:quiet-luxe-climate-card', entity };
@@ -85,6 +114,9 @@ function climateCardConfig(
     entity,
     form,
     ...(weatherEntity === undefined ? {} : { weather_entity: weatherEntity }),
+    ...(roomScopedArea === undefined
+      ? {}
+      : { name: roomScopedDialName(ctx, roomScopedArea, entity) }),
   };
 }
 
@@ -99,6 +131,7 @@ export function climateCards(
   areaId?: string,
   limit?: number,
   form: 'compact' | 'full' = 'compact',
+  roomScopedArea?: AreaEntry,
 ): ReadonlyArray<LovelaceCardConfig> {
   const ids = climateEntityIds(ctx, areaId);
   const paired = pairedClimateIds(ctx, ids);
@@ -107,7 +140,7 @@ export function climateCards(
   return scoped.map((entity) =>
     isFanDevice(ctx, entity)
       ? fanCardConfig(ctx, entity, form)
-      : climateCardConfig(ctx, entity, form),
+      : climateCardConfig(ctx, entity, form, roomScopedArea),
   );
 }
 
@@ -128,8 +161,9 @@ export function climateColumnCards(
   areaId?: string,
   limit?: number,
   form: 'compact' | 'full' = 'compact',
+  roomScopedArea?: AreaEntry,
 ): ReadonlyArray<LovelaceCardConfig> {
-  return orderTallestFirst(climateCards(ctx, areaId, limit, form)).map((card) => ({
+  return orderTallestFirst(climateCards(ctx, areaId, limit, form, roomScopedArea)).map((card) => ({
     ...card,
     grid_options: contentGrid(COLUMNS_FULL),
   }));

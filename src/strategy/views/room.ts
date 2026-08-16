@@ -120,7 +120,10 @@ export function roomView(ctx: StrategyContext, area: AreaEntry): LovelaceViewCon
     [
       {
         heading: headingCard(ctx.locale, 'section.climate'),
-        cards: climateColumnCards(ctx, areaId),
+        /* Only the room view passes its own area: the title already names the
+           room, so the dial's eyebrow can drop it. Home and All Climates mix
+           rooms on one screen and never pass this. */
+        cards: climateColumnCards(ctx, areaId, undefined, 'compact', area),
       },
     ],
     REGION_SPAN.roomClimate,

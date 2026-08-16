@@ -128,7 +128,7 @@ export function stripAreaName(name: string, areaNames: ReadonlyArray<string>): s
 }
 
 /** Strategy-time counterpart of the card's displayName chain (states are live here). */
-function entityName(ctx: StrategyContext, entityId: string): string {
+export function entityName(ctx: StrategyContext, entityId: string): string {
   const friendly: unknown = ctx.states[entityId]?.attributes['friendly_name'];
   if (typeof friendly === 'string' && friendly.trim() !== '') {
     return friendly.trim();
