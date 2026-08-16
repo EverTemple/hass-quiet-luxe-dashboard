@@ -147,13 +147,20 @@ export const ROOM_CONTROLS_ROW_SPAN = 3;
  * nothing here — it draws inside the ring's fixed diameter rather than
  * stacking below it.
  *
+ * Remeasured again the same day after the design-review changes (mode label
+ * removed, ambient shown at both sizes): full 446, compact 384, taken off
+ * `climate.steven_bedroom` on the live snapshot at a 395px track across all
+ * three views that emit the card. Compact matters more than its 6px suggests —
+ * at 378 it sorted BELOW the 382 fan card and inverted the intended order;
+ * at 384 it sorts above again.
+ *
  * Still approximate by design: the only thing they decide is the ORDER cards
  * are emitted in, and being 10px out never changes a comparison. Entries with
  * no live instance to measure keep their drawn value and are marked.
  */
 const CARD_HEIGHT_PX: Readonly<Record<string, number>> = {
-  'custom:quiet-luxe-climate-dial-card': 444,
-  'custom:quiet-luxe-climate-dial-card#compact': 378,
+  'custom:quiet-luxe-climate-dial-card': 446,
+  'custom:quiet-luxe-climate-dial-card#compact': 384,
   'custom:quiet-luxe-fan-card': 382,
   'custom:quiet-luxe-fan-card#compact': 190,
   'custom:quiet-luxe-climate-card': 130,

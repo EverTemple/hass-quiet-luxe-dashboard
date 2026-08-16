@@ -209,7 +209,7 @@ describe('climate packing', () => {
       card('custom:quiet-luxe-fan-card', 'full'),
       card('custom:quiet-luxe-climate-card'),
     ];
-    /* 444 / 382 / 130 → median 382, budget 764. Nothing in the column exceeds
+    /* 446 / 382 / 130 → median 382, budget 764. Nothing in the column exceeds
        it; before the reflow the Dyson's dial ladder alone was ~800px. */
     expect(medianCardHeight(column)).toBe(382);
     for (const entry of column) {
