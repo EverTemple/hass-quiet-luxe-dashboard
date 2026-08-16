@@ -209,7 +209,18 @@ function buildPane(mode: ThemeMode): HTMLElement {
       meta: 'Fri 1 Aug · 29°',
       presence: 'Home',
     }),
-    el('ql-header-room', { name: 'Living Room', stats: ['24.5°', '62%', 'AQI 18'] }),
+    el('ql-header-view', {
+      variant: 'mobile',
+      backLabel: 'Home',
+      heading: 'Living Room',
+      subtitle: '24.5° · 62% · AQI 18',
+    }),
+    el('ql-header-view', {
+      variant: 'ipad',
+      backLabel: 'Home',
+      heading: 'Living Room',
+      subtitle: '24.5° · 62% · AQI 18',
+    }),
     section('Primitives', primitives()),
     section('Rooms', [
       makeCard('quiet-luxe-room-card', {
