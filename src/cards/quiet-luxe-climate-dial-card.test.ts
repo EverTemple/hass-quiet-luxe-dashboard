@@ -96,6 +96,27 @@ describe('quiet-luxe-climate-dial-card', () => {
     expect(dial(card)?.ambientText).toBe('Set to 23°');
   });
 
+  it('passes the entity’s own humidity through to the dial', async () => {
+    const humid = SENSIBO();
+    const card = await mount(
+      makeEntity(humid.entity_id, 'cool', { ...humid.attributes, current_humidity: 65 }),
+    );
+    expect(dial(card)?.humidityText).toBe('65%');
+  });
+
+  it('omits the humidity row rather than a placeholder when the entity reports none', async () => {
+    const card = await mount(SENSIBO());
+    expect(dial(card)?.humidityText).toBe('');
+  });
+
+  it('drops the humidity reading when the entity is unavailable', async () => {
+    const humid = SENSIBO();
+    const card = await mount(
+      makeEntity(humid.entity_id, 'unavailable', { ...humid.attributes, current_humidity: 65 }),
+    );
+    expect(dial(card)?.humidityText).toBe('');
+  });
+
   it('sends the released setpoint as climate.set_temperature', async () => {
     const card = await mount(SENSIBO());
     dial(card)?.dispatchEvent(
@@ -215,6 +236,39 @@ describe('quiet-luxe-climate-dial-card', () => {
     expect(card.shadowRoot?.querySelector('ql-sheet')).toBeNull();
   });
 
+  it('draws the header as weather glyph, mode glyph and menu glyph around the eyebrow', async () => {
+    const card = await mount(SENSIBO());
+    expect(card.shadowRoot?.querySelector('.head-slot-left svg.glyph')).not.toBeNull();
+    expect(card.shadowRoot?.querySelector('.head-mode svg.glyph')).not.toBeNull();
+    expect(card.shadowRoot?.querySelector('.head-slot-right svg.glyph')).not.toBeNull();
+  });
+
+  it('redraws the mode glyph for the entity’s own hvac mode', async () => {
+    const cool = await mount(SENSIBO());
+    const coolPath = cool.shadowRoot?.querySelector('.head-mode path')?.getAttribute('d');
+
+    const heating = SENSIBO();
+    const heat = await mount(makeEntity(heating.entity_id, 'heat', heating.attributes));
+    const heatPath = heat.shadowRoot?.querySelector('.head-mode path')?.getAttribute('d');
+
+    const offEntity = SENSIBO();
+    const off = await mount(makeEntity(offEntity.entity_id, 'off', offEntity.attributes));
+    const offPaths = [...(off.shadowRoot?.querySelectorAll('.head-mode path') ?? [])].map((el) =>
+      el.getAttribute('d'),
+    );
+
+    expect(coolPath).not.toBe(heatPath);
+    expect(offPaths).not.toContain(coolPath);
+    expect(offPaths).not.toContain(heatPath);
+  });
+
+  it('truncates the eyebrow to one line instead of wrapping', async () => {
+    const card = await mount(SENSIBO());
+    const eyebrow = card.shadowRoot?.querySelector('.eyebrow-text');
+    expect(eyebrow).not.toBeNull();
+    expect(card.shadowRoot?.querySelector('.eyebrow.ql-clamp-2')).toBeNull();
+  });
+
   it('flanks the dial with a minus and a plus', async () => {
     const card = await mount(SENSIBO());
     const glyphs = [...(card.shadowRoot?.querySelectorAll('ql-quick-adjust') ?? [])];
@@ -273,6 +327,17 @@ describe('quiet-luxe-climate-dial-card', () => {
       }),
     );
     expect(card.shadowRoot?.querySelectorAll('ql-preset-row')).toHaveLength(1);
+  });
+
+  it('draws More controls with the smaller 14×14 chevron and still opens the sheet', async () => {
+    const card = await mount(SENSIBO());
+    const more = card.shadowRoot?.querySelector<HTMLButtonElement>('.more');
+    const chevron = more?.querySelector('svg.chevron');
+    expect(chevron?.getAttribute('width')).toBe('14');
+    expect(chevron?.getAttribute('height')).toBe('14');
+    more?.click();
+    await card.updateComplete;
+    expect(card.shadowRoot?.querySelector('ql-sheet')).not.toBeNull();
   });
 
   it('opens the sheet with every group the Sensibo supports', async () => {

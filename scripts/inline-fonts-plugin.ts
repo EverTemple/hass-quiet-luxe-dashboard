@@ -22,7 +22,7 @@ interface InlineFontSpec {
 /** Latin faces inlined into the bundle. Keep in sync with scripts/build-fonts.mjs. */
 export const INLINE_FONTS: readonly InlineFontSpec[] = [
   { pkg: '@fontsource/marcellus', weights: [400] },
-  { pkg: '@fontsource/outfit', weights: [300, 400, 500] },
+  { pkg: '@fontsource/outfit', weights: [200, 300, 400, 500] },
 ];
 
 /** Only these @fontsource subsets are inlined; everything else is skipped. */

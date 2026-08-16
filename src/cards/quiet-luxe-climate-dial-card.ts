@@ -5,6 +5,7 @@ import type { QlRingDialHandle } from '../elements/ql-ring-dial';
 import { t } from '../i18n/translate';
 import type { TranslationKey } from '../i18n/locales/en';
 import type { Locale } from '../i18n/types';
+import { climateModeGlyph, menuGlyph, weatherGlyph } from './climate-dial-header-glyphs';
 import {
   ambientTemperature,
   cardHvacModes,
@@ -129,11 +130,35 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
         flex-direction: column;
         gap: var(--ql-space-l, 16px);
       }
+      /* Three parts, vertically centred: the identity on the left, the mode
+         glyph optically centred on the row, the status reading on the right.
+         Left and right are both flex:1 so the mode glyph never drifts off
+         centre when the eyebrow is short — it truncates instead of pushing. */
       .head {
         display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: var(--ql-space-s, 8px);
+        align-items: center;
+      }
+      .head-slot {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1 1 0;
+        min-width: 0;
+      }
+      .head-slot-left {
+        padding-right: 12px;
+      }
+      .head-slot-right {
+        justify-content: flex-end;
+        padding-left: 12px;
+      }
+      .head-mode {
+        display: flex;
+        flex: none;
+      }
+      .glyph {
+        display: block;
+        flex: none;
       }
       .eyebrow {
         display: block;
@@ -143,10 +168,33 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
+      /* The header's own eyebrow: a single line that truncates rather than
+         wrapping, so it can share the row with the weather glyph beside it
+         instead of pushing the mode glyph off centre. */
+      .eyebrow-text {
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: var(--ql-ink-muted, #8c8578);
+        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      /* .ql-info's shared width/margin hack extends its hit area sideways for
+         a button that owns the whole row on its own; here it shares the row
+         with the weather glyph, so only the vertical extension is kept. */
+      .head-slot-left .ql-info {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
+        margin: calc(-1 * var(--ql-space-xs, 4px)) 0;
+        padding: var(--ql-space-xs, 4px) 0;
+      }
       /* The dot is a reading, not a control, so it never takes a tap. */
       ql-status-dot {
         flex: 0 0 auto;
-        margin-top: 3px;
       }
       /* A named row: the eyebrow says what the segments are for, because "Auto
          / Low / Mid / High" on its own could be a fan or a mode. */
@@ -156,25 +204,26 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
         gap: var(--ql-space-s, 8px);
         min-width: 0;
       }
+      /* De-chromed to a bare text link (Figma dropped the outlined pill): no
+         border, no background, no fixed touch height. Only a colour shift on
+         hover/focus — the chevron alone signals "opens a sheet". */
       .more {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: var(--ql-space-s, 8px);
-        box-sizing: border-box;
-        width: 100%;
-        min-height: var(--ql-touch-min, 56px);
-        padding: var(--ql-space-m, 12px) var(--ql-space-l, 16px);
-        border: 1px solid var(--ql-surface-border, #e4dccb);
-        border-radius: var(--ql-radius-chip, 999px);
-        background: transparent;
+        gap: var(--ql-space-xs, 4px);
+        width: auto;
+        padding: var(--ql-space-s, 8px) 0;
+        border: none;
+        border-radius: 0;
+        background: none;
         color: var(--ql-ink-primary, #2b2620);
-        font: 400 14px/18px var(--ql-font-body, Outfit, sans-serif);
+        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        letter-spacing: 0.02em;
         cursor: pointer;
-        transition: border-color 200ms ease;
+        transition: color 200ms ease;
       }
       .more:hover {
-        border-color: var(--ql-accent-champagne, #b08d57);
+        color: var(--ql-accent-champagne, #b08d57);
       }
       .more:focus-visible {
         outline: 2px solid var(--ql-accent-champagne, #b08d57);
@@ -183,7 +232,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
       .more .chevron {
         flex: 0 0 auto;
         fill: none;
-        stroke: currentColor;
+        stroke: var(--ql-ink-primary, #2b2620);
         stroke-width: 1.5;
         stroke-linecap: round;
         stroke-linejoin: round;
@@ -334,6 +383,19 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     return ambient === undefined ? '' : `${t(locale, 'climate.now')} ${ambient.toFixed(1)}°`;
   }
 
+  /**
+   * "77%" beside the eyebrow, or '' when the entity reports no humidity —
+   * `ql-ring-dial` omits the whole row rather than drawing a placeholder.
+   */
+  private humidityText(): string {
+    const raw = this.entity(this.entityId())?.attributes.current_humidity;
+    if (raw === null || raw === undefined || raw === '') {
+      return '';
+    }
+    const humidity = Number(raw);
+    return Number.isFinite(humidity) ? `${String(Math.round(humidity))}%` : '';
+  }
+
   /** Off promotes the room's own reading to the hero numeral. */
   private heroOf(mode: DialMode): string {
     if (mode !== 'off') {
@@ -402,8 +464,8 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     return html`
       <button class="more" type="button" ?disabled=${disabled} @click=${this.openSheet}>
         ${t(locale, 'control.more')}
-        <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M6 3.5 10.5 8 6 12.5" />
+        <svg class="chevron" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" focusable="false">
+          <path d="M4.5 2L9.5 7L4.5 12" />
         </svg>
       </button>
     `;
@@ -431,6 +493,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
         locale,
         disabled: offline,
         modeLabel: t(locale, MODE_LABELS[mode]),
+        humidityText: offline ? '' : this.humidityText(),
         ambientText: this.captionOf(locale, mode),
         heroText: this.heroOf(mode),
         onAdjust: this.onQuickAdjust,
@@ -440,15 +503,22 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     return html`
       <div class="ql-card ${offline ? 'ql-unavailable' : ''}">
         <div class="head">
-          <button
-            class="ql-info"
-            type="button"
-            aria-label=${`${label} — ${t(locale, 'control.more')}`}
-            @click=${this.openSheet}
-          >
-            <span class="eyebrow ql-clamp-2">${label}</span>
-          </button>
-          <ql-status-dot status=${mode === 'off' ? 'neutral' : 'good'}></ql-status-dot>
+          <div class="head-slot head-slot-left">
+            ${weatherGlyph()}
+            <button
+              class="ql-info"
+              type="button"
+              aria-label=${`${label} — ${t(locale, 'control.more')}`}
+              @click=${this.openSheet}
+            >
+              <span class="eyebrow-text">${label}</span>
+            </button>
+          </div>
+          <span class="head-mode">${climateModeGlyph(mode)}</span>
+          <div class="head-slot head-slot-right">
+            <ql-status-dot status=${mode === 'off' ? 'neutral' : 'good'}></ql-status-dot>
+            ${menuGlyph()}
+          </div>
         </div>
         ${dial(this.form())} ${this.renderModeRow(locale, offline)}
         ${this.renderFanRow(locale, offline)} ${this.renderMore(locale, offline)}

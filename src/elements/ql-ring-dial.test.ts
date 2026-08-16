@@ -170,6 +170,19 @@ describe('ql-ring-dial', () => {
     expect(el.shadowRoot?.textContent).toContain('25');
   });
 
+  it('draws the range pair as a divider bar, not a text glyph, and no stepped-down degree mark', async () => {
+    const el = await mount({ kind: 'range', mode: 'heat_cool', low: 21, high: 25 });
+    expect(el.shadowRoot?.querySelector('.range-divider')).not.toBeNull();
+    expect(el.shadowRoot?.querySelector('.divider')).toBeNull();
+    // The pair's own degree mark is plain text at the numeral's size, unlike
+    // the single-setpoint reading, which nests a smaller `.unit` span.
+    const readings = [...(el.shadowRoot?.querySelectorAll('.numeral.pair .reading') ?? [])];
+    expect(readings.map((reading) => reading.textContent?.trim())).toEqual(['21°', '25°']);
+    expect(el.shadowRoot?.querySelector('.numeral.pair .unit')).toBeNull();
+    expect(readings[0]?.classList.contains('low')).toBe(true);
+    expect(readings[1]?.classList.contains('high')).toBe(true);
+  });
+
   it('never lets the heat end cross the cool one', async () => {
     const el = await mount({ kind: 'range', mode: 'heat_cool', low: 23, high: 25 });
     const seen = changes(el);
@@ -223,6 +236,43 @@ describe('ql-ring-dial', () => {
     expect(styles).toContain('var(--ql-status-good, #7e8b6f)');
     expect(styles).toContain('prefers-reduced-motion');
   });
+
+  it('draws the full-size numeral at Outfit ExtraLight, per Figma', () => {
+    const styles = QlRingDial.styles.toString();
+    expect(styles).toContain('font: 200 56px/60px');
+  });
+
+  it('shows the humidity reading between the eyebrow and the numeral', async () => {
+    const el = await mount({ humidityText: '77%' });
+    const row = el.shadowRoot?.querySelector('.humidity-row');
+    expect(row).not.toBeNull();
+    expect(row?.querySelector('svg.glyph')).not.toBeNull();
+    expect(row?.querySelector('.humidity-value')?.textContent?.trim()).toBe('77%');
+    const stack = [...(el.shadowRoot?.querySelectorAll('.centre > *') ?? [])];
+    expect(stack.indexOf(row as Element)).toBeGreaterThan(
+      stack.findIndex((node) => node.classList.contains('eyebrow')),
+    );
+    expect(stack.indexOf(row as Element)).toBeLessThan(
+      stack.findIndex((node) => node.classList.contains('numeral')),
+    );
+  });
+
+  it('omits the humidity row entirely when the entity reports none, no placeholder', async () => {
+    const el = await mount({ humidityText: '' });
+    expect(el.shadowRoot?.querySelector('.humidity-row')).toBeNull();
+  });
+
+  it('draws the compact droplet a size smaller than the full one', async () => {
+    const compact = await mount({ size: 'compact', humidityText: '40%' });
+    expect(compact.shadowRoot?.querySelector('.humidity-row svg')?.getAttribute('width')).toBe('11');
+    const full = await mount({ size: 'full', humidityText: '40%' });
+    expect(full.shadowRoot?.querySelector('.humidity-row svg')?.getAttribute('width')).toBe('12');
+  });
+
+  it('shows the humidity row when the device is off, too', async () => {
+    const el = await mount({ mode: 'off', heroText: '22.6°', humidityText: '77%' });
+    expect(el.shadowRoot?.querySelector('.humidity-row')).not.toBeNull();
+  });
 });
 
 describe('ql-ring-dial compact', () => {
@@ -242,5 +292,12 @@ describe('ql-ring-dial compact', () => {
   it('drops the caption when the device reports no ambient reading', async () => {
     const el = await mount({ size: 'full', ambientText: '' });
     expect(el.shadowRoot?.querySelector('.caption')).toBeNull();
+  });
+
+  it('steps the compact numeral to 26/30 Light, not the full dial’s ExtraLight', () => {
+    const styles = QlRingDial.styles.toString();
+    expect(styles).toContain('font-weight: 300');
+    expect(styles).toContain('font-size: 26px');
+    expect(styles).toContain('line-height: 30px');
   });
 });

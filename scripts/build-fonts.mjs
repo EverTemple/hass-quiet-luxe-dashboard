@@ -10,7 +10,7 @@ const outDir = join(pkgRoot, 'dist', 'fonts');
 
 const FONTS = [
   { pkg: '@fontsource/marcellus', weights: [400] },
-  { pkg: '@fontsource/outfit', weights: [300, 400, 500] },
+  { pkg: '@fontsource/outfit', weights: [200, 300, 400, 500] },
   { pkg: '@fontsource/noto-serif-tc', weights: [300] },
   { pkg: '@fontsource/noto-sans-tc', weights: [400, 500] },
   { pkg: '@fontsource/noto-serif-sc', weights: [300] },

@@ -9,10 +9,10 @@ function freshDocument(): Document {
 describe('INLINE_FONT_CSS', () => {
   it('inlines every required Latin face as a base64 woff2', () => {
     const faces = INLINE_FONT_CSS.match(/@font-face\{/g) ?? [];
-    expect(faces.length).toBeGreaterThanOrEqual(8);
+    expect(faces.length).toBeGreaterThanOrEqual(10);
     expect(INLINE_FONT_CSS).toContain("font-family:'Marcellus'");
     expect(INLINE_FONT_CSS).toContain("font-family:'Outfit'");
-    for (const weight of [300, 400, 500]) {
+    for (const weight of [200, 300, 400, 500]) {
       expect(INLINE_FONT_CSS).toContain(`font-weight:${weight}`);
     }
     expect(INLINE_FONT_CSS).toContain('src:url(data:font/woff2;base64,');

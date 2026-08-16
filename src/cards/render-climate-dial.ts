@@ -28,6 +28,8 @@ export interface ClimateDialOptions {
   readonly locale: Locale;
   readonly disabled: boolean;
   readonly modeLabel: string;
+  /** "77%", pre-formatted by the card — omitted (or '') skips the row. */
+  readonly humidityText?: string;
   readonly ambientText: string;
   readonly heroText: string;
   readonly onAdjust: ClimateDialAdjust;
@@ -86,6 +88,7 @@ export function renderClimateDial(options: ClimateDialOptions): TemplateResult {
         .low=${setpoints.low ?? scale.min}
         .high=${setpoints.high ?? scale.max}
         mode-label=${options.modeLabel}
+        humidity-text=${options.humidityText ?? ''}
         ambient-text=${options.ambientText}
         hero-text=${options.heroText}
         value-label=${t(locale, 'control.target')}
