@@ -3,7 +3,6 @@ import '../elements/ql-preset-row';
 import '../elements/ql-status-dot';
 import type { QlRingDialHandle } from '../elements/ql-ring-dial';
 import { t } from '../i18n/translate';
-import type { TranslationKey } from '../i18n/locales/en';
 import type { Locale } from '../i18n/types';
 import { climateModeGlyph, menuGlyph, weatherGlyph } from './climate-dial-header-glyphs';
 import {
@@ -40,16 +39,13 @@ export interface ClimateDialCardConfig {
   readonly name?: string;
   /** `compact` is the room-view dial: a smaller ring, and no ticks on it. */
   readonly form?: ClimateDialForm;
+  /**
+   * A `weather` entity to drive the header's weather glyph from its own
+   * condition. Absent keeps the header's static partly-cloudy mark — the
+   * strategy sends this only when the home has a weather entity to point at.
+   */
+  readonly weather_entity?: string;
 }
-
-/** The eyebrow above the numeral, which names what the device is doing. */
-const MODE_LABELS: Readonly<Record<DialMode, TranslationKey>> = {
-  heat: 'climate.heating',
-  cool: 'climate.cooling',
-  heat_cool: 'hvac.auto',
-  off: 'hvac.off',
-  other: 'state.active',
-};
 
 /**
  * Climate dial card (Figma `card/climate-dial-v2`, 114:2885).
@@ -396,6 +392,17 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     return Number.isFinite(humidity) ? `${String(Math.round(humidity))}%` : '';
   }
 
+  /**
+   * The header's weather glyph, driven live off `weather_entity`'s own state
+   * when the card is given one — `weatherGlyph` falls back to the static
+   * partly-cloudy mark for `undefined` and for any state it does not recognise,
+   * so an absent config field and an unavailable entity degrade the same way.
+   */
+  private weatherCondition(): string | undefined {
+    const weatherId = this.config?.weather_entity;
+    return weatherId === undefined ? undefined : this.entity(weatherId)?.state;
+  }
+
   /** Off promotes the room's own reading to the hero numeral. */
   private heroOf(mode: DialMode): string {
     if (mode !== 'off') {
@@ -448,6 +455,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
       <div class="group">
         <span class="eyebrow">${t(locale, 'control.fan')}</span>
         <ql-preset-row
+          wrap
           .options=${modes.map((mode) => ({ value: mode, label: titleCase(mode) }))}
           .value=${String(entity?.attributes.fan_mode ?? '')}
           .label=${t(locale, 'control.fan')}
@@ -492,7 +500,6 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
         mode,
         locale,
         disabled: offline,
-        modeLabel: t(locale, MODE_LABELS[mode]),
         humidityText: offline ? '' : this.humidityText(),
         ambientText: this.captionOf(locale, mode),
         heroText: this.heroOf(mode),
@@ -504,7 +511,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
       <div class="ql-card ${offline ? 'ql-unavailable' : ''}">
         <div class="head">
           <div class="head-slot head-slot-left">
-            ${weatherGlyph()}
+            ${weatherGlyph(this.weatherCondition())}
             <button
               class="ql-info"
               type="button"

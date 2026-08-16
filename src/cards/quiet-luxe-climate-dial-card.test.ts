@@ -243,6 +243,48 @@ describe('quiet-luxe-climate-dial-card', () => {
     expect(card.shadowRoot?.querySelector('.head-slot-right svg.glyph')).not.toBeNull();
   });
 
+  it('keeps the static weather glyph when the config has no weather_entity', async () => {
+    const card = await mount(SENSIBO());
+    expect(card.shadowRoot?.querySelector('.head-slot-left svg.glyph')).not.toBeNull();
+  });
+
+  it('drives the header weather glyph off weather_entity’s own condition, when the card is given one', async () => {
+    const withWeather = document.createElement('quiet-luxe-climate-dial-card') as QuietLuxeClimateDialCard;
+    withWeather.setConfig({
+      type: 'custom:quiet-luxe-climate-dial-card',
+      entity: 'climate.steven_bedroom',
+      weather_entity: 'weather.home',
+    });
+    withWeather.hass = makeMockHass([SENSIBO(), makeEntity('weather.home', 'rainy')]);
+    document.body.append(withWeather);
+    await withWeather.updateComplete;
+
+    const withoutWeather = await mount(SENSIBO());
+
+    const weatherMarkup = withWeather.shadowRoot?.querySelector('.head-slot-left svg.glyph')?.innerHTML;
+    const staticMarkup = withoutWeather.shadowRoot?.querySelector('.head-slot-left svg.glyph')?.innerHTML;
+    expect(weatherMarkup).not.toBe(staticMarkup);
+    withWeather.remove();
+  });
+
+  it('falls back to the static weather glyph when weather_entity is unavailable', async () => {
+    const card = document.createElement('quiet-luxe-climate-dial-card') as QuietLuxeClimateDialCard;
+    card.setConfig({
+      type: 'custom:quiet-luxe-climate-dial-card',
+      entity: 'climate.steven_bedroom',
+      weather_entity: 'weather.missing',
+    });
+    card.hass = makeMockHass([SENSIBO()]);
+    document.body.append(card);
+    await card.updateComplete;
+
+    const withoutWeather = await mount(SENSIBO());
+    const fallbackMarkup = card.shadowRoot?.querySelector('.head-slot-left svg.glyph')?.innerHTML;
+    const staticMarkup = withoutWeather.shadowRoot?.querySelector('.head-slot-left svg.glyph')?.innerHTML;
+    expect(fallbackMarkup).toBe(staticMarkup);
+    card.remove();
+  });
+
   it('redraws the mode glyph for the entity’s own hvac mode', async () => {
     const cool = await mount(SENSIBO());
     const coolPath = cool.shadowRoot?.querySelector('.head-mode path')?.getAttribute('d');
@@ -314,6 +356,16 @@ describe('quiet-luxe-climate-dial-card', () => {
     expect(calls(card)).toEqual([
       ['climate', 'set_fan_mode', { entity_id: 'climate.steven_bedroom', fan_mode: 'high' }],
     ]);
+  });
+
+  it('lets the fan row wrap instead of truncating six speeds at a narrow width', async () => {
+    const card = await mount(SENSIBO());
+    const fanRow = card.shadowRoot?.querySelectorAll('ql-preset-row')[1];
+    expect(fanRow?.hasAttribute('wrap')).toBe(true);
+    // The hvac mode row never truncates at 2–4 segments, so it keeps its
+    // default single-line behaviour.
+    const modeRow = card.shadowRoot?.querySelectorAll('ql-preset-row')[0];
+    expect(modeRow?.hasAttribute('wrap')).toBe(false);
   });
 
   it('draws no fan row for a device that reports no fan modes', async () => {
