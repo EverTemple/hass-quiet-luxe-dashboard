@@ -1,13 +1,11 @@
 import { css, html, nothing, type CSSResultGroup, type TemplateResult } from 'lit';
 import { t } from '../i18n/translate';
-import type { TranslationKey } from '../i18n/locales/en';
 import type { Locale } from '../i18n/types';
 import {
   ambientTemperature,
   climateScale,
   dialMode,
   dialSetpoints,
-  type DialMode,
   type DialSetpoints,
 } from './climate-dial';
 import {
@@ -23,15 +21,6 @@ import { adjustSetpoints, QUICK_ADJUST_COMMIT_DELAY_MS, type AdjustDirection } f
 import { registerCard } from './register';
 import { climateDialStyles, renderClimateDial } from './render-climate-dial';
 import { climateSheetStyles, renderClimateSheet } from './render-climate-sheet';
-
-/** The eyebrow over the sheet's dial, which names what the device is doing. */
-const SHEET_MODE_LABELS: Readonly<Record<DialMode, TranslationKey>> = {
-  heat: 'climate.heating',
-  cool: 'climate.cooling',
-  heat_cool: 'hvac.auto',
-  off: 'hvac.off',
-  other: 'state.active',
-};
 
 export interface ClimateCardConfig {
   readonly type: string;
@@ -324,7 +313,6 @@ export class QuietLuxeClimateCard extends QlBaseCard {
       mode,
       locale,
       disabled: offline,
-      modeLabel: t(locale, SHEET_MODE_LABELS[mode]),
       ambientText: ambient === undefined ? '' : `${t(locale, 'climate.now')} ${ambient.toFixed(1)}°`,
       heroText: ambient === undefined ? '—' : `${ambient.toFixed(1)}°`,
       onAdjust: this.onQuickAdjust,
