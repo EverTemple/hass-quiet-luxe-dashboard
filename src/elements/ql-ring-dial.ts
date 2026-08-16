@@ -308,13 +308,25 @@ export class QlRingDial extends LitElement {
       display: inline-flex;
       align-items: flex-start;
     }
+    /* Sized and positioned per dial size, not as one em-relative rule scaled
+       off the numeral: at 0.34em/0.6em (its previous form) the mark tracked
+       the 56px full numeral fine but shrank to under 9px against the 26px
+       compact one — legible as a dot, not as a degree mark. Figma's own
+       unit text is a flat 12px regardless of numeral size; used as-is here
+       for compact. Full keeps the larger, already-reviewed 19px rather than
+       matching that 12px — Figma only measured the mark on the one variant,
+       so it does not settle what the other should look like, and dropping
+       full to 12px read worse. The margin-top is tuned per size rather than
+       derived, since the offset that reaches cap height does not track the
+       mark's own (now fixed) font-size the way it did when both were em. */
     .unit {
-      font-size: 0.34em;
+      font-size: 19px;
       line-height: 1;
-      /* Drops the mark from the line box's top to the numeral's cap height.
-         Both this and the size are relative to the type, so the compact dial
-         and the full one place the mark identically. */
-      margin-top: 0.6em;
+      margin-top: 11px;
+    }
+    :host([size='compact']) .unit {
+      font-size: 12px;
+      margin-top: 6px;
     }
     .range-divider {
       display: inline-block;

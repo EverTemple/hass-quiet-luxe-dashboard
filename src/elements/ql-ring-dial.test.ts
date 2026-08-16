@@ -242,6 +242,30 @@ describe('ql-ring-dial', () => {
     expect(styles).toContain('font: 200 56px/60px');
   });
 
+  /* Regression: the degree mark was `font-size: 0.34em; margin-top: 0.6em`,
+     relative to the numeral. That tracked the 56px full numeral fine — 19px —
+     but against the 26px compact numeral it shrank to ~8.8px: a detached
+     speck, not a unit mark. Absolute, per-size values are the fix; asserting
+     no `em` in the block keeps it from quietly drifting back to relative. */
+  it('sizes the degree mark absolutely, not relative to the numeral', () => {
+    const styles = QlRingDial.styles.toString();
+    const unitBlock = /\.unit\s*\{[^}]*\}/.exec(styles)?.[0] ?? '';
+    expect(unitBlock).not.toBe('');
+    expect(unitBlock).not.toMatch(/\d+(\.\d+)?em\b/);
+    expect(styles).toContain('font-size: 19px');
+    const compactUnitBlock = /\[size='compact'\]\)\s*\.unit\s*\{[^}]*\}/.exec(styles)?.[0] ?? '';
+    expect(compactUnitBlock).toContain('font-size: 12px');
+  });
+
+  it('draws a legible degree mark on the compact numeral, not an illegible speck', async () => {
+    const el = await mount({ size: 'compact', step: 1, value: 23 });
+    const unit = el.shadowRoot?.querySelector<HTMLElement>('.numeral .unit');
+    expect(unit).not.toBeNull();
+    const fontSize = parseFloat(unit ? getComputedStyle(unit).fontSize : '0');
+    // 8.8px (0.34em of a 26px compact numeral) was the bug; give real margin.
+    expect(fontSize).toBeGreaterThanOrEqual(11);
+  });
+
   it('shows the humidity reading between the eyebrow and the numeral', async () => {
     const el = await mount({ humidityText: '77%' });
     const row = el.shadowRoot?.querySelector('.humidity-row');
