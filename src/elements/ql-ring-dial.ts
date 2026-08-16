@@ -91,7 +91,6 @@ export class QlRingDial extends LitElement {
     mode: { type: String, reflect: true },
     size: { type: String, reflect: true },
     unit: { type: String },
-    modeLabel: { attribute: 'mode-label', type: String },
     /** "77%", pre-formatted by the card — empty omits the row entirely. */
     humidityText: { attribute: 'humidity-text', type: String },
     ambientText: { attribute: 'ambient-text', type: String },
@@ -112,9 +111,7 @@ export class QlRingDial extends LitElement {
   declare mode: DialMode;
   declare size: QlRingDialSize;
   declare unit: string;
-  /** The eyebrow above the numeral — "Heating", "Cooling", "Auto", "Off". */
-  declare modeLabel: string;
-  /** "77%" under the eyebrow, or '' when the entity reports no humidity. */
+  /** "77%" above the numeral, or '' when the entity reports no humidity. */
   declare humidityText: string;
   /** The caption under it — "Now 22.6°", or "Set to 23°" when off. */
   declare ambientText: string;
@@ -143,7 +140,6 @@ export class QlRingDial extends LitElement {
     this.mode = 'off';
     this.size = 'full';
     this.unit = '°';
-    this.modeLabel = '';
     this.humidityText = '';
     this.ambientText = '';
     this.heroText = '';
@@ -263,13 +259,6 @@ export class QlRingDial extends LitElement {
       text-align: center;
       min-width: 0;
     }
-    .eyebrow {
-      margin: 0;
-      color: var(--ql-ink-muted, #8c8578);
-      font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
     /* numeral/dial — Outfit ExtraLight 56/60. The one type style this element
        adds; every other size here is an existing card style. */
     .numeral {
@@ -300,33 +289,13 @@ export class QlRingDial extends LitElement {
       font-size: 26px;
       line-height: 30px;
     }
-    /* The degree mark rides at the numeral's cap height, not on its baseline,
-       so "24°" reads as one figure rather than a number and a stray dot. Only
-       the single-setpoint numeral steps it down — a pair's "21°"/"25°" carry
-       their mark at the same size as the digits either side of the divider. */
+    /* The degree mark sits inline with the numeral at its own font size, tight
+       to the digit — the single setpoint and the low/high pair read the same
+       way, so "24°" and "21°"/"25°" both read as one figure rather than a
+       number with a stepped-down, raised dot beside it. */
     .reading {
       display: inline-flex;
       align-items: flex-start;
-    }
-    /* Sized and positioned per dial size, not as one em-relative rule scaled
-       off the numeral: at 0.34em/0.6em (its previous form) the mark tracked
-       the 56px full numeral fine but shrank to under 9px against the 26px
-       compact one — legible as a dot, not as a degree mark. Figma's own
-       unit text is a flat 12px regardless of numeral size; used as-is here
-       for compact. Full keeps the larger, already-reviewed 19px rather than
-       matching that 12px — Figma only measured the mark on the one variant,
-       so it does not settle what the other should look like, and dropping
-       full to 12px read worse. The margin-top is tuned per size rather than
-       derived, since the offset that reaches cap height does not track the
-       mark's own (now fixed) font-size the way it did when both were em. */
-    .unit {
-      font-size: 19px;
-      line-height: 1;
-      margin-top: 11px;
-    }
-    :host([size='compact']) .unit {
-      font-size: 12px;
-      margin-top: 6px;
     }
     .range-divider {
       display: inline-block;
@@ -354,18 +323,6 @@ export class QlRingDial extends LitElement {
       display: flex;
       align-items: center;
       gap: 3px;
-    }
-    /* Mode palette. Heat is champagne, cool is the good/sage green, auto shows
-       one of each, off is muted throughout. */
-    :host([mode='heat']) .eyebrow,
-    :host([mode='other']) .eyebrow {
-      color: var(--ql-accent-champagne, #b08d57);
-    }
-    :host([mode='cool']) .eyebrow {
-      color: var(--ql-status-good, #7e8b6f);
-    }
-    :host([mode='heat_cool']) .eyebrow {
-      color: var(--ql-accent-champagne, #b08d57);
     }
     :host([mode='off']) .numeral {
       color: var(--ql-ink-muted, #8c8578);
@@ -595,36 +552,27 @@ export class QlRingDial extends LitElement {
     `;
   }
 
+  /** A reading, e.g. "24°" or "21°" — the degree mark inline at the numeral's
+   * own size, single setpoint and low/high pair alike. */
   private reading(value: number, cls = ''): TemplateResult {
-    const text = Number.isInteger(this.step) ? String(Math.round(value)) : value.toFixed(1);
-    return html`<span class="reading ${cls}">${text}<span class="unit">${this.unit}</span></span>`;
-  }
-
-  /**
-   * A range reading, e.g. "21°" — unlike the single-setpoint numeral, the
-   * pair carries its degree mark at the same size as the digits either side
-   * of the divider, so it is plain text rather than `reading()`'s stepped-down
-   * `.unit` span.
-   */
-  private pairReading(value: number, cls: string): TemplateResult {
     const text = Number.isInteger(this.step) ? String(Math.round(value)) : value.toFixed(1);
     return html`<span class="reading ${cls}">${text}${this.unit}</span>`;
   }
 
   /**
-   * The compact dial carries the mode and the reading only. At 136px the ring's
-   * inner well is not tall enough for a third line, and the room view already
-   * shows the room's own temperature above the card.
+   * The caption under the numeral, at both sizes: dropping the mode-label row
+   * (the eyebrow used to carry it) cost the compact ring a line, and without
+   * this it goes visibly hollow on a device that reports no humidity.
    */
   private caption(): TemplateResult | typeof nothing {
-    if (this.size === 'compact' || this.ambientText === '') {
+    if (this.ambientText === '') {
       return nothing;
     }
     return html`<p class="caption">${this.ambientText}</p>`;
   }
 
   /**
-   * The humidity reading beside the eyebrow. Card-supplied and pre-formatted:
+   * The humidity reading above the numeral. Card-supplied and pre-formatted:
    * an entity that reports no humidity passes '', and the row disappears
    * entirely rather than showing a placeholder or a dash.
    */
@@ -645,7 +593,6 @@ export class QlRingDial extends LitElement {
     // demoted to the caption — the honest statement of a device doing nothing.
     if (this.mode === 'off' || this.kind === 'none') {
       return html`
-        <p class="eyebrow">${this.modeLabel}</p>
         ${this.renderHumidity()}
         <p class="numeral">${this.heroText}</p>
         ${this.caption()}
@@ -653,10 +600,9 @@ export class QlRingDial extends LitElement {
     }
     if (this.kind === 'range') {
       return html`
-        <p class="eyebrow">${this.modeLabel}</p>
         ${this.renderHumidity()}
         <p class="numeral pair">
-          ${this.pairReading(this.low, 'low')}<span class="range-divider"></span>${this.pairReading(
+          ${this.reading(this.low, 'low')}<span class="range-divider"></span>${this.reading(
             this.high,
             'high',
           )}
@@ -665,7 +611,6 @@ export class QlRingDial extends LitElement {
       `;
     }
     return html`
-      <p class="eyebrow">${this.modeLabel}</p>
       ${this.renderHumidity()}
       <p class="numeral">${this.reading(this.value)}</p>
       ${this.caption()}

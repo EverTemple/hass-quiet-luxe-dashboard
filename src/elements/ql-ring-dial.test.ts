@@ -170,17 +170,22 @@ describe('ql-ring-dial', () => {
     expect(el.shadowRoot?.textContent).toContain('25');
   });
 
-  it('draws the range pair as a divider bar, not a text glyph, and no stepped-down degree mark', async () => {
+  it('draws the range pair as a divider bar, not a text glyph', async () => {
     const el = await mount({ kind: 'range', mode: 'heat_cool', low: 21, high: 25 });
     expect(el.shadowRoot?.querySelector('.range-divider')).not.toBeNull();
     expect(el.shadowRoot?.querySelector('.divider')).toBeNull();
-    // The pair's own degree mark is plain text at the numeral's size, unlike
-    // the single-setpoint reading, which nests a smaller `.unit` span.
     const readings = [...(el.shadowRoot?.querySelectorAll('.numeral.pair .reading') ?? [])];
     expect(readings.map((reading) => reading.textContent?.trim())).toEqual(['21°', '25°']);
-    expect(el.shadowRoot?.querySelector('.numeral.pair .unit')).toBeNull();
     expect(readings[0]?.classList.contains('low')).toBe(true);
     expect(readings[1]?.classList.contains('high')).toBe(true);
+  });
+
+  it('unifies the degree mark: inline plain text, same as the range pair, no stepped-down .unit span', async () => {
+    const el = await mount({ value: 24, step: 1 });
+    const reading = el.shadowRoot?.querySelector('.numeral .reading');
+    expect(reading?.textContent?.trim()).toBe('24°');
+    expect(el.shadowRoot?.querySelector('.unit')).toBeNull();
+    expect(QlRingDial.styles.toString()).not.toMatch(/\.unit\s*\{/);
   });
 
   it('never lets the heat end cross the cool one', async () => {
@@ -242,40 +247,14 @@ describe('ql-ring-dial', () => {
     expect(styles).toContain('font: 200 56px/60px');
   });
 
-  /* Regression: the degree mark was `font-size: 0.34em; margin-top: 0.6em`,
-     relative to the numeral. That tracked the 56px full numeral fine — 19px —
-     but against the 26px compact numeral it shrank to ~8.8px: a detached
-     speck, not a unit mark. Absolute, per-size values are the fix; asserting
-     no `em` in the block keeps it from quietly drifting back to relative. */
-  it('sizes the degree mark absolutely, not relative to the numeral', () => {
-    const styles = QlRingDial.styles.toString();
-    const unitBlock = /\.unit\s*\{[^}]*\}/.exec(styles)?.[0] ?? '';
-    expect(unitBlock).not.toBe('');
-    expect(unitBlock).not.toMatch(/\d+(\.\d+)?em\b/);
-    expect(styles).toContain('font-size: 19px');
-    const compactUnitBlock = /\[size='compact'\]\)\s*\.unit\s*\{[^}]*\}/.exec(styles)?.[0] ?? '';
-    expect(compactUnitBlock).toContain('font-size: 12px');
-  });
-
-  it('draws a legible degree mark on the compact numeral, not an illegible speck', async () => {
-    const el = await mount({ size: 'compact', step: 1, value: 23 });
-    const unit = el.shadowRoot?.querySelector<HTMLElement>('.numeral .unit');
-    expect(unit).not.toBeNull();
-    const fontSize = parseFloat(unit ? getComputedStyle(unit).fontSize : '0');
-    // 8.8px (0.34em of a 26px compact numeral) was the bug; give real margin.
-    expect(fontSize).toBeGreaterThanOrEqual(11);
-  });
-
-  it('shows the humidity reading between the eyebrow and the numeral', async () => {
+  it('shows the humidity reading above the numeral, first in the centre stack', async () => {
     const el = await mount({ humidityText: '77%' });
     const row = el.shadowRoot?.querySelector('.humidity-row');
     expect(row).not.toBeNull();
     expect(row?.querySelector('svg.glyph')).not.toBeNull();
     expect(row?.querySelector('.humidity-value')?.textContent?.trim()).toBe('77%');
     const stack = [...(el.shadowRoot?.querySelectorAll('.centre > *') ?? [])];
-    expect(stack.indexOf(row as Element)).toBeGreaterThan(
-      stack.findIndex((node) => node.classList.contains('eyebrow')),
-    );
+    expect(stack.indexOf(row as Element)).toBe(0);
     expect(stack.indexOf(row as Element)).toBeLessThan(
       stack.findIndex((node) => node.classList.contains('numeral')),
     );
@@ -300,12 +279,16 @@ describe('ql-ring-dial', () => {
 });
 
 describe('ql-ring-dial compact', () => {
-  it('carries the mode and the reading only', async () => {
-    const el = await mount({ size: 'compact', ambientText: 'Now 22.1°', modeLabel: 'Cooling' });
-    expect(el.shadowRoot?.querySelector('.eyebrow')?.textContent?.trim()).toBe('Cooling');
+  it('draws no eyebrow — the mode glyph in the card header carries that cue now', async () => {
+    const el = await mount({ size: 'compact', ambientText: 'Now 22.1°' });
+    expect(el.shadowRoot?.querySelector('.eyebrow')).toBeNull();
     expect(el.shadowRoot?.querySelector('.numeral')?.textContent?.trim()).toBe('23°');
-    expect(el.shadowRoot?.querySelector('.caption')).toBeNull();
     expect(el.shadowRoot?.querySelectorAll('.tick')).toHaveLength(0);
+  });
+
+  it('shows the ambient caption at compact too, not full size only', async () => {
+    const el = await mount({ size: 'compact', ambientText: 'Now 22.1°' });
+    expect(el.shadowRoot?.querySelector('.caption')?.textContent?.trim()).toBe('Now 22.1°');
   });
 
   it('still shows the caption at full size', async () => {
@@ -313,9 +296,11 @@ describe('ql-ring-dial compact', () => {
     expect(el.shadowRoot?.querySelector('.caption')?.textContent?.trim()).toBe('Now 22.1°');
   });
 
-  it('drops the caption when the device reports no ambient reading', async () => {
-    const el = await mount({ size: 'full', ambientText: '' });
-    expect(el.shadowRoot?.querySelector('.caption')).toBeNull();
+  it('drops the caption at either size when the device reports no ambient reading', async () => {
+    const full = await mount({ size: 'full', ambientText: '' });
+    expect(full.shadowRoot?.querySelector('.caption')).toBeNull();
+    const compact = await mount({ size: 'compact', ambientText: '' });
+    expect(compact.shadowRoot?.querySelector('.caption')).toBeNull();
   });
 
   it('steps the compact numeral to 26/30 Light, not the full dial’s ExtraLight', () => {
