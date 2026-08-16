@@ -23,13 +23,15 @@ import { headingCard, sectionOf } from './heading';
 const MIN_STRIPPED_NAME_LENGTH = 3;
 
 /**
- * The dial's eyebrow inside a single-room view, with that room's own name cut
- * off the entity's name — the room view's title already says it. Matches the
- * resolved area (and its aliases/config override) rather than a hardcoded
- * word list, so it degrades safely on a device whose name never mentioned the
- * room to begin with.
+ * A climate card's name inside a single-room view, with that room's own name
+ * cut off the entity's name — the room view's title already says it. Feeds
+ * both the dial card's eyebrow and the plain tile's label, the same way
+ * `roomScopedLabels` already does for the room's light/cover/switch cards.
+ * Matches the resolved area (and its aliases/config override) rather than a
+ * hardcoded word list, so it degrades safely on a device whose name never
+ * mentioned the room to begin with.
  */
-function roomScopedDialName(ctx: StrategyContext, area: AreaEntry, entityId: string): string {
+function roomScopedClimateName(ctx: StrategyContext, area: AreaEntry, entityId: string): string {
   const full = entityName(ctx, entityId);
   const stripped = stripAreaName(full, areaNameVariants(ctx.home, area));
   return stripped.length < MIN_STRIPPED_NAME_LENGTH ? full : stripped;
@@ -97,7 +99,9 @@ function pairedClimateIds(
  *
  * `roomScopedArea`, when given, is the single room the whole view is already
  * titled with (the room view only — Home and All Climates mix rooms on one
- * screen, so they always pass nothing here and keep the full name).
+ * screen, so they always pass nothing here and keep the full name). It
+ * shortens the name on both branches below: the plain tile uses the same
+ * shared `nameOf` chain as the dial card, so it crowds the same way.
  */
 function climateCardConfig(
   ctx: StrategyContext,
@@ -106,7 +110,13 @@ function climateCardConfig(
   roomScopedArea?: AreaEntry,
 ): LovelaceCardConfig {
   if (!entity.startsWith('climate.') || !hasDialSetpoint(ctx.states[entity])) {
-    return { type: 'custom:quiet-luxe-climate-card', entity };
+    return {
+      type: 'custom:quiet-luxe-climate-card',
+      entity,
+      ...(roomScopedArea === undefined
+        ? {}
+        : { name: roomScopedClimateName(ctx, roomScopedArea, entity) }),
+    };
   }
   const weatherEntity = ctx.registry.all('weather')[0];
   return {
@@ -116,7 +126,7 @@ function climateCardConfig(
     ...(weatherEntity === undefined ? {} : { weather_entity: weatherEntity }),
     ...(roomScopedArea === undefined
       ? {}
-      : { name: roomScopedDialName(ctx, roomScopedArea, entity) }),
+      : { name: roomScopedClimateName(ctx, roomScopedArea, entity) }),
   };
 }
 

@@ -232,12 +232,16 @@ describe('climateCards weather_entity on the dial card', () => {
 });
 
 /**
- * The dial's eyebrow drops the room name only where the room is already
- * established by context — the room view's own title (`roomScopedArea`
- * threaded from `views/room.ts`). Home and All Climates mix rooms on one
- * screen and never pass it, so they keep the entity's full name untouched.
+ * Both the dial card's eyebrow and the plain tile's label drop the room name
+ * only where the room is already established by context — the room view's
+ * own title (`roomScopedArea` threaded from `views/room.ts`). Home and All
+ * Climates mix rooms on one screen and never pass it, so they keep the
+ * entity's full name untouched. The plain tile gets the same treatment as
+ * the dial because both draw their label through the same shared `nameOf`
+ * chain (`ql-base-card.ts`) — the room already stripped for the room view's
+ * light/cover/switch cards via `roomScopedLabels`.
  */
-describe('climateCards room-scoped dial name', () => {
+describe('climateCards room-scoped climate name', () => {
   const area = mockArea('steven_bedroom', 'Steven Bedroom');
   const dialAttrs = {
     supported_features: 937,
@@ -299,23 +303,46 @@ describe('climateCards room-scoped dial name', () => {
     expect(card).toMatchObject({ name: 'AC Steven Bedroom' });
   });
 
-  it('never sets name on the plain (non-dial) climate tile, room-scoped or not', () => {
-    const ctx = makeContext({
+  function exhaustCtx(friendlyName: string): StrategyContext {
+    return makeContext({
       snapshot: {
         areas: [area],
         devices: [],
         entities: [mockRegEntity('climate.exhaust', { area_id: 'steven_bedroom' })],
       },
       entities: [
-        makeEntity('climate.exhaust', 'fan_only', {
-          supported_features: 384,
-          friendly_name: 'Exhaust Steven Bedroom',
-        }),
+        makeEntity('climate.exhaust', 'fan_only', { supported_features: 384, friendly_name: friendlyName }),
       ],
     });
+  }
+
+  it('strips the room name on the plain (non-dial) climate tile too, room-scoped', () => {
+    const ctx = exhaustCtx('Exhaust Steven Bedroom');
     const card = climateCards(ctx, 'steven_bedroom', undefined, 'compact', area).find(
       (c) => c.entity === 'climate.exhaust',
     );
+    expect(card).toEqual({
+      type: 'custom:quiet-luxe-climate-card',
+      entity: 'climate.exhaust',
+      name: 'Exhaust',
+    });
+  });
+
+  it('keeps the plain tile untouched on Home/All Climates (no roomScopedArea)', () => {
+    const ctx = exhaustCtx('Exhaust Steven Bedroom');
+    const card = climateCards(ctx, 'steven_bedroom').find((c) => c.entity === 'climate.exhaust');
     expect(card).toEqual({ type: 'custom:quiet-luxe-climate-card', entity: 'climate.exhaust' });
+  });
+
+  it('keeps the original name on the plain tile too, when stripping would leave it too short', () => {
+    const ctx = exhaustCtx('AC Steven Bedroom');
+    const card = climateCards(ctx, 'steven_bedroom', undefined, 'compact', area).find(
+      (c) => c.entity === 'climate.exhaust',
+    );
+    expect(card).toEqual({
+      type: 'custom:quiet-luxe-climate-card',
+      entity: 'climate.exhaust',
+      name: 'AC Steven Bedroom',
+    });
   });
 });
