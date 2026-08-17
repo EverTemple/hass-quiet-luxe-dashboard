@@ -6,19 +6,25 @@ import { adminSection } from '../sections/admin';
 import { carCard } from '../sections/car';
 import { climateColumnCards } from '../sections/climate';
 import { energyViewSections } from '../sections/energy';
-import { sectionOf, viewHeaderSection } from '../sections/heading';
+import { viewHeaderSection } from '../sections/heading';
 import { mediaViewSections } from '../sections/media';
 import { orderedAreas } from '../sections/rooms';
 import { securityViewSections } from '../sections/security';
 import {
-  isSection,
   PATHS,
   type LovelaceSectionConfig,
   type LovelaceViewConfig,
   type StrategyContext,
 } from '../types';
 
-/** Views that hold a single card keep a narrow band; the card is not a grid. */
+/**
+ * Sections that hold a single card keep a narrow column, since the card is
+ * not a grid. The view itself still runs the full `MAX_COLUMNS` track count
+ * (like every other view), so the narrow section sits left-aligned beside
+ * the rest of the band instead of being centred alone in its own 2-track
+ * view — `max_columns` here would otherwise be the one thing pulling these
+ * three views out of the shared left-aligned layout.
+ */
 const SINGLE_CARD_MAX_COLUMNS = 2;
 
 /**
@@ -62,23 +68,41 @@ export function energyView(ctx: StrategyContext): LovelaceViewConfig | null {
 
 /**
  * All Climates (spec §6): devices grouped by room; area names are proper nouns.
- * One span-1 column per area, free flow across the four tracks.
  *
- * The column is a single track, so it takes the same card treatment as the room
- * view's climate column — full-track cards, tallest first. Sharing the helper
- * is what stops a dehumidifier tile standing half-width under a full-width
- * dial, which is what the two views did differently before.
+ * The strategy runs once, with no viewport — HA resolves the column count at
+ * runtime from the width it actually has, and clamps at narrower widths. A
+ * span computed from "4 columns" would be wrong the moment the view is
+ * narrower, so the area is never one section spanning several tracks: the
+ * heading gets its own full-band section, and each card gets its OWN
+ * span-1 section. HA then flows those single-track sections across however
+ * many columns it resolves — four per row at four columns, two at two,
+ * stacked at one — with no viewport knowledge baked in here.
+ *
+ * Cards keep the room's tallest-first order and the room's full-track sizing
+ * (`climateColumnCards`) — the same treatment as the room view's climate
+ * column, so a dehumidifier tile never stands half-width under a full-width
+ * dial. Areas with no climate cards are dropped entirely, heading included.
  */
 export function climatesView(ctx: StrategyContext): LovelaceViewConfig | null {
-  const sections = orderedAreas(ctx)
-    .map((area) =>
-      sectionOf(
-        { type: 'heading', heading: roomName(ctx.home, area) },
-        climateColumnCards(ctx, area.area_id, undefined, 'full'),
-        REGION_SPAN.climatesArea,
-      ),
-    )
-    .filter(isSection);
+  const sections = orderedAreas(ctx).flatMap((area): ReadonlyArray<LovelaceSectionConfig> => {
+    const cards = climateColumnCards(ctx, area.area_id, undefined, 'full');
+    if (cards.length === 0) {
+      return [];
+    }
+    const heading: LovelaceSectionConfig = {
+      type: 'grid',
+      column_span: MAX_COLUMNS,
+      cards: [{ type: 'heading', heading: roomName(ctx.home, area) }],
+    };
+    const cardSections = cards.map(
+      (card): LovelaceSectionConfig => ({
+        type: 'grid',
+        column_span: REGION_SPAN.climatesArea,
+        cards: [card],
+      }),
+    );
+    return [heading, ...cardSections];
+  });
   return view(ctx, 'view.climates', PATHS.climates, 'mdi:thermostat', sections);
 }
 
@@ -88,7 +112,7 @@ export function carView(ctx: StrategyContext): LovelaceViewConfig | null {
     card === null
       ? []
       : [{ type: 'grid', column_span: SINGLE_CARD_MAX_COLUMNS, cards: [card] }];
-  return view(ctx, 'view.car', PATHS.car, 'mdi:car-outline', sections, SINGLE_CARD_MAX_COLUMNS);
+  return view(ctx, 'view.car', PATHS.car, 'mdi:car-outline', sections, MAX_COLUMNS);
 }
 
 export function adminView(ctx: StrategyContext): LovelaceViewConfig | null {
@@ -97,7 +121,7 @@ export function adminView(ctx: StrategyContext): LovelaceViewConfig | null {
     section === null
       ? []
       : [{ ...section, column_span: SINGLE_CARD_MAX_COLUMNS }];
-  return view(ctx, 'view.admin', PATHS.admin, 'mdi:tune', sections, SINGLE_CARD_MAX_COLUMNS);
+  return view(ctx, 'view.admin', PATHS.admin, 'mdi:tune', sections, MAX_COLUMNS);
 }
 
 /** Language page always exists (spec §5) — kiosk-friendly full-page switcher. */
@@ -108,7 +132,7 @@ export function languageView(ctx: StrategyContext): LovelaceViewConfig {
     path: PATHS.language,
     icon: 'mdi:translate',
     type: 'sections',
-    max_columns: SINGLE_CARD_MAX_COLUMNS,
+    max_columns: MAX_COLUMNS,
     dense_section_placement: true,
     sections: [
       viewHeaderSection(ctx, { title }),

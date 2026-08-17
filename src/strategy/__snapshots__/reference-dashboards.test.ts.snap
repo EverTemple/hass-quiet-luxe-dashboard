@@ -726,6 +726,12 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "heading": "Main Living",
               "type": "heading",
             },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
             {
               "entity": "climate.main_living_ac",
               "grid_options": {
@@ -744,6 +750,12 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "heading": "Side Living",
               "type": "heading",
             },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
             {
               "entity": "fan.side_living_fan",
               "grid_options": {
@@ -762,6 +774,12 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "heading": "Master Bedroom",
               "type": "heading",
             },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
             {
               "entity": "climate.master_ac",
               "grid_options": {
@@ -781,7 +799,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:car-outline",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "car",
       "sections": [
         {
@@ -820,7 +838,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:tune",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "admin",
       "sections": [
         {
@@ -865,7 +883,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:translate",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "language",
       "sections": [
         {
@@ -1375,6 +1393,12 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "heading": "Living Room",
               "type": "heading",
             },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
             {
               "entity": "climate.living_ac",
               "grid_options": {
@@ -1394,7 +1418,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:car-outline",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "car",
       "sections": [
         {
@@ -1433,7 +1457,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:tune",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "admin",
       "sections": [
         {
@@ -1472,7 +1496,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:translate",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "language",
       "sections": [
         {
@@ -2040,6 +2064,12 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "heading": "Bedroom",
               "type": "heading",
             },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
             {
               "entity": "climate.bedroom_ac",
               "grid_options": {
@@ -2058,6 +2088,12 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
               "heading": "Living Room",
               "type": "heading",
             },
+          ],
+          "column_span": 4,
+          "type": "grid",
+        },
+        {
+          "cards": [
             {
               "entity": "climate.living_ac",
               "grid_options": {
@@ -2077,7 +2113,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:car-outline",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "car",
       "sections": [
         {
@@ -2116,7 +2152,7 @@ exports[`reference-home dashboards (spec §2 matrix) > full dashboards match the
     {
       "dense_section_placement": true,
       "icon": "mdi:translate",
-      "max_columns": 2,
+      "max_columns": 4,
       "path": "language",
       "sections": [
         {

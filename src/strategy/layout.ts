@@ -94,7 +94,7 @@ export const REGION_SPAN = {
   roomClimate: 1,
   roomLights: 2,
   roomSensors: 1,
-  /** All Climates: one span-1 column per area, free flow. */
+  /** All Climates: one span-1 section per CARD, free flow across the grid. */
   climatesArea: 1,
   /** Security: every band is 4 across, so each section takes the whole band. */
   securityBand: 4,
