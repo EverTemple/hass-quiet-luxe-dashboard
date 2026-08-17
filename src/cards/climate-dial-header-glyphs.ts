@@ -151,17 +151,23 @@ const MODE_PATHS: Readonly<Record<'heat' | 'cool' | 'heat_cool', string>> = {
 };
 
 /**
- * The state colour the mode glyph now carries — the same mapping the centre
- * stack's mode-label eyebrow used before it was dropped (that text duplicated
- * this glyph directly above it). `off` stays `--ql-ink-muted` so it and
- * `heat_cool`/`other`'s champagne read as two distinct marks, not two shades
- * of the same one.
+ * The state colour the mode glyph now carries — the mode-label eyebrow that
+ * used to state this in words was dropped because it duplicated the glyph
+ * directly above it, so colour is now the ONLY state cue and each mode has to
+ * be distinguishable on it alone.
+ *
+ * `heat_cool` and `other` are deliberately NOT champagne. Champagne is heat's
+ * colour, and an auto or dry thermostat sharing it read as heating. They take
+ * `--ql-ink-primary` — a strong neutral that says "engaged" without claiming a
+ * direction. Nor `--ql-status-warn`: that is the alert vocabulary, and auto is
+ * an ordinary operating mode, not a condition to act on. `off` stays muted so
+ * it reads as inert against all four.
  */
 const MODE_STROKE: Readonly<Record<DialMode, string>> = {
   heat: 'var(--ql-accent-champagne, #b08d57)',
   cool: 'var(--ql-status-good, #7e8b6f)',
-  heat_cool: 'var(--ql-accent-champagne, #b08d57)',
-  other: 'var(--ql-accent-champagne, #b08d57)',
+  heat_cool: 'var(--ql-ink-primary, #2b2620)',
+  other: 'var(--ql-ink-primary, #2b2620)',
   off: STROKE,
 };
 

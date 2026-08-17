@@ -90,19 +90,32 @@ describe('climateModeGlyph', () => {
     }
   });
 
-  it('colours cool and heat/auto with the status colours the dropped mode label used', () => {
-    const cool = mount(climateModeGlyph('cool')).querySelector('svg');
-    expect(cool?.getAttribute('stroke')).toBe('var(--ql-status-good, #7e8b6f)');
-    const heat = mount(climateModeGlyph('heat')).querySelector('svg');
-    expect(heat?.getAttribute('stroke')).toBe('var(--ql-accent-champagne, #b08d57)');
-    const auto = mount(climateModeGlyph('heat_cool')).querySelector('svg');
-    expect(auto?.getAttribute('stroke')).toBe('var(--ql-accent-champagne, #b08d57)');
+  it('gives heat and cool the directional colours, auto a neutral one', () => {
+    const stroke = (mode: DialMode): string | null | undefined =>
+      mount(climateModeGlyph(mode)).querySelector('svg')?.getAttribute('stroke');
+    expect(stroke('cool')).toBe('var(--ql-status-good, #7e8b6f)');
+    expect(stroke('heat')).toBe('var(--ql-accent-champagne, #b08d57)');
+    expect(stroke('heat_cool')).toBe('var(--ql-ink-primary, #2b2620)');
+    expect(stroke('other')).toBe('var(--ql-ink-primary, #2b2620)');
   });
 
-  it('keeps off visually distinct from auto now that colour is the only state cue', () => {
-    const off = mount(climateModeGlyph('off')).querySelector('svg');
-    const auto = mount(climateModeGlyph('heat_cool')).querySelector('svg');
-    expect(off?.getAttribute('stroke')).not.toBe(auto?.getAttribute('stroke'));
-    expect(off?.getAttribute('stroke')).toBe('var(--ql-ink-muted, #8c8578)');
+  /*
+   * Colour is the ONLY state cue since the mode-label eyebrow was dropped, so
+   * the invariant is distinctness, not any particular value. Auto previously
+   * shared heat's champagne, which made an auto thermostat read as heating —
+   * asserting the literal colours above would not have caught that on its own.
+   */
+  it('gives every mode a stroke no other mode shares, except auto and other', () => {
+    const byMode = new Map(
+      MODES.map((mode) => [
+        mode,
+        mount(climateModeGlyph(mode)).querySelector('svg')?.getAttribute('stroke'),
+      ]),
+    );
+    /* auto and other are deliberately the same — both mean "engaged, no direction". */
+    expect(byMode.get('heat_cool')).toBe(byMode.get('other'));
+    const distinct = ['heat', 'cool', 'heat_cool', 'off'] as const;
+    expect(new Set(distinct.map((mode) => byMode.get(mode))).size).toBe(distinct.length);
+    expect(byMode.get('off')).toBe('var(--ql-ink-muted, #8c8578)');
   });
 });
