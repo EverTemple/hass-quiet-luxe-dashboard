@@ -8,6 +8,20 @@
  *                                  .fit-rows fixed heights, .full-width
  * - common/compute-card-grid-size.ts — defaults { columns: 12, rows: 'auto' }
  *
+ * Re-verified 2026-08-17 against home-assistant/frontend `dev` branch,
+ * `src/panels/lovelace/views/hui-sections-view.ts` (fetched from GitHub;
+ * lines below refer to that read). One point was wrong: `.ql-dev-content`
+ * sized its tracks as `repeat(var(--content-column-count), 1fr)` with no cap,
+ * which always fills 100% of its container. Real HA's `.content` grid (line
+ * 667-676) does the exact same `1fr` + `justify-content: center` — that
+ * `justify-content` is a structural no-op there too, for the same reason.
+ * What actually caps and centres the grid is the OUTER `.wrapper` (line
+ * 553-564): `max-width: calc(column-count × column-max-width + (column-count
+ * − 1) × column-gap)` with `margin: 0 auto`. `.content` then just fills
+ * whatever width that capped, centred wrapper gives it. This harness has no
+ * separate wrapper element, so the same cap + auto margin is applied directly
+ * to `.ql-dev-content` below instead of introducing one.
+ *
  * Keep this file in sync when HA changes those files; it is the only place the
  * repo asserts what HA does with grid_options.
  */
@@ -19,6 +33,8 @@ export const COLUMN_GAP_PX = 8;
 export const VIEW_COLUMN_MIN_WIDTH_PX = 320;
 export const VIEW_COLUMN_GAP_PX = 32;
 export const VIEW_ROW_GAP_PX = 24;
+/** `--ha-view-sections-column-max-width`, set to 390px by inject-theme.ts. */
+export const VIEW_COLUMN_MAX_WIDTH_PX = 390;
 export const DEFAULT_MAX_COLUMNS = 4;
 
 export interface GridOptions {
@@ -158,6 +174,14 @@ export const HA_GRID_CSS = `
   grid-auto-flow: row;
   gap: ${VIEW_ROW_GAP_PX}px ${VIEW_COLUMN_GAP_PX}px;
   padding: ${VIEW_ROW_GAP_PX}px 0;
+  /* HA's real cap (hui-sections-view.ts .wrapper): each track never grows
+     past --ha-view-sections-column-max-width, so a wide viewport gains
+     margin instead of fatter cards. */
+  max-width: calc(
+    var(--content-column-count) * ${VIEW_COLUMN_MAX_WIDTH_PX}px +
+      (var(--content-column-count) - 1) * ${VIEW_COLUMN_GAP_PX}px
+  );
+  margin: 0 auto;
 }
 .ql-dev-view-section { grid-column: span var(--column-span); grid-row: span 1; }
 .ql-dev-grid {
