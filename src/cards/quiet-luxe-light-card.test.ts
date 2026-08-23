@@ -158,3 +158,22 @@ describe('quiet-luxe-light-card more-info', () => {
     expect(seen).toEqual(['light.a']);
   });
 });
+
+describe('quiet-luxe-light-card touch target and motion', () => {
+  /** .head measures 14px tall (a bare eyebrow row); an invisible layer grows
+   * the hit area upward from the row's own bottom edge so it never reaches
+   * into the .ql-info/slider controls beneath it. */
+  it('.head carries an expanded hit area and a focus ring', () => {
+    const cssText = QuietLuxeLightCard.styles.toString();
+    expect(cssText).toContain('.head::after');
+    expect(cssText).toContain('height: var(--ql-touch-min, 56px)');
+    expect(cssText).toContain('.head:focus-visible');
+  });
+
+  it('disables the bulb glow transition under reduced motion', () => {
+    const cssText = QuietLuxeLightCard.styles.toString();
+    const start = cssText.indexOf('@media (prefers-reduced-motion: reduce)');
+    expect(start).toBeGreaterThan(-1);
+    expect(cssText.slice(start)).toMatch(/\.bulb\s*\{\s*transition:\s*none;/);
+  });
+});

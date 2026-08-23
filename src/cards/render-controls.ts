@@ -4,6 +4,7 @@ import '../elements/ql-slider';
 import '../elements/ql-stepper';
 import '../elements/ql-toggle';
 import type { QlSegmentOption } from '../elements/ql-segmented';
+import { formatInteger } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import type { Locale } from '../i18n/types';
 import { optionLabel, type ControlId, type DeviceControl } from './device-controls';
@@ -44,9 +45,21 @@ export function renderControl(
 ): TemplateResult {
   const label = t(locale, control.labelKey);
 
+  /* Stepper, toggle, slider and segmented each ship their own `.label` prop,
+     which becomes an `aria-label` inside their own shadow root — the exact
+     same string as the visible `.ql-control-label` span beside them, so a
+     screen reader read it twice. None of the four exposes an
+     `aria-labelledby` hook back out to this span, so the fix runs the other
+     way: every branch's wrapper carries the one accessible name (role="group"
+     + aria-label), and `.label` is left unset on the control itself. Each
+     element defaults it to '', and an empty aria-label is dropped by the
+     accessible-name computation either way: ql-toggle and ql-slider skip
+     rendering the attribute at all for '', while ql-stepper and ql-segmented
+     render `aria-label=""` — which browsers treat the same way, as absent,
+     not a blank name — so nothing names the inner control twice. */
   if (control.kind === 'stepper') {
     return html`
-      <div class="ql-control ql-control-inline">
+      <div class="ql-control ql-control-inline" role="group" aria-label=${label}>
         <span class="ql-control-label">${label}</span>
         <ql-stepper
           .value=${control.target.value}
@@ -54,7 +67,7 @@ export function renderControl(
           .max=${control.target.max}
           .step=${control.target.step}
           .unit=${control.unit}
-          .label=${label}
+          .locale=${locale}
           decrease-label=${t(locale, 'control.decrease')}
           increase-label=${t(locale, 'control.increase')}
           ?disabled=${disabled}
@@ -67,11 +80,10 @@ export function renderControl(
 
   if (control.kind === 'toggle') {
     return html`
-      <div class="ql-control ql-control-inline">
+      <div class="ql-control ql-control-inline" role="group" aria-label=${label}>
         <span class="ql-control-label">${label}</span>
         <ql-toggle
           .checked=${control.on}
-          .label=${label}
           ?disabled=${disabled}
           @ql-change=${(event: CustomEvent<{ checked: boolean }>): void =>
             emit(control.id, event.detail.checked)}
@@ -82,14 +94,13 @@ export function renderControl(
 
   if (control.kind === 'slider') {
     return html`
-      <div class="ql-control">
-        ${labelRow(label, `${Math.round(control.target.value)}${control.unit}`)}
+      <div class="ql-control" role="group" aria-label=${label}>
+        ${labelRow(label, `${formatInteger(control.target.value, locale)}${control.unit}`)}
         <ql-slider
           .value=${control.target.value}
           .min=${control.target.min}
           .max=${control.target.max}
           .step=${control.target.step}
-          .label=${label}
           ?disabled=${disabled}
           @ql-change=${(event: CustomEvent<{ value: number }>): void =>
             emit(control.id, event.detail.value)}
@@ -100,13 +111,12 @@ export function renderControl(
 
   if (control.kind === 'span') {
     return html`
-      <div class="ql-control">
+      <div class="ql-control" role="group" aria-label=${label}>
         ${labelRow(label)}
         <ql-segmented
           size="touch"
           .options=${control.spans.map((span) => ({ value: String(span), label: `${span}°` }))}
           .value=${control.value === undefined ? '' : String(control.value)}
-          .label=${label}
           @ql-change=${(event: CustomEvent<{ value: string }>): void =>
             emit(control.id, Number(event.detail.value))}
         ></ql-segmented>
@@ -115,13 +125,12 @@ export function renderControl(
   }
 
   return html`
-    <div class="ql-control">
+    <div class="ql-control" role="group" aria-label=${label}>
       ${labelRow(label)}
       <ql-segmented
         size="touch"
         .options=${segments(locale, control.id, control.options)}
         .value=${control.value}
-        .label=${label}
         @ql-change=${(event: CustomEvent<{ value: string }>): void =>
           emit(control.id, event.detail.value)}
       ></ql-segmented>

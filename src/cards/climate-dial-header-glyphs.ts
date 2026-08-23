@@ -10,7 +10,7 @@ import type { DialMode } from './climate-dial';
  * exception in the row rather than one of a matching set.
  */
 
-const STROKE = 'var(--ql-ink-muted, #8c8578)';
+const STROKE = 'var(--ql-ink-muted, #736d63)';
 
 /** The cloud half of every non-clear weather glyph, undrawn here since sun,
  * rain, snow and storm all sit it at a slightly different lift. */

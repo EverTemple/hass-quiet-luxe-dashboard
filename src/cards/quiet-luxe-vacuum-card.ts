@@ -7,11 +7,13 @@ import {
   type TemplateResult,
 } from 'lit';
 import '../elements/ql-chip';
+import { formatInteger } from '../i18n/format-number';
 import type { TranslationKey } from '../i18n/locales/en';
 import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export const DEFAULT_ROOM_COMMAND = 'app_segment_clean';
 
@@ -107,8 +109,8 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -122,22 +124,22 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
       .status {
         display: block;
         margin: 0;
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
       }
       .status.accent {
-        color: var(--ql-accent-champagne, #b08d57);
+        color: var(--ql-accent-champagne-text, #846a41);
       }
       .status.muted {
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
       }
       .status.warn {
-        color: var(--ql-status-warn, #c08552);
+        color: var(--ql-status-warn-text, #91643e);
       }
       .battery {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
       .chips {
         display: flex;
@@ -174,7 +176,7 @@ export class QuietLuxeVacuumCard extends QlBaseCard {
             <span class="status ${status.cls}">${status.text}</span>
             ${Number.isFinite(battery)
               ? html`<span class="battery">
-                  ${Math.round(battery)}% · ${t(locale, 'common.battery')}
+                  ${formatInteger(battery, locale)}% · ${t(locale, 'common.battery')}
                 </span>`
               : nothing}
           </span>

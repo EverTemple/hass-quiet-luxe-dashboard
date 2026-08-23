@@ -1,5 +1,6 @@
 import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-slider';
+import { formatInteger } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import type { HassEntity } from '../types/home-assistant';
 import { controlServiceCall, deviceControls, type ControlId } from './device-controls';
@@ -8,6 +9,7 @@ import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 import { renderControls } from './render-controls';
 import { COVER_FEATURE, supportsFeature } from './supported-features';
+import { TYPE } from '../tokens/type';
 
 export type CoverType = 'curtain' | 'shade';
 
@@ -57,15 +59,16 @@ export class QuietLuxeCoverCard extends QlBaseCard {
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
       .value {
         display: block;
         margin: var(--ql-space-s, 8px) 0;
-        font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.numeral}
+        font-variant-numeric: tabular-nums;
       }
       .ops {
         display: flex;
@@ -82,7 +85,7 @@ export class QuietLuxeCoverCard extends QlBaseCard {
         min-width: var(--ql-touch-min, 56px);
         border-radius: var(--ql-radius-thumb, 12px);
         border: 1px solid var(--ql-surface-border, #e4dccb);
-        background: var(--ql-surface-card, #fdfbf6);
+        background: var(--ql-surface-inset, #fdfbf6);
         color: var(--ql-ink-primary, #2b2620);
         font: 400 13px/16px var(--ql-font-body, Outfit, sans-serif);
         cursor: pointer;
@@ -90,6 +93,10 @@ export class QuietLuxeCoverCard extends QlBaseCard {
       .ops button:disabled {
         opacity: 0.5;
         cursor: default;
+      }
+      .ops button:focus-visible {
+        outline: 2px solid var(--ql-accent-champagne, #b08d57);
+        outline-offset: 2px;
       }
     `,
   ];
@@ -182,7 +189,7 @@ export class QuietLuxeCoverCard extends QlBaseCard {
           @click=${this.onMoreInfo}
         >
           <span class="eyebrow ql-clamp-2">${label}</span>
-          <span class="value">${position === undefined ? '—' : `${position}%`}</span>
+          <span class="value">${position === undefined ? '—' : `${formatInteger(position, locale)}%`}</span>
         </button>
         <ql-slider
           .value=${position ?? 0}
@@ -191,13 +198,13 @@ export class QuietLuxeCoverCard extends QlBaseCard {
           @ql-change=${this.onSlider}
         ></ql-slider>
         <div class="ops">
-          <button ?disabled=${!available} @click=${(): void => this.call('open_cover')}>
+          <button type="button" ?disabled=${!available} @click=${(): void => this.call('open_cover')}>
             ${t(locale, 'cover.open')}
           </button>
-          <button ?disabled=${!available} @click=${(): void => this.call('stop_cover')}>
+          <button type="button" ?disabled=${!available} @click=${(): void => this.call('stop_cover')}>
             ${t(locale, 'cover.stop')}
           </button>
-          <button ?disabled=${!available} @click=${(): void => this.call('close_cover')}>
+          <button type="button" ?disabled=${!available} @click=${(): void => this.call('close_cover')}>
             ${t(locale, 'cover.close')}
           </button>
         </div>
@@ -208,12 +215,14 @@ export class QuietLuxeCoverCard extends QlBaseCard {
           ? html`
               <div class="ops">
                 <button
+                  type="button"
                   ?disabled=${!available}
                   @click=${(): void => this.callTilt('open_cover_tilt')}
                 >
                   ${t(locale, 'control.tilt')} ${t(locale, 'cover.open')}
                 </button>
                 <button
+                  type="button"
                   ?disabled=${!available}
                   @click=${(): void => this.callTilt('close_cover_tilt')}
                 >

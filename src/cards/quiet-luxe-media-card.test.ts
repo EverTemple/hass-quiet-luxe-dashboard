@@ -54,6 +54,28 @@ describe('quiet-luxe-media-card', () => {
     card.remove();
   });
 
+  it('artwork is lazy-loaded', async () => {
+    const card = await mount({ entity: 'media_player.living' }, makeMockHass([playingSonos()]));
+    expect(card.shadowRoot?.querySelector('img.art')?.getAttribute('loading')).toBe('lazy');
+    card.remove();
+  });
+
+  /** The transport discs paint at 30/34px, but each carries an invisible
+   * hit-area layer sized against the 56px minimum without growing the row. */
+  it('transport buttons declare type=button and an expanded hit area', async () => {
+    const card = await mount({ entity: 'media_player.living' }, makeMockHass([playingSonos()]));
+    const buttons = [
+      ...(card.shadowRoot?.querySelectorAll<HTMLButtonElement>('button.transport') ?? []),
+    ];
+    expect(buttons).toHaveLength(3);
+    expect(buttons.every((b) => b.getAttribute('type') === 'button')).toBe(true);
+    const cssText = QuietLuxeMediaCard.styles.toString();
+    expect(cssText).toContain('button.transport::after');
+    expect(cssText).toContain('var(--ql-touch-min, 56px)');
+    expect(cssText).toContain('button.transport:focus-visible');
+    card.remove();
+  });
+
   it('shows the localized idle line when nothing is playing', async () => {
     const idle = makeEntity('media_player.living', 'idle', { friendly_name: 'Living Sonos' });
     const en = await mount({ entity: 'media_player.living', form: 'bar' }, makeMockHass([idle]));

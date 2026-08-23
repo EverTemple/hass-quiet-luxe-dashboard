@@ -2,6 +2,7 @@ import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-header-home';
 import '../elements/ql-header-view';
 import type { QlHeaderPerson, QlHeaderVariant } from '../elements/ql-header-home';
+import { formatFixed, formatInteger } from '../i18n/format-number';
 import { contentGrid, type QlGridOptions } from './grid-options';
 import { navigate } from './navigate';
 import { QlBaseCard } from './ql-base-card';
@@ -118,14 +119,31 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
     if (weatherId !== undefined && this.availability(weatherId) === 'available') {
       const temperature: unknown = this.entity(weatherId)?.attributes.temperature;
       if (typeof temperature === 'number') {
-        parts.push(`${Math.round(temperature)}°`);
+        parts.push(`${formatInteger(temperature, this.locale())}°`);
       }
     }
     const aqiId = this.config?.aqi_entity;
     if (aqiId !== undefined && this.availability(aqiId) === 'available') {
-      parts.push(`AQI ${this.entity(aqiId)?.state ?? ''}`);
+      parts.push(`AQI ${this.localizedState(this.entity(aqiId)?.state ?? '')}`);
     }
     return parts.join(' · ');
+  }
+
+  /**
+   * HA hands entity states over as strings ("22.3", "77.0"), so there is no
+   * `toFixed` call to replace — interpolating the state verbatim hardcodes the
+   * decimal point just as surely. Reformatting at the raw string's own
+   * precision keeps every locale that uses a point rendering byte-identically,
+   * and gives `id` the comma it expects. A non-numeric state (unavailable,
+   * unknown) falls through unchanged.
+   */
+  private localizedState(state: string): string {
+    const value = Number(state);
+    if (state.trim() === '' || !Number.isFinite(value)) {
+      return state;
+    }
+    const decimals = state.split('.')[1]?.length ?? 0;
+    return formatFixed(value, this.locale(), decimals);
   }
 
   private today(now: Date = new Date()): string {
@@ -159,9 +177,9 @@ export class QuietLuxeHeaderCard extends QlBaseCard {
         stats.push(format(this.entity(entityId)?.state ?? ''));
       }
     };
-    push(config.temperature_entity, (state) => `${state}°`);
-    push(config.humidity_entity, (state) => `${state}%`);
-    push(config.aqi_entity, (state) => `AQI ${state}`);
+    push(config.temperature_entity, (state) => `${this.localizedState(state)}°`);
+    push(config.humidity_entity, (state) => `${this.localizedState(state)}%`);
+    push(config.aqi_entity, (state) => `AQI ${this.localizedState(state)}`);
     return stats;
   }
 

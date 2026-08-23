@@ -12,6 +12,7 @@ import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_HALF_OF_WIDE_SECTION, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export type CameraCardSize = 'm' | 'l';
 export type CameraCardState = 'live' | 'motion' | 'unavailable';
@@ -147,7 +148,18 @@ export class QuietLuxeCameraCard extends QlBaseCard {
     return this.picture() !== undefined;
   }
 
-  /** Cache-busted once per render; `tick` is what makes the interval refresh. */
+  /**
+   * Cache-busted once per render; `tick` is what makes the interval refresh.
+   *
+   * The frame carries `loading="lazy"`: the browser only defers a fetch it
+   * has not started, so it never delays the *first* frame a visible card
+   * shows. What it does change is an off-screen card — a refresh tick still
+   * updates this `src`, but the browser holds that fetch until the card is
+   * near the viewport again, then loads whatever `src` is current at that
+   * point (the latest tick, not a stale one). The refresh timer itself is
+   * untouched; only the network fetch for a card nobody can see is deferred,
+   * which is the point of lazy-loading a card in a scrollable dashboard.
+   */
   private snapshotUrl(): string | undefined {
     const picture = this.picture();
     if (picture === undefined) {
@@ -160,6 +172,21 @@ export class QuietLuxeCameraCard extends QlBaseCard {
   private readonly onSnapshotError = (): void => {
     this.snapshotFailed = true;
   };
+
+  /**
+   * The identity button's accessible name. The Motion pill is colour and an
+   * icon — nothing an assistive technology can read on its own — so its
+   * state folds into the name whenever it would be visible, using the same
+   * `motion.detected` word the pill itself shows.
+   */
+  private accessibleName(name: string): string {
+    const locale = this.locale();
+    const details = t(locale, 'common.show_details');
+    if (!this.motionDetected()) {
+      return `${name} — ${details}`;
+    }
+    return `${name} — ${t(locale, 'motion.detected')}, ${details}`;
+  }
 
   static override styles: CSSResultGroup = [
     QlBaseCard.qlCardStyles,
@@ -222,21 +249,31 @@ export class QuietLuxeCameraCard extends QlBaseCard {
       .camera[data-size='l'] .scrim {
         height: 88px;
       }
-      /* Documented exemption: white on the scrim in both modes — the scrim is
-         a fixed near-black, so the name never inherits the page's ink. */
-      .name {
+      /* The absolutely-positioned frame the identity button sits in, kept
+         apart from the button itself: .ql-info's own width/margin hit-area
+         hack is built for a normal flow block, and would fight this frame's
+         left/right anchors if it landed on the same element. */
+      .name-frame {
         position: absolute;
         left: var(--ql-space-m, 12px);
         right: var(--ql-space-m, 12px);
         bottom: var(--ql-space-m, 12px);
-        margin: 0;
-        color: #ffffff;
-        font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
       }
-      .camera[data-size='l'] .name {
+      .camera[data-size='l'] .name-frame {
         left: var(--ql-space-l, 16px);
         right: var(--ql-space-l, 16px);
         bottom: var(--ql-space-l, 16px);
+      }
+      /* Documented exemption: white on the scrim in both modes — the scrim is
+         a fixed near-black, so the name never inherits the page's ink.
+         Same reason this is on an inner span rather than .ql-info's own
+         button as .offline-name below: .ql-clamp-2's overflow:hidden would
+         otherwise clip .ql-info's touch-target overlay to the painted text. */
+      .name {
+        display: block;
+        width: 100%;
+        color: #ffffff;
+        ${TYPE.title}
       }
       .pill {
         position: absolute;
@@ -248,7 +285,7 @@ export class QuietLuxeCameraCard extends QlBaseCard {
         border-radius: var(--ql-radius-chip, 999px);
         /* Dark glass, fixed in both modes so the badge reads over any frame. */
         background: rgba(22, 19, 16, 0.55);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
         white-space: nowrap;
@@ -290,48 +327,77 @@ export class QuietLuxeCameraCard extends QlBaseCard {
         justify-content: center;
         gap: var(--ql-space-s, 8px);
         padding: var(--ql-space-l, 16px);
-        background: var(--ql-surface-card, #fdfbf6);
+        background: var(--ql-surface-inset, #fdfbf6);
         border: 1px solid var(--ql-surface-border, #e4dccb);
         text-align: center;
       }
       .glyph-wrap {
         display: flex;
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
         opacity: 0.7;
       }
+      /* margin:0 is not needed here the way it was on the <p> this used to
+         be — a <button> carries no user-agent margin, and .ql-info's own
+         negative margin is what turns the standard padding into extra hit
+         area without moving the visible text.
+         .ql-clamp-2 is deliberately on an inner span, not this class's own
+         button: .ql-clamp-* sets its own overflow:hidden for the line-clamp
+         to work, and that clipped .ql-info's touch-target ::after overlay
+         down to the painted text (30px) when both landed on the same
+         element — the overlay is a child of .ql-info, so .ql-info's own
+         overflow governs whether it is visible past the text. */
       .offline-name {
-        margin: 0;
+        display: block;
+        width: 100%;
         color: var(--ql-ink-primary, #2b2620);
-        font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.title}
       }
       .offline-reason {
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
     `,
   ];
 
-  private renderUnavailable(name: string): TemplateResult {
+  private renderUnavailable(name: string, entityId: string): TemplateResult {
     const locale = this.locale();
     const reason =
-      this.availability(this.config?.entity ?? '') === 'available'
+      this.availability(entityId) === 'available'
         ? t(locale, 'camera.snapshot_unavailable')
         : t(locale, 'common.unavailable');
     return html`
       <span class="glyph-wrap">${cameraGlyph(this.size() === 'l' ? 54 : 36)}</span>
-      <p class="offline-name ql-clamp-2">${name}</p>
+      <button
+        type="button"
+        class="ql-info"
+        data-ql-info=${entityId}
+        aria-label=${`${name} — ${t(locale, 'common.show_details')}`}
+        @click=${this.onMoreInfo}
+      >
+        <span class="offline-name ql-clamp-2">${name}</span>
+      </button>
       <p class="offline-reason ql-clamp-2">${reason}</p>
     `;
   }
 
-  private renderLive(name: string, url: string): TemplateResult {
+  private renderLive(name: string, url: string, entityId: string): TemplateResult {
     const locale = this.locale();
     return html`
-      <img class="frame" src=${url} alt=${name} @error=${this.onSnapshotError} />
+      <img class="frame" src=${url} alt=${name} loading="lazy" @error=${this.onSnapshotError} />
       <span class="scrim"></span>
-      <p class="name ql-clamp-2">${name}</p>
+      <span class="name-frame">
+        <button
+          type="button"
+          class="ql-info"
+          data-ql-info=${entityId}
+          aria-label=${this.accessibleName(name)}
+          @click=${this.onMoreInfo}
+        >
+          <span class="name ql-clamp-2">${name}</span>
+        </button>
+      </span>
       <span class="pill live">
         <ql-status-dot status="alert"></ql-status-dot>${t(locale, 'camera.live')}
       </span>
@@ -357,14 +423,12 @@ export class QuietLuxeCameraCard extends QlBaseCard {
       <div
         class="camera ${state} ${state === 'unavailable' ? 'ql-unavailable' : ''}"
         data-size=${this.size()}
-        role="button"
-        tabindex="0"
         data-ql-info=${config.entity}
-        aria-label=${`${name} — ${t(this.locale(), 'common.show_details')}`}
         @click=${this.onMoreInfo}
-        @keydown=${this.onMoreInfoKey}
       >
-        ${url === undefined ? this.renderUnavailable(name) : this.renderLive(name, url)}
+        ${url === undefined
+          ? this.renderUnavailable(name, config.entity)
+          : this.renderLive(name, url, config.entity)}
       </div>
     `;
   }

@@ -8,10 +8,12 @@ import {
 } from 'lit';
 import '../elements/ql-slider';
 import '../elements/ql-toggle';
+import { formatInteger } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export type MediaCardForm = 'bar' | 'player' | 'group-row';
 
@@ -90,15 +92,15 @@ export class QuietLuxeMediaCard extends QlBaseCard {
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
       .title {
         display: block;
         margin: 2px 0 0;
-        font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.title}
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -106,19 +108,19 @@ export class QuietLuxeMediaCard extends QlBaseCard {
       .caption {
         display: block;
         margin: 2px 0 0;
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.caption}
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
       .muted {
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
       }
       /* The group row has no reading of its own, so its name carries the
          more-info tap; an explicit auto width keeps the base pill from
          claiming the whole row and squeezing the volume slider. */
       .name {
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
         flex: 1 1 auto;
         min-width: 0;
         width: auto;
@@ -131,14 +133,28 @@ export class QuietLuxeMediaCard extends QlBaseCard {
         margin-top: var(--ql-space-m, 12px);
       }
       button.transport {
+        position: relative;
         border-radius: var(--ql-radius-chip, 999px);
         border: 1px solid var(--ql-surface-border, #e4dccb);
-        background: var(--ql-surface-card, #fdfbf6);
+        background: var(--ql-surface-inset, #fdfbf6);
         color: var(--ql-ink-primary, #2b2620);
         cursor: pointer;
         font: 400 13px/1 var(--ql-font-body, Outfit, sans-serif);
         width: 30px;
         height: 30px;
+      }
+      /* The disc stays the size Figma drew it; the hit area is an invisible
+         layer floating over it, taller than the disc (up to the 56px minimum)
+         and only as wide as the 16px row gap allows before it would start
+         overlapping the next transport button's own hit area. */
+      button.transport::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 46px;
+        height: var(--ql-touch-min, 56px);
+        transform: translate(-50%, -50%);
       }
       button.transport.play {
         width: 34px;
@@ -146,6 +162,13 @@ export class QuietLuxeMediaCard extends QlBaseCard {
         background: var(--ql-ink-primary, #2b2620);
         color: var(--ql-bg-base, #f4f0e8);
         border-color: transparent;
+      }
+      button.transport.play::after {
+        width: 50px;
+      }
+      button.transport:focus-visible {
+        outline: 2px solid var(--ql-accent-champagne, #b08d57);
+        outline-offset: 2px;
       }
       button.transport:disabled {
         opacity: 0.5;
@@ -235,7 +258,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
     if (picture === undefined) {
       return html`<div class="art ${size}"></div>`;
     }
-    return html`<img class="art ${size}" src=${picture} alt="" />`;
+    return html`<img class="art ${size}" src=${picture} alt="" loading="lazy" />`;
   }
 
   protected override render(): TemplateResult {
@@ -287,6 +310,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
     const source = entity?.attributes.source as string | undefined;
     const playButton = html`
       <button
+        type="button"
         class="transport play"
         aria-label=${playing ? t(locale, 'media.pause') : t(locale, 'media.play')}
         ?disabled=${unavailable}
@@ -337,6 +361,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
         </div>
         <div class="transport-row">
           <button
+            type="button"
             class="transport previous"
             aria-label=${t(locale, 'media.previous')}
             ?disabled=${unavailable}
@@ -346,6 +371,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
           </button>
           ${playButton}
           <button
+            type="button"
             class="transport next"
             aria-label=${t(locale, 'media.next')}
             ?disabled=${unavailable}
@@ -361,7 +387,7 @@ export class QuietLuxeMediaCard extends QlBaseCard {
             ?disabled=${unavailable}
             @ql-change=${this.onVolume}
           ></ql-slider>
-          <span class="caption muted">${this.volumePercent()}%</span>
+          <span class="caption muted">${formatInteger(this.volumePercent(), locale)}%</span>
         </div>
       </div>
     `;

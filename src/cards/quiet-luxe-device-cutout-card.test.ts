@@ -81,3 +81,33 @@ describe('quiet-luxe-device-cutout-card', () => {
     card.remove();
   });
 });
+
+describe('quiet-luxe-device-cutout-card touch target and lazy image', () => {
+  /** .ql-info measures 157x22 in the header; an invisible layer floats over
+   * it up to the touch minimum. Nothing beneath it is independently
+   * interactive, so the extra reach carries no risk of stealing a tap. */
+  it('.ql-info carries an expanded hit area', () => {
+    const cssText = QuietLuxeDeviceCutoutCard.styles.toString();
+    expect(cssText).toContain('.ql-info::after');
+    expect(cssText).toContain('height: var(--ql-touch-min, 56px)');
+  });
+
+  it('lazy-loads the cutout image', async () => {
+    const card = await mount(
+      { entity: 'media_player.tv', image: '/local/tv.png' },
+      makeMockHass([makeEntity('media_player.tv', 'on')]),
+    );
+    expect(card.shadowRoot?.querySelector('img.cutout')?.getAttribute('loading')).toBe('lazy');
+    card.remove();
+  });
+
+  /* A fixed height (not max-height) reserves the box before the browser
+     knows the image's intrinsic size, so the card doesn't shift on load. */
+  it('reserves a fixed height for the cutout image to prevent layout shift on load', () => {
+    const cssText = QuietLuxeDeviceCutoutCard.styles.toString();
+    const imgRule = /img\.cutout \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(imgRule).toContain('height: 96px');
+    expect(imgRule).not.toContain('max-height');
+    expect(imgRule).toContain('object-fit: contain');
+  });
+});

@@ -273,6 +273,17 @@ describe('quiet-luxe-fan-card capability gating', () => {
 });
 
 describe('quiet-luxe-fan-card layout', () => {
+  /* --ql-font-display resolves to Marcellus (a serif) in production. A
+     numeral is not a heading or a name — ql-ring-dial's own numeral right
+     above these in the same column is set in Outfit — so both this card's
+     numerals must reference --ql-font-body, not --ql-font-display. */
+  it('sets its numerals in the body face, not the display face', () => {
+    const cssText = QuietLuxeFanCard.styles.toString();
+    expect(cssText).toMatch(/\.numeral \{[\s\S]*?font: 300 26px\/30px var\(--ql-font-body,/);
+    expect(cssText).toMatch(/\.numeral-xl \{[\s\S]*?font: 300 44px\/48px var\(--ql-font-body,/);
+    expect(cssText).not.toMatch(/\.numeral(-xl)? \{[\s\S]*?var\(--ql-font-display,/);
+  });
+
   /**
    * A 64px dial cannot shrink — it is a thumb target. In a half-width column on
    * a phone four of them overflowed the card and overlapped, and their labels
@@ -438,6 +449,16 @@ describe('quiet-luxe-fan-card oscillation sheet', () => {
     expect(card.shadowRoot?.querySelector('.readout .numeral')?.textContent?.trim()).toBe('90°');
     const caption = card.shadowRoot?.querySelector('.readout .caption')?.textContent ?? '';
     expect(caption.replace(/\s+/g, ' ').trim()).toBe('Start -45° · End +45° from front');
+  });
+
+  /* The dial and the preset row both drive this readout without moving
+     focus off the control that was pressed, so nothing else announces the
+     change — role="status" is what makes it reach assistive tech, matching
+     ql-stepper's own <output role="status"> readout. */
+  it('announces the sweep readout through role="status"', async () => {
+    const { card } = await mount();
+    await openSheet(card, 'Oscillation');
+    expect(card.shadowRoot?.querySelector('.readout')?.getAttribute('role')).toBe('status');
   });
 
   /** The wedge body is the aim target; the readout says so while it is held. */
@@ -635,7 +656,26 @@ describe('quiet-luxe-fan-card airflow sheet', () => {
     const { card } = await mount();
     await openSheet(card, 'Direction');
     const tiles = [...(card.shadowRoot?.querySelectorAll('.tile') ?? [])];
-    expect(tiles.map((t) => t.getAttribute('aria-pressed'))).toEqual(['true', 'false']);
+    expect(tiles.map((t) => t.getAttribute('aria-checked'))).toEqual(['true', 'false']);
+  });
+
+  /* Front and back are mutually exclusive, so the pair is a radiogroup —
+     matching the roving-tabindex, arrow-key-navigable pattern this file's
+     other choice controls (ql-preset-row, ql-segmented) already use. */
+  it('exposes the tiles as a radiogroup with roving tabindex and arrow-key navigation', async () => {
+    const { card } = await mount();
+    await openSheet(card, 'Direction');
+    const group = card.shadowRoot?.querySelector('.tiles');
+    expect(group?.getAttribute('role')).toBe('radiogroup');
+    expect(group?.getAttribute('aria-label')).toBe('Airflow direction');
+    const tiles = [...(card.shadowRoot?.querySelectorAll<HTMLButtonElement>('.tile') ?? [])];
+    expect(tiles.map((t) => t.getAttribute('role'))).toEqual(['radio', 'radio']);
+    expect(tiles.map((t) => t.getAttribute('tabindex'))).toEqual(['0', '-1']);
+
+    group?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await card.updateComplete;
+    expect(tiles.map((t) => t.getAttribute('aria-checked'))).toEqual(['false', 'true']);
+    expect(tiles.map((t) => t.getAttribute('tabindex'))).toEqual(['-1', '0']);
   });
 
   it('maps the back tile to reverse', async () => {
@@ -655,6 +695,12 @@ describe('quiet-luxe-fan-card airflow sheet', () => {
 });
 
 describe('quiet-luxe-fan-card speed sheet', () => {
+  it('announces the step readout through role="status"', async () => {
+    const { card } = await mount();
+    await openSheet(card, 'Speed');
+    expect(card.shadowRoot?.querySelector('.readout')?.getAttribute('role')).toBe('status');
+  });
+
   it('draws one bar per step the device reports', async () => {
     const { card } = await mount();
     await openSheet(card, 'Speed');

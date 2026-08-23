@@ -11,6 +11,7 @@ import { formatEnergy, formatPower, ringDasharray } from './energy-format';
 import { contentGrid, COLUMNS_FULL, COLUMNS_THIRD, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export type EnergyCardForm = 'strip' | 'ring';
 
@@ -94,7 +95,7 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
         gap: var(--ql-space-m, 12px);
       }
       .bolt {
-        color: var(--ql-accent-champagne, #b08d57);
+        color: var(--ql-accent-champagne-text, #846a41);
         font-size: 16px;
       }
       /* Both forms hang the more-info tap off the live power reading: the ring
@@ -107,13 +108,14 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
       .value {
         display: block;
         margin: 0;
-        font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.numeral}
         letter-spacing: 0.01em;
+        font-variant-numeric: tabular-nums;
       }
       .caption {
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
       .ring {
         display: flex;
@@ -138,8 +140,8 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
       }
       .eyebrow {
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -182,7 +184,7 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
             aria-label=${infoLabel}
             @click=${this.onMoreInfo}
           >
-            <span class="value">${formatPower(watts)}</span>
+            <span class="value">${formatPower(watts, locale)}</span>
           </button>
         </div>
       `;
@@ -198,11 +200,11 @@ export class QuietLuxeEnergyCard extends QlBaseCard {
           aria-label=${infoLabel}
           @click=${this.onMoreInfo}
         >
-          <span class="value">${formatPower(watts)}</span>
+          <span class="value">${formatPower(watts, locale)}</span>
         </button>
         ${config.today_entity === undefined
           ? nothing
-          : html`<p class="caption">${formatEnergy(today)} · ${t(locale, 'energy.today')}</p>`}
+          : html`<p class="caption">${formatEnergy(today, locale)} · ${t(locale, 'energy.today')}</p>`}
       </div>
     `;
   }

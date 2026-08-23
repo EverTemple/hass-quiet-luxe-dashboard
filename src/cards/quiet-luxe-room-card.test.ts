@@ -62,6 +62,7 @@ describe('quiet-luxe-room-card', () => {
     expect(card.shadowRoot?.querySelector<HTMLImageElement>('img.photo')?.getAttribute('src')).toBe(
       '/local/quiet-luxe/rooms/living.jpg',
     );
+    expect(card.shadowRoot?.querySelector('img.photo')?.getAttribute('loading')).toBe('lazy');
     expect(card.shadowRoot?.querySelector('.header .name')?.textContent).toBe('Living Room');
     const css = styleText();
     expect(css).toContain('rgba(8, 6, 4, 0.62)');
@@ -125,15 +126,28 @@ describe('quiet-luxe-room-card', () => {
     expect(styleText()).toContain('var(--ql-font-display, Marcellus, serif)');
   });
 
-  it('tap and Enter navigate to navigation_path', async () => {
+  it('tapping the tile navigates for pointer users, with no role="button" swallowing the chips, edit affordance or sheet', async () => {
     vi.spyOn(history, 'pushState').mockImplementation(() => undefined);
     const card = await mount({ navigation_path: '/quiet-luxe/living' });
     const root = card.shadowRoot?.querySelector<HTMLElement>('.room');
-    expect(root?.getAttribute('role')).toBe('button');
-    expect(root?.getAttribute('tabindex')).toBe('0');
+    expect(root?.getAttribute('role')).toBeNull();
+    expect(root?.hasAttribute('tabindex')).toBe(false);
     root?.click();
-    root?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(history.pushState).toHaveBeenCalledTimes(2);
+    expect(history.pushState).toHaveBeenCalledTimes(1);
+    expect(history.pushState).toHaveBeenCalledWith(null, '', '/quiet-luxe/living');
+  });
+
+  it('the identity button carries the keyboard/AT path to navigation, separately from the tile', async () => {
+    vi.spyOn(history, 'pushState').mockImplementation(() => undefined);
+    const card = await mount({ navigation_path: '/quiet-luxe/living' });
+    const identity = card.shadowRoot?.querySelector<HTMLButtonElement>('.identity');
+    expect(identity?.tagName).toBe('BUTTON');
+    expect(identity?.getAttribute('type')).toBe('button');
+    expect(identity?.getAttribute('aria-label')).toBe('Living Room');
+    identity?.click();
+    // One navigation, not two: the button's own click must not also bubble
+    // into the tile's `@click`, which would double-fire onTap.
+    expect(history.pushState).toHaveBeenCalledTimes(1);
     expect(history.pushState).toHaveBeenCalledWith(null, '', '/quiet-luxe/living');
   });
 
@@ -274,6 +288,16 @@ describe('quiet-luxe-room-card background picker', () => {
     expect(card.shadowRoot?.querySelector('ql-sheet')?.getAttribute('heading')).toBe(
       'Room background',
     );
+  });
+
+  it('the picker preview is lazy-loaded too', async () => {
+    const card = await mount({ area_id: 'living' }, makeMockHass([], { user: ADMIN }));
+    card.shadowRoot?.querySelector<HTMLButtonElement>('button.edit')?.click();
+    card.draftImage = '/local/rooms/candidate.jpg';
+    await card.updateComplete;
+    const preview = card.shadowRoot?.querySelector<HTMLImageElement>('img.preview');
+    expect(preview?.getAttribute('src')).toBe('/local/rooms/candidate.jpg');
+    expect(preview?.getAttribute('loading')).toBe('lazy');
   });
 
   /* The choice is written to the AREA, so every HA surface picks it up — not
