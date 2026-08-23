@@ -5,12 +5,16 @@ export interface ColorTokens {
   readonly bgGlowCenter: string;
   readonly bgVignette: string;
   readonly surfaceCard: string;
+  readonly surfaceInset: string;
   readonly surfaceBorder: string;
   readonly inkPrimary: string;
   readonly inkMuted: string;
   readonly accentChampagne: string;
+  readonly accentChampagneText: string;
   readonly statusGood: string;
+  readonly statusGoodText: string;
   readonly statusWarn: string;
+  readonly statusWarnText: string;
   readonly statusAlert: string;
   readonly glowLampInner: string;
   readonly glowLampOuter: string;

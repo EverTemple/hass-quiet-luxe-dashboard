@@ -9,7 +9,12 @@ describe('colorCssVariables', () => {
     expect(vars['--ql-surface-card']).toBe('#FDFBF6');
     expect(vars['--ql-ink-primary']).toBe('#2B2620');
     expect(vars['--ql-accent-champagne']).toBe('#B08D57');
-    expect(Object.keys(vars)).toHaveLength(13);
+    expect(vars['--ql-surface-inset']).toBe('#FDFBF6');
+    expect(vars['--ql-ink-muted']).toBe('#736D63');
+    expect(vars['--ql-accent-champagne-text']).toBe('#846A41');
+    expect(vars['--ql-status-good-text']).toBe('#67715B');
+    expect(vars['--ql-status-warn-text']).toBe('#91643E');
+    expect(Object.keys(vars)).toHaveLength(17);
   });
 
   it('maps dark tokens with the exact dark values', () => {
@@ -17,6 +22,8 @@ describe('colorCssVariables', () => {
     expect(vars['--ql-bg-glow-center']).toBe('#2E261A');
     expect(vars['--ql-surface-card']).toBe('rgba(255, 250, 240, 0.055)');
     expect(vars['--ql-status-alert']).toBe('#C07A6E');
+    expect(vars['--ql-surface-inset']).toBe('#23201C');
+    expect(vars['--ql-ink-muted']).toBe('#A29C8E');
   });
 });
 
