@@ -2,6 +2,7 @@ import { css, html, nothing, type CSSResultGroup, type TemplateResult } from 'li
 import '../elements/ql-preset-row';
 import '../elements/ql-status-dot';
 import type { QlRingDialHandle } from '../elements/ql-ring-dial';
+import { formatFixed, formatInteger, formatTrimmed } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import type { Locale } from '../i18n/types';
 import { climateModeGlyph, menuGlyph, weatherGlyph } from './climate-dial-header-glyphs';
@@ -29,6 +30,7 @@ import { climateSheetStyles, renderClimateSheet } from './render-climate-sheet';
 import { optionLabel, titleCase } from './device-controls';
 import { CLIMATE_FEATURE, selectableOptions } from './supported-features';
 import { fireMoreInfo } from './more-info';
+import { TYPE } from '../tokens/type';
 
 /** The card's own two sizes. The sheet's dial is a third, owned by the sheet. */
 export type ClimateDialForm = 'full' | 'compact';
@@ -159,8 +161,8 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -173,8 +175,8 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -182,11 +184,24 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
          a button that owns the whole row on its own; here it shares the row
          with the weather glyph, so only the vertical extension is kept. */
       .head-slot-left .ql-info {
+        position: relative;
         flex: 1 1 auto;
         min-width: 0;
         width: auto;
         margin: calc(-1 * var(--ql-space-xs, 4px)) 0;
         padding: var(--ql-space-xs, 4px) 0;
+      }
+      /* Measured 123x28: an invisible layer over the button's own footprint
+         reaches the 56px minimum. The 16px gap to the dial below it absorbs
+         the growth without reaching the dial's own drag target. */
+      .head-slot-left .ql-info::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: var(--ql-touch-min, 56px);
+        transform: translateY(-50%);
       }
       /* The dot is a reading, not a control, so it never takes a tap. */
       ql-status-dot {
@@ -204,6 +219,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
          border, no background, no fixed touch height. Only a colour shift on
          hover/focus — the chevron alone signals "opens a sheet". */
       .more {
+        position: relative;
         display: inline-flex;
         align-items: center;
         gap: var(--ql-space-xs, 4px);
@@ -213,13 +229,24 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
         border-radius: 0;
         background: none;
         color: var(--ql-ink-primary, #2b2620);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
         cursor: pointer;
         transition: color 200ms ease;
       }
+      /* Measured 324x32: an invisible layer over the link's own row reaches
+         the 56px minimum without growing the de-chromed text link itself. */
+      .more::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: var(--ql-touch-min, 56px);
+        transform: translateY(-50%);
+      }
       .more:hover {
-        color: var(--ql-accent-champagne, #b08d57);
+        color: var(--ql-accent-champagne-text, #846a41);
       }
       .more:focus-visible {
         outline: 2px solid var(--ql-accent-champagne, #b08d57);
@@ -373,10 +400,12 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
     if (mode === 'off') {
       const setpoints = this.setpoints();
       const target = setpoints.kind === 'single' ? setpoints.value : setpoints.high;
-      return target === undefined ? '' : `${t(locale, 'climate.set_to')} ${String(target)}°`;
+      return target === undefined
+        ? ''
+        : `${t(locale, 'climate.set_to')} ${formatTrimmed(target, locale, 1)}°`;
     }
     const ambient = ambientTemperature(entity);
-    return ambient === undefined ? '' : `${t(locale, 'climate.now')} ${ambient.toFixed(1)}°`;
+    return ambient === undefined ? '' : `${t(locale, 'climate.now')} ${formatFixed(ambient, locale, 1)}°`;
   }
 
   /**
@@ -389,7 +418,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
       return '';
     }
     const humidity = Number(raw);
-    return Number.isFinite(humidity) ? `${String(Math.round(humidity))}%` : '';
+    return Number.isFinite(humidity) ? `${formatInteger(humidity, this.locale())}%` : '';
   }
 
   /**
@@ -409,7 +438,7 @@ export class QuietLuxeClimateDialCard extends QlBaseCard {
       return '';
     }
     const ambient = ambientTemperature(this.entity(this.entityId()));
-    return ambient === undefined ? '—' : `${ambient.toFixed(1)}°`;
+    return ambient === undefined ? '—' : `${formatFixed(ambient, this.locale(), 1)}°`;
   }
 
   /**

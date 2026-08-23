@@ -1,4 +1,5 @@
 import { css, html, LitElement, type CSSResult, type TemplateResult } from 'lit';
+import { TYPE } from '../tokens/type';
 
 /** Figma `modal/timer` dial stage: 372x240, centre (186,118), ring r=100. */
 const STAGE_W = 372;
@@ -7,6 +8,13 @@ const CX = 186;
 const CY = 118;
 const R_RING = 100;
 const RING_WIDTH = 4;
+/**
+ * Page Up/Down move five times the base step — the same multiplier the
+ * climate ring dial uses for its own coarse jump (`DIAL_COARSE_MULTIPLIER`)
+ * — so an 8-hour timer at 15-minute steps takes about seven presses to cross
+ * instead of thirty-two.
+ */
+const TIMER_PAGE_MULTIPLIER = 5;
 
 /** Progress runs clockwise from 12 o'clock; a full ring is `max` minutes. */
 function polar(radius: number, fraction: number): readonly [number, number] {
@@ -103,13 +111,18 @@ export class QlTimerDial extends LitElement {
     }
     .reading {
       color: var(--ql-ink-primary, #2b2620);
-      font: 300 44px/48px var(--ql-font-display, Outfit, sans-serif);
+      /* A numeral, so the body face — the third site of the wrong-token bug
+         the fan card's two numerals carried. It read --ql-font-display with an
+         Outfit fallback, which resolves to Marcellus in production and put the
+         timer's digits in a serif while every other numeral in the library is
+         Outfit. */
+      ${TYPE.numeralXl}
       letter-spacing: 0.01em;
       font-variant-numeric: tabular-nums;
     }
     .caption {
-      color: var(--ql-ink-muted, #8c8578);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
     }
     .grip {
@@ -175,20 +188,60 @@ export class QlTimerDial extends LitElement {
     this.emit(type);
   }
 
+  private stageCentre(): { readonly x: number; readonly y: number } | undefined {
+    const stage = this.shadowRoot?.querySelector('.stage');
+    if (stage === null || stage === undefined) {
+      return undefined;
+    }
+    const box = stage.getBoundingClientRect();
+    return { x: box.left + (box.width * CX) / STAGE_W, y: box.top + (box.height * CY) / STAGE_H };
+  }
+
+  /** Set while `centreCache` is good for the current animation frame. */
+  private centreFresh = false;
+  private centreCache?: { readonly x: number; readonly y: number };
+
+  /**
+   * `getBoundingClientRect` is a synchronous layout read; `pointermove` can
+   * fire well above the paint rate, so the read is throttled to once per
+   * animation frame instead of once per event. It is not cached for the
+   * whole gesture: this dial can sit on a live dashboard where an unrelated
+   * card's own update reflows the page mid-drag, and freezing the stage's
+   * position for the whole gesture would let the drag silently drift off the
+   * ring's actual box. Refreshing every frame keeps that drift to at most
+   * one frame.
+   */
+  private currentCentre(): { readonly x: number; readonly y: number } | undefined {
+    if (!this.centreFresh) {
+      this.centreCache = this.stageCentre();
+      this.centreFresh = true;
+      requestAnimationFrame(() => {
+        this.centreFresh = false;
+      });
+    }
+    return this.centreCache;
+  }
+
   private readonly onPointerDown = (event: PointerEvent): void => {
     event.preventDefault();
     this.dragging = true;
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    // Force a fresh read at the start of the gesture rather than trusting
+    // whatever frame the cache last settled on.
+    this.centreFresh = false;
+    this.currentCentre();
   };
 
   private readonly onPointerMove = (event: PointerEvent): void => {
-    const stage = this.shadowRoot?.querySelector('.stage');
-    if (!this.dragging || stage === null || stage === undefined) {
+    if (!this.dragging) {
       return;
     }
-    const box = stage.getBoundingClientRect();
-    const dx = event.clientX - (box.left + (box.width * CX) / STAGE_W);
-    const dy = event.clientY - (box.top + (box.height * CY) / STAGE_H);
+    const centre = this.currentCentre();
+    if (centre === undefined) {
+      return;
+    }
+    const dx = event.clientX - centre.x;
+    const dy = event.clientY - centre.y;
     const degrees = (((Math.atan2(dy, dx) * 180) / Math.PI + 90) % 360 + 360) % 360;
     this.apply((degrees / 360) * this.max, 'ql-input');
   };
@@ -199,20 +252,39 @@ export class QlTimerDial extends LitElement {
     }
     this.dragging = false;
     (event.currentTarget as HTMLElement).releasePointerCapture?.(event.pointerId);
+    this.centreFresh = false;
+    this.centreCache = undefined;
     this.emit('ql-change');
   };
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
-    let direction: 1 | -1;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
-      direction = 1;
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
-      direction = -1;
-    } else {
-      return;
+    let next: number;
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowUp':
+        next = this.minutes + this.step;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        next = this.minutes - this.step;
+        break;
+      case 'PageUp':
+        next = this.minutes + this.step * TIMER_PAGE_MULTIPLIER;
+        break;
+      case 'PageDown':
+        next = this.minutes - this.step * TIMER_PAGE_MULTIPLIER;
+        break;
+      case 'Home':
+        next = 0;
+        break;
+      case 'End':
+        next = this.max;
+        break;
+      default:
+        return;
     }
     event.preventDefault();
-    this.apply(this.minutes + direction * this.step, 'ql-change');
+    this.apply(next, 'ql-change');
   };
 
   protected override render(): TemplateResult {
@@ -220,12 +292,21 @@ export class QlTimerDial extends LitElement {
     const [gx, gy] = polar(R_RING, fraction);
     return html`
       <div class="stage">
-        <svg viewBox=${`0 0 ${String(STAGE_W)} ${String(STAGE_H)}`} aria-hidden="true">
+        <svg
+          viewBox=${`0 0 ${String(STAGE_W)} ${String(STAGE_H)}`}
+          aria-hidden="true"
+          focusable="false"
+        >
           <circle class="track" cx=${CX} cy=${CY} r=${R_RING} />
           ${fraction > 0 ? html`<path class="progress" d=${progressPath(fraction)} />` : ''}
         </svg>
         <div class="readout">
-          <span class="reading">${this.reading}</span>
+          <!-- The reading, and only the reading, is the live region: a drag
+               reports continuously and a keypress can repeat, so the caption
+               stays a sibling outside it rather than being re-announced on
+               every tick. output carries an implicit status role already;
+               role=status is kept explicit, matching ql-stepper's readout. -->
+          <output class="reading" role="status">${this.reading}</output>
           <span class="caption">${this.caption}</span>
         </div>
         <button

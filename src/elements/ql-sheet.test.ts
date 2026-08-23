@@ -53,14 +53,26 @@ describe('ql-sheet', () => {
     expect(el.shadowRoot?.contains(dialogOf(el))).toBe(true);
   });
 
-  it('carries explicit dialog semantics and is labelled by its heading', async () => {
+  it('carries explicit dialog semantics and is labelled by its heading, not a duplicate of it', async () => {
     const el = await mount({ open: true });
     await el.updateComplete;
     const dialog = dialogOf(el);
+    const h2 = el.shadowRoot?.querySelector('h2');
     expect(dialog.getAttribute('role')).toBe('dialog');
     expect(dialog.getAttribute('aria-modal')).toBe('true');
-    expect(dialog.getAttribute('aria-label')).toBe('Oscillation');
-    expect(el.shadowRoot?.querySelector('h2')?.textContent?.trim()).toBe('Oscillation');
+    expect(dialog.hasAttribute('aria-label')).toBe(false);
+    expect(dialog.getAttribute('aria-labelledby')).toBe(h2?.id);
+    expect(h2?.id).toBeTruthy();
+    expect(h2?.textContent?.trim()).toBe('Oscillation');
+  });
+
+  /* aria-labelledby pointing at an empty node is no better than the old
+     aria-label="" — the sheet omits it entirely instead, matching every other
+     "nothing when empty" aria binding in this library. */
+  it('omits aria-labelledby rather than pointing it at an empty heading', async () => {
+    const el = await mount({ open: true, heading: '' });
+    await el.updateComplete;
+    expect(dialogOf(el).hasAttribute('aria-labelledby')).toBe(false);
   });
 
   it('closes on the close button and reports the reason', async () => {
@@ -116,6 +128,30 @@ describe('ql-sheet', () => {
 
   it('caps the sheet at 420 and lets it shrink on a phone', () => {
     expect(QlSheet.styles.toString()).toContain('width: min(420px, 100%)');
+  });
+
+  it('contains overscroll inside the scrolling panel instead of chaining to the page', () => {
+    const cssText = QlSheet.styles.toString();
+    const sheetRule = /\.sheet \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(sheetRule).toContain('overscroll-behavior: contain');
+  });
+
+  it('pads the dialog for safe areas without adding to the base padding on unnotched devices', () => {
+    const cssText = QlSheet.styles.toString();
+    const dialogRule = /dialog \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(dialogRule).toContain('max(var(--ql-space-l, 16px), env(safe-area-inset-top))');
+    expect(dialogRule).toContain('max(var(--ql-space-l, 16px), env(safe-area-inset-right))');
+    expect(dialogRule).toContain('max(var(--ql-space-l, 16px), env(safe-area-inset-bottom))');
+    expect(dialogRule).toContain('max(var(--ql-space-l, 16px), env(safe-area-inset-left))');
+    // The desktop/tablet variant (min(420px, 100%) panel) must stay untouched.
+    expect(cssText).toContain('width: min(420px, 100%)');
+  });
+
+  it("keeps the panel's max-height in sync with the dialog's safe-area padding", () => {
+    const cssText = QlSheet.styles.toString();
+    const sheetRule = /\.sheet \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(sheetRule).toContain('max(var(--ql-space-l, 16px), env(safe-area-inset-top))');
+    expect(sheetRule).toContain('max(var(--ql-space-l, 16px), env(safe-area-inset-bottom))');
   });
 
   /**

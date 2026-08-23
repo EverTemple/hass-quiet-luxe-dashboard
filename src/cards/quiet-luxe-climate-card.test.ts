@@ -465,3 +465,14 @@ describe('quiet-luxe-climate-card control degradation', () => {
     expect(card.shadowRoot?.querySelector('ql-sheet')).toBeNull();
   });
 });
+
+describe('quiet-luxe-climate-card touch target', () => {
+  /** The power disc paints at 36px; an invisible layer sized against the
+   * touch minimum floats over it without growing the visible chip. */
+  it('.power carries an expanded hit area at the 56px minimum', () => {
+    const cssText = QuietLuxeClimateCard.styles.toString();
+    expect(cssText).toContain('.power::after');
+    expect(cssText).toContain('width: var(--ql-touch-min, 56px)');
+    expect(cssText).toContain('height: var(--ql-touch-min, 56px)');
+  });
+});

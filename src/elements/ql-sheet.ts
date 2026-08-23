@@ -1,5 +1,6 @@
-import { css, html, LitElement, type CSSResult, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } from 'lit';
 import { dysonIcon } from './dyson-icons';
+import { TYPE } from '../tokens/type';
 
 /**
  * Modal shell for the on-card control sheets (Figma `modal/control-sheet`):
@@ -61,7 +62,13 @@ export class QlSheet extends LitElement {
       height: 100dvh;
       max-height: 100dvh;
       margin: 0;
-      padding: var(--ql-space-l, 16px);
+      /* max() composes with the token so untrimmed devices (env() falls back
+         to 0px) keep exactly --ql-space-l — this only grows past it on a
+         notch or home-indicator inset, never adds to it unconditionally. */
+      padding: max(var(--ql-space-l, 16px), env(safe-area-inset-top))
+        max(var(--ql-space-l, 16px), env(safe-area-inset-right))
+        max(var(--ql-space-l, 16px), env(safe-area-inset-bottom))
+        max(var(--ql-space-l, 16px), env(safe-area-inset-left));
       border: 0;
       background: transparent;
       overflow: hidden;
@@ -83,8 +90,15 @@ export class QlSheet extends LitElement {
       gap: var(--ql-space-l, 16px);
       box-sizing: border-box;
       width: min(420px, 100%);
-      max-height: calc(100dvh - 2 * var(--ql-space-l, 16px));
+      /* Mirrors the dialog's actual (safe-area-aware) top/bottom padding —
+         a bare 2 * --ql-space-l would let the panel claim more height than
+         the padded content box has room for once an inset grows past 16px. */
+      max-height: calc(
+        100dvh - max(var(--ql-space-l, 16px), env(safe-area-inset-top)) -
+          max(var(--ql-space-l, 16px), env(safe-area-inset-bottom))
+      );
       overflow-y: auto;
+      overscroll-behavior: contain;
       padding: var(--ql-space-xl, 24px);
       border: 1px solid var(--ql-surface-border, #e4dccb);
       border-radius: var(--ql-radius-card, 18px);
@@ -117,7 +131,7 @@ export class QlSheet extends LitElement {
       margin: 0;
       min-width: 0;
       overflow-wrap: anywhere;
-      font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.title}
       color: var(--ql-ink-primary, #2b2620);
     }
     .close {
@@ -131,7 +145,7 @@ export class QlSheet extends LitElement {
       border: 0;
       border-radius: var(--ql-radius-chip, 999px);
       background: transparent;
-      color: var(--ql-ink-muted, #8c8578);
+      color: var(--ql-ink-muted, #736d63);
       cursor: pointer;
       transition: background 200ms ease;
     }
@@ -242,13 +256,18 @@ export class QlSheet extends LitElement {
       <dialog
         role="dialog"
         aria-modal="true"
-        aria-label=${this.heading}
+        aria-labelledby=${this.heading === '' ? nothing : 'ql-sheet-heading'}
         @cancel=${this.onCancel}
         @click=${this.onDialogClick}
       >
         <div class="sheet" part="sheet" tabindex="-1">
           <div class="title-row">
-            <h2>${this.heading}</h2>
+            <!-- aria-labelledby, not aria-label, so the dialog's name is the
+                 same node sighted users read rather than a duplicate copy of
+                 it — and it disappears cleanly (rather than pointing at an
+                 empty node) on the rare sheet with no heading, matching the
+                 rest of this library's "nothing when empty" convention. -->
+            <h2 id="ql-sheet-heading">${this.heading}</h2>
             <button
               class="close"
               type="button"

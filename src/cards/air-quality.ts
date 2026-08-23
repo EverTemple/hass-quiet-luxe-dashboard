@@ -1,5 +1,7 @@
 import type { HassEntity } from '../types/home-assistant';
+import { formatFixed, formatInteger } from '../i18n/format-number';
 import type { TranslationKey } from '../i18n/locales/en';
+import type { Locale } from '../i18n/types';
 
 /**
  * The band model behind `readout/air-quality` (Figma 108:9844).
@@ -200,11 +202,11 @@ export const BAND_KEYS: Readonly<Record<AirBand, TranslationKey>> = {
  * number of µg/m³. Printing "6.4" for VOC and "12" for PM2.5 is what the
  * device itself does.
  */
-function readingText(id: PollutantId, value: number): string {
+function readingText(id: PollutantId, value: number, locale: Locale): string {
   if (id === 'voc' || id === 'no2') {
-    return Number.isInteger(value) ? String(value) : value.toFixed(1);
+    return Number.isInteger(value) ? formatInteger(value, locale) : formatFixed(value, locale, 1);
   }
-  return String(Math.round(value));
+  return formatInteger(value, locale);
 }
 
 /**
@@ -215,6 +217,7 @@ function readingText(id: PollutantId, value: number): string {
 export function airReadings(
   entities: AirQualityEntities,
   lookup: (entityId: string) => HassEntity | undefined,
+  locale: Locale,
   thresholds: AirQualityThresholds = DEFAULT_AIR_QUALITY_THRESHOLDS,
 ): ReadonlyArray<AirReading> {
   const readings: AirReading[] = [];
@@ -231,7 +234,7 @@ export function airReadings(
       id,
       label: POLLUTANT_LABELS[id],
       value,
-      text: readingText(id, value),
+      text: readingText(id, value, locale),
       band: bandFor(thresholds[id], value),
     });
   }

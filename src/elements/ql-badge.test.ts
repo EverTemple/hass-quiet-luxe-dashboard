@@ -16,7 +16,7 @@ describe('ql-badge', () => {
   it('styles the pill from --ql-* variables only', () => {
     const cssText = QlBadge.styles.toString();
     expect(cssText).toContain('var(--ql-radius-chip, 999px)');
-    expect(cssText).toContain('var(--ql-surface-card, #fdfbf6)');
+    expect(cssText).toContain('var(--ql-surface-inset, #fdfbf6)');
     expect(cssText).toContain('var(--ql-surface-border, #e4dccb)');
     expect(cssText).toContain('var(--ql-ink-primary, #2b2620)');
   });

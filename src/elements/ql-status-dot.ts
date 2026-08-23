@@ -21,7 +21,7 @@ export class QlStatusDot extends LitElement {
       width: 8px;
       height: 8px;
       border-radius: var(--ql-radius-chip, 999px);
-      background: var(--ql-ink-muted, #8c8578);
+      background: var(--ql-ink-muted, #736d63);
     }
     :host([status='good']) {
       background: var(--ql-status-good, #7e8b6f);

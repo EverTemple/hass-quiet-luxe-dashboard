@@ -11,6 +11,7 @@ import {
   sensorStatus,
   type SensorMetric,
 } from './sensor-format';
+import { TYPE } from '../tokens/type';
 
 export interface SensorTileConfig {
   readonly type: string;
@@ -97,15 +98,15 @@ export class QuietLuxeSensorTile extends QlBaseCard {
          ellipsing on one line. */
       .eyebrow {
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
       .value {
         display: block;
         margin: 0;
-        font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.numeral}
       }
     `,
   ];
@@ -132,7 +133,7 @@ export class QuietLuxeSensorTile extends QlBaseCard {
             <span class="eyebrow ql-clamp-1">${label}</span>
             <ql-status-dot .status=${sensorStatus(metric, state)}></ql-status-dot>
           </span>
-          <span class="value">${formatSensorValue(metric, state)}</span>
+          <span class="value">${formatSensorValue(metric, state, locale)}</span>
         </button>
       </div>
     `;

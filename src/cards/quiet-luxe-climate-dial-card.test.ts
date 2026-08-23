@@ -519,3 +519,15 @@ describe('quiet-luxe-climate-dial-card sizing', () => {
     expect(card.getGridOptions().rows).toBe('auto');
   });
 });
+
+describe('quiet-luxe-climate-dial-card touch target', () => {
+  /** .more (324x32) and the header's .ql-info (123x28) both measured under
+   * the touch minimum; each carries an invisible layer sized against
+   * --ql-touch-min without growing its own painted footprint. */
+  it('.more and .head-slot-left .ql-info carry an expanded hit area', () => {
+    const cssText = QuietLuxeClimateDialCard.styles.toString();
+    expect(cssText).toContain('.more::after');
+    expect(cssText).toContain('.head-slot-left .ql-info::after');
+    expect(cssText.match(/height: var\(--ql-touch-min, 56px\);/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+  });
+});

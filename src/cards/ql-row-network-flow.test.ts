@@ -41,6 +41,17 @@ describe('ql-row-network-flow', () => {
     row.remove();
   });
 
+  /* The toggle's checked state doesn't change on the first (arming) tap — the
+     hint text swap is the only signal it happened, so it must be announced. */
+  it('exposes the confirm hint as a live region so the armed swap is announced', async () => {
+    const row = await mount(
+      { entity: 'switch.guest_wifi' },
+      makeMockHass([makeEntity('switch.guest_wifi', 'on')]),
+    );
+    expect(row.shadowRoot?.querySelector('p.hint')?.getAttribute('role')).toBe('status');
+    row.remove();
+  });
+
   it('first toggle arms without a service call; second within timeout toggles', async () => {
     const hass = makeMockHass([makeEntity('switch.guest_wifi', 'on')]);
     const row = await mount({ entity: 'switch.guest_wifi' }, hass);

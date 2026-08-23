@@ -21,7 +21,9 @@ describe('ql-chip', () => {
 
   it('renders a native button (keyboard semantics for free)', async () => {
     const el = await mount();
-    expect(el.shadowRoot?.querySelector('button')).not.toBeNull();
+    const button = el.shadowRoot?.querySelector('button');
+    expect(button).not.toBeNull();
+    expect(button?.getAttribute('type')).toBe('button');
     el.remove();
   });
 
@@ -60,5 +62,26 @@ describe('ql-chip', () => {
     const css = QlChip.styles.toString();
     expect(css).toContain("variant='device'][active]");
     expect(css).not.toContain('color: var(--ql-surface-card');
+  });
+
+  it('extends the hit area to the touch minimum without growing the painted pill or reaching a neighbour', () => {
+    const cssText = QlChip.styles.toString();
+    const buttonRule = /button \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    // The painted pill keeps its 28px min-height — unchanged.
+    expect(buttonRule).toContain('min-height: 28px');
+    expect(buttonRule).toContain('position: relative');
+    const hitAreaRule = /button::before \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(hitAreaRule).toContain('height: var(--ql-touch-min, 56px)');
+    expect(hitAreaRule).toContain('position: absolute');
+    // Width stays at the chip's own 100% — never the row's — so the overlay
+    // can't cross into a neighbouring wrapped chip.
+    expect(hitAreaRule).toContain('width: 100%');
+  });
+
+  it('disables its background/color transition under reduced motion', () => {
+    const cssText = QlChip.styles.toString();
+    const start = cssText.indexOf('@media (prefers-reduced-motion: reduce)');
+    expect(start).toBeGreaterThan(-1);
+    expect(cssText.slice(start)).toMatch(/button\s*\{\s*transition:\s*none;/);
   });
 });

@@ -49,7 +49,7 @@ describe('quiet-luxe-language-card', () => {
   it('marks the tile matching the current hass locale as selected', async () => {
     const card = await mount({}, makeMockHass([], 'zh-Hant'));
     const buttons = [...(card.shadowRoot?.querySelectorAll('button') ?? [])];
-    expect(buttons.map((b) => b.getAttribute('aria-pressed'))).toEqual([
+    expect(buttons.map((b) => b.getAttribute('aria-checked'))).toEqual([
       'false',
       'true',
       'false',
@@ -68,6 +68,42 @@ describe('quiet-luxe-language-card', () => {
     const buttons = [...(card.shadowRoot?.querySelectorAll('button') ?? [])];
     buttons[3]?.click();
     expect(received).toEqual(['ms']);
+    card.remove();
+  });
+
+  /** Mutually-exclusive tiles carry radiogroup semantics, not toggle-button
+   * ones — a screen reader should hear "radio button, 2 of 5", not five
+   * independent pressed/unpressed toggles. */
+  it('exposes radiogroup/radio semantics with a roving tabindex', async () => {
+    const card = await mount({}, makeMockHass([], 'zh-Hant'));
+    expect(card.shadowRoot?.querySelector('.grid')?.getAttribute('role')).toBe('radiogroup');
+    const buttons = [...(card.shadowRoot?.querySelectorAll('button') ?? [])];
+    expect(buttons.every((b) => b.getAttribute('role') === 'radio')).toBe(true);
+    expect(buttons.every((b) => b.getAttribute('type') === 'button')).toBe(true);
+    expect(buttons.map((b) => b.getAttribute('tabindex'))).toEqual(['-1', '0', '-1', '-1', '-1']);
+    card.remove();
+  });
+
+  /** A button may only contain phrasing content — <p> is invalid inside one. */
+  it('renders the native and gloss lines as spans, not paragraphs', async () => {
+    const card = await mount({}, makeMockHass());
+    const button = card.shadowRoot?.querySelector('button');
+    expect(button?.querySelector('p')).toBeNull();
+    expect(button?.querySelector('span.native')?.textContent).toBe('English');
+    expect(button?.querySelector('span.gloss')?.textContent).toBe('English');
+    card.remove();
+  });
+
+  it('arrow keys move focus and select the next tile', async () => {
+    const card = await mount({}, makeMockHass([], 'en'));
+    const received: string[] = [];
+    window.addEventListener('hass-language-select', (event) =>
+      received.push((event as CustomEvent<string>).detail),
+    );
+    const buttons = [...(card.shadowRoot?.querySelectorAll<HTMLButtonElement>('button') ?? [])];
+    buttons[0]?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(received).toEqual(['zh-Hant']);
+    expect(card.shadowRoot?.activeElement).toBe(buttons[1]);
     card.remove();
   });
 });

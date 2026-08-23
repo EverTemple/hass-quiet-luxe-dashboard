@@ -147,7 +147,7 @@ describe('climate packing', () => {
         card('custom:quiet-luxe-climate-card'),
         card('custom:quiet-luxe-cover-card'),
       ]),
-    ).toBe(157);
+    ).toBe(166);
   });
 
   /* Packing rule 3: the deficit lands at the bottom edge, never mid-grid. */

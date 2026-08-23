@@ -25,6 +25,7 @@ import {
   type AgendaItem,
   type HaTodoItem,
 } from './schedule-data';
+import { TYPE } from '../tokens/type';
 
 export type ScheduleCardView = 'schedule' | 'tasks';
 
@@ -240,12 +241,12 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
       .title {
         margin: 0;
         color: var(--ql-ink-primary, #2b2620);
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
       }
       .source {
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
       .task {
@@ -253,8 +254,10 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
         align-items: center;
         gap: var(--ql-space-m, 12px);
         min-width: 0;
-        /* A whole row is the target; the box only draws it. */
-        min-height: 28px;
+        /* A whole row is the target, raised to the touch minimum — the
+           <label> itself covers the added height, so nothing here looks
+           tappable without actually being part of the target. */
+        min-height: var(--ql-touch-min, 56px);
         cursor: pointer;
       }
       .task input {
@@ -268,25 +271,25 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
         flex: 1 1 0;
         min-width: 0;
         color: var(--ql-ink-primary, #2b2620);
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
       }
       .task.completed .summary {
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
         text-decoration: line-through;
       }
       .due {
         flex: none;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
       .due.soon {
-        color: var(--ql-status-warn, #c08552);
+        color: var(--ql-status-warn-text, #91643e);
       }
       .footer {
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
       /* A view with nothing in it is a calm sentence, never a collapsed card. */
@@ -297,16 +300,16 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
         width: 100%;
         padding: var(--ql-space-xl, 24px) 0;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
         text-align: center;
       }
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }

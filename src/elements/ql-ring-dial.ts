@@ -26,6 +26,9 @@ import {
   type DialSetpointKind,
 } from '../cards/climate-dial';
 import { dropletGlyph } from './climate-dial-centre-glyphs';
+import { formatFixed, formatInteger } from '../i18n/format-number';
+import type { Locale } from '../i18n/types';
+import { TYPE } from '../tokens/type';
 
 export type QlRingDialSize = 'full' | 'compact' | 'sheet';
 /** Which grip a gesture belongs to. A single-setpoint dial only has `value`. */
@@ -99,6 +102,7 @@ export class QlRingDial extends LitElement {
     lowLabel: { attribute: 'low-label', type: String },
     highLabel: { attribute: 'high-label', type: String },
     disabled: { type: Boolean, reflect: true },
+    locale: { type: String },
   };
 
   declare min: number;
@@ -121,6 +125,8 @@ export class QlRingDial extends LitElement {
   declare lowLabel: string;
   declare highLabel: string;
   declare disabled: boolean;
+  /** Session locale for the reading's decimal separator; defaults to `en` for a caller that has none. */
+  declare locale: Locale;
 
   private dragging?: QlRingDialHandle;
   /** Distinguishes this dial's gradient from every other dial's on the page. */
@@ -147,6 +153,7 @@ export class QlRingDial extends LitElement {
     this.lowLabel = 'Heat to';
     this.highLabel = 'Cool to';
     this.disabled = false;
+    this.locale = 'en';
   }
 
   static override styles: CSSResult = css`
@@ -184,7 +191,7 @@ export class QlRingDial extends LitElement {
       stroke-linecap: round;
     }
     .tick {
-      stroke: var(--ql-ink-muted, #8c8578);
+      stroke: var(--ql-ink-muted, #736d63);
       stroke-width: 1;
       stroke-opacity: 0.55;
       stroke-linecap: round;
@@ -259,15 +266,15 @@ export class QlRingDial extends LitElement {
       text-align: center;
       min-width: 0;
     }
-    /* numeral/dial — Outfit ExtraLight 56/60. The one type style this element
-       adds; every other size here is an existing card style. */
+    /* numeral/dial — TYPE.numeralXxl (Outfit ExtraLight 56/60). The one type
+       style this element adds; every other size here is an existing card style. */
     .numeral {
       display: flex;
       align-items: flex-start;
       justify-content: center;
       margin: 0;
       color: var(--ql-ink-primary, #2b2620);
-      font: 200 56px/60px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.numeralXxl}
       font-variant-numeric: tabular-nums;
       letter-spacing: -0.01em;
     }
@@ -315,8 +322,8 @@ export class QlRingDial extends LitElement {
     .caption,
     .humidity-value {
       margin: 0;
-      color: var(--ql-ink-muted, #8c8578);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
     }
     .humidity-row {
@@ -325,13 +332,13 @@ export class QlRingDial extends LitElement {
       gap: 3px;
     }
     :host([mode='off']) .numeral {
-      color: var(--ql-ink-muted, #8c8578);
+      color: var(--ql-ink-muted, #736d63);
     }
     .reading.low {
-      color: var(--ql-accent-champagne, #b08d57);
+      color: var(--ql-accent-champagne-text, #846a41);
     }
     .reading.high {
-      color: var(--ql-status-good, #7e8b6f);
+      color: var(--ql-status-good-text, #67715b);
     }
     @media (prefers-reduced-motion: reduce) {
       .grip::after {
@@ -386,6 +393,31 @@ export class QlRingDial extends LitElement {
     return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
   }
 
+  /** Set while `centreCache` is good for the current animation frame. */
+  private centreFresh = false;
+  private centreCache?: { readonly x: number; readonly y: number };
+
+  /**
+   * `getBoundingClientRect` is a synchronous layout read; `pointermove` can
+   * fire well above the paint rate, so the read is throttled to once per
+   * animation frame instead of once per event. It is not cached for the
+   * whole gesture: this dial can sit on a live dashboard where an unrelated
+   * card's own update reflows the page mid-drag (a card above it changing
+   * height, for instance), and freezing the stage's position for the whole
+   * gesture would let the drag silently drift off the entity's actual box.
+   * Refreshing every frame keeps that drift to at most one frame.
+   */
+  private currentCentre(): { readonly x: number; readonly y: number } | undefined {
+    if (!this.centreFresh) {
+      this.centreCache = this.stageCentre();
+      this.centreFresh = true;
+      requestAnimationFrame(() => {
+        this.centreFresh = false;
+      });
+    }
+    return this.centreCache;
+  }
+
   private static handleOf(event: Event): QlRingDialHandle | undefined {
     const raw = (event.currentTarget as HTMLElement | null)?.dataset.handle;
     return raw === 'value' || raw === 'low' || raw === 'high' ? raw : undefined;
@@ -399,6 +431,10 @@ export class QlRingDial extends LitElement {
     event.preventDefault();
     this.dragging = handle;
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    // Force a fresh read at the start of the gesture rather than trusting
+    // whatever frame the cache last settled on.
+    this.centreFresh = false;
+    this.currentCentre();
   };
 
   private readonly onPointerMove = (event: PointerEvent): void => {
@@ -406,7 +442,7 @@ export class QlRingDial extends LitElement {
     if (handle === undefined) {
       return;
     }
-    const centre = this.stageCentre();
+    const centre = this.currentCentre();
     if (centre === undefined) {
       return;
     }
@@ -421,25 +457,51 @@ export class QlRingDial extends LitElement {
     }
     this.dragging = undefined;
     (event.currentTarget as HTMLElement).releasePointerCapture?.(event.pointerId);
+    this.centreFresh = false;
+    this.centreCache = undefined;
     this.emit('ql-change', handle);
   };
 
+  /**
+   * Home/End jump straight to the entity's own band ends. Page Up/Down move
+   * the same coarse step Shift+Arrow already does (`DIAL_COARSE_MULTIPLIER`,
+   * 5× the entity's step) — per the ARIA APG slider pattern, and enough to
+   * cross a 7–35° band in around a dozen presses instead of fifty-six.
+   */
   private readonly onKeyDown = (event: KeyboardEvent): void => {
     const handle = QlRingDial.handleOf(event);
     if (handle === undefined || this.disabled) {
       return;
     }
-    let direction: 1 | -1;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
-      direction = 1;
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
-      direction = -1;
-    } else {
-      return;
+    const scale = this.scale();
+    const current = this.readingOf(handle);
+    let next: number;
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowUp':
+        next = nudgeValue(scale, current, 1, event.shiftKey);
+        break;
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        next = nudgeValue(scale, current, -1, event.shiftKey);
+        break;
+      case 'PageUp':
+        next = nudgeValue(scale, current, 1, true);
+        break;
+      case 'PageDown':
+        next = nudgeValue(scale, current, -1, true);
+        break;
+      case 'Home':
+        next = scale.min;
+        break;
+      case 'End':
+        next = scale.max;
+        break;
+      default:
+        return;
     }
     event.preventDefault();
-    const current = this.readingOf(handle);
-    this.apply(handle, nudgeValue(this.scale(), current, direction, event.shiftKey), 'ql-change');
+    this.apply(handle, next, 'ql-change');
   };
 
   private readingOf(handle: QlRingDialHandle): number {
@@ -497,7 +559,7 @@ export class QlRingDial extends LitElement {
     const [x2, y2] = polarPoint(centre, centre, radius, span.to);
     const ramps: Readonly<Record<DialMode, readonly [string, string]>> = {
       heat: ['var(--ql-accent-champagne, #b08d57)', 'var(--ql-glow-lamp-outer, #e0b263)'],
-      cool: ['var(--ql-ink-muted, #8c8578)', 'var(--ql-status-good, #7e8b6f)'],
+      cool: ['var(--ql-ink-muted, #736d63)', 'var(--ql-status-good, #7e8b6f)'],
       heat_cool: ['var(--ql-accent-champagne, #b08d57)', 'var(--ql-status-good, #7e8b6f)'],
       other: ['var(--ql-accent-champagne, #b08d57)', 'var(--ql-glow-lamp-outer, #e0b263)'],
       off: ['var(--ql-surface-border, #e4dccb)', 'var(--ql-surface-border, #e4dccb)'],
@@ -555,7 +617,9 @@ export class QlRingDial extends LitElement {
   /** A reading, e.g. "24°" or "21°" — the degree mark inline at the numeral's
    * own size, single setpoint and low/high pair alike. */
   private reading(value: number, cls = ''): TemplateResult {
-    const text = Number.isInteger(this.step) ? String(Math.round(value)) : value.toFixed(1);
+    const text = Number.isInteger(this.step)
+      ? formatInteger(value, this.locale)
+      : formatFixed(value, this.locale, 1);
     return html`<span class="reading ${cls}">${text}${this.unit}</span>`;
   }
 
@@ -588,31 +652,38 @@ export class QlRingDial extends LitElement {
     `;
   }
 
+  /**
+   * The numeral, and only the numeral, is the live region: a drag reports
+   * continuously and a keypress can repeat, so the humidity readout and the
+   * ambient caption stay siblings outside it rather than being re-announced
+   * on every tick. `<output>` carries an implicit `status` role already;
+   * `role="status"` is kept explicit, matching `ql-stepper`'s readout.
+   */
   private renderCentre(): TemplateResult {
     // Off shows the room's own reading as the hero, with the standing setpoint
     // demoted to the caption — the honest statement of a device doing nothing.
     if (this.mode === 'off' || this.kind === 'none') {
       return html`
         ${this.renderHumidity()}
-        <p class="numeral">${this.heroText}</p>
+        <output class="numeral" role="status">${this.heroText}</output>
         ${this.caption()}
       `;
     }
     if (this.kind === 'range') {
       return html`
         ${this.renderHumidity()}
-        <p class="numeral pair">
+        <output class="numeral pair" role="status">
           ${this.reading(this.low, 'low')}<span class="range-divider"></span>${this.reading(
             this.high,
             'high',
           )}
-        </p>
+        </output>
         ${this.caption()}
       `;
     }
     return html`
       ${this.renderHumidity()}
-      <p class="numeral">${this.reading(this.value)}</p>
+      <output class="numeral" role="status">${this.reading(this.value)}</output>
       ${this.caption()}
     `;
   }
@@ -628,7 +699,11 @@ export class QlRingDial extends LitElement {
     const gradientId = `ql-dial-ramp-${this.instanceId}`;
     return html`
       <div class="stage">
-        <svg viewBox=${`0 0 ${String(geometry.size)} ${String(geometry.size)}`} aria-hidden="true">
+        <svg
+          viewBox=${`0 0 ${String(geometry.size)} ${String(geometry.size)}`}
+          aria-hidden="true"
+          focusable="false"
+        >
           <defs>
             ${span === undefined ? nothing : this.renderGradient(gradientId, centre, geometry.radius, span)}
           </defs>

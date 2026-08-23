@@ -1,4 +1,5 @@
 import { css, html, nothing, type CSSResultGroup, type TemplateResult } from 'lit';
+import { formatFixed, formatInteger } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import type { Locale } from '../i18n/types';
 import {
@@ -21,6 +22,7 @@ import { adjustSetpoints, QUICK_ADJUST_COMMIT_DELAY_MS, type AdjustDirection } f
 import { registerCard } from './register';
 import { climateDialStyles, renderClimateDial } from './render-climate-dial';
 import { climateSheetStyles, renderClimateSheet } from './render-climate-sheet';
+import { TYPE } from '../tokens/type';
 
 export interface ClimateCardConfig {
   readonly type: string;
@@ -111,16 +113,17 @@ export class QuietLuxeClimateCard extends QlBaseCard {
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
       .value {
         display: block;
         margin: var(--ql-space-s, 8px) 0 0;
-        font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.numeral}
         letter-spacing: 0.01em;
+        font-variant-numeric: tabular-nums;
       }
       .row {
         display: flex;
@@ -130,26 +133,38 @@ export class QuietLuxeClimateCard extends QlBaseCard {
       }
       .status {
         margin: 0;
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.caption}
       }
       .status.accent {
-        color: var(--ql-accent-champagne, #b08d57);
+        color: var(--ql-accent-champagne-text, #846a41);
       }
       .status.muted {
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
       }
       .status.warn {
-        color: var(--ql-status-warn, #c08552);
+        color: var(--ql-status-warn-text, #91643e);
       }
       .power {
+        position: relative;
         width: 36px;
         height: 36px;
         border-radius: var(--ql-radius-chip, 999px);
         border: 1px solid var(--ql-surface-border, #e4dccb);
-        background: var(--ql-surface-card, #fdfbf6);
+        background: var(--ql-surface-inset, #fdfbf6);
         color: var(--ql-ink-primary, #2b2620);
         cursor: pointer;
         font: 400 14px/1 var(--ql-font-body, Outfit, sans-serif);
+      }
+      /* The disc paints at 36px; an invisible layer floating over it reaches
+         the 56px hit-area minimum without growing the visible chip. */
+      .power::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: var(--ql-touch-min, 56px);
+        height: var(--ql-touch-min, 56px);
+        transform: translate(-50%, -50%);
       }
       .power:disabled {
         opacity: 0.5;
@@ -313,8 +328,9 @@ export class QuietLuxeClimateCard extends QlBaseCard {
       mode,
       locale,
       disabled: offline,
-      ambientText: ambient === undefined ? '' : `${t(locale, 'climate.now')} ${ambient.toFixed(1)}°`,
-      heroText: ambient === undefined ? '—' : `${ambient.toFixed(1)}°`,
+      ambientText:
+        ambient === undefined ? '' : `${t(locale, 'climate.now')} ${formatFixed(ambient, locale, 1)}°`,
+      heroText: ambient === undefined ? '—' : `${formatFixed(ambient, locale, 1)}°`,
       onAdjust: this.onQuickAdjust,
       onInput: this.onDialInput,
       onChange: this.onDialChange,
@@ -345,13 +361,14 @@ export class QuietLuxeClimateCard extends QlBaseCard {
       return '—';
     }
     const entity = this.entity(valueId);
+    const locale = this.locale();
     if (config.value_entity === undefined && valueId.startsWith('climate.')) {
       const temp = Number(entity?.attributes.current_temperature);
-      return Number.isFinite(temp) ? `${temp.toFixed(1)}°` : '—';
+      return Number.isFinite(temp) ? `${formatFixed(temp, locale, 1)}°` : '—';
     }
     const numeric = Number(entity?.state);
     if (Number.isFinite(numeric)) {
-      return String(Math.round(numeric));
+      return formatInteger(numeric, locale);
     }
     if (entity?.state === 'on') {
       return t(this.locale(), 'common.on');

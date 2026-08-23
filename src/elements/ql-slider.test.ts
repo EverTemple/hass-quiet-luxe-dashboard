@@ -74,4 +74,24 @@ describe('ql-slider', () => {
     expect(cssText).toContain('var(--ql-surface-border, #e4dccb)');
     expect(cssText).toContain('var(--ql-surface-card, #fdfbf6)');
   });
+
+  it('keeps the drawn track and thumb at their Figma sizes', () => {
+    const cssText = QlSlider.styles.toString();
+    expect(cssText).toMatch(/::-webkit-slider-runnable-track\s*\{[^}]*height:\s*4px/);
+    expect(cssText).toMatch(/::-webkit-slider-thumb\s*\{[^}]*width:\s*16px/);
+    expect(cssText).toMatch(/::-webkit-slider-thumb\s*\{[^}]*height:\s*16px/);
+  });
+
+  it('extends the input’s own hit area to the touch minimum via padding, offset by a matching negative margin', () => {
+    const inputRule = /(?<!:)input \{([^}]*)\}/.exec(QlSlider.styles.toString())?.[1] ?? '';
+    expect(inputRule).toContain('height: 16px');
+    expect(inputRule).toContain('padding: calc((var(--ql-touch-min, 56px) - 16px) / 2) 0');
+    expect(inputRule).toContain('margin: calc(-1 * (var(--ql-touch-min, 56px) - 16px) / 2) 0');
+    expect(inputRule).toContain('box-sizing: content-box');
+  });
+
+  it('leaves touch-action at its default so vertical scroll over the control still works', () => {
+    const inputRule = /(?<!:)input \{([^}]*)\}/.exec(QlSlider.styles.toString())?.[1] ?? '';
+    expect(inputRule).not.toContain('touch-action');
+  });
 });

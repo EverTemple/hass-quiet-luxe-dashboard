@@ -41,13 +41,15 @@ describe('ql-air-quality', () => {
     expect(cells(el)[2]?.textContent?.replace(/\s+/g, '')).toBe('VOC6.4');
   });
 
-  it('colours each value by its own band', async () => {
+  it('colours each value by its own band, in the text-safe sibling', async () => {
     const el = await mount({ readings: READINGS });
     const value = (index: number): string =>
       cells(el)[index]?.querySelector<HTMLElement>('.value')?.style.getPropertyValue(
-        '--ql-air-band',
+        '--ql-air-band-text',
       ) ?? '';
-    expect(value(0)).toContain('--ql-status-good');
+    // A value is small text, so it takes the 4.5:1 sibling rather than the base
+    // hue the dot fill uses.
+    expect(value(0)).toContain('--ql-status-good-text');
     expect(value(2)).toContain('--ql-status-alert');
   });
 
@@ -57,7 +59,7 @@ describe('ql-air-quality', () => {
     });
     const tint = cells(el)[0]
       ?.querySelector<HTMLElement>('.value')
-      ?.style.getPropertyValue('--ql-air-band');
+      ?.style.getPropertyValue('--ql-air-band-text');
     expect(tint).toContain('--ql-ink-muted');
   });
 

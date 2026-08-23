@@ -79,6 +79,24 @@ describe('quiet-luxe-camera-card', () => {
     const src = image?.getAttribute('src') ?? '';
     expect(src.startsWith('/api/camera_proxy/camera.front_door?token=abc&time=')).toBe(true);
     expect(image?.classList.contains('frame')).toBe(true);
+    expect(image?.getAttribute('loading')).toBe('lazy');
+    card.remove();
+  });
+
+  /* Lazy-loading must not stall the refresh cycle: each tick still updates
+     `src` on schedule, and re-render itself does not depend on whether the
+     browser has actually fetched the previous frame yet. */
+  it('keeps refreshing the cache-busted src on schedule with loading="lazy"', async () => {
+    const card = await mount(
+      { entity: 'camera.front_door', refresh_interval: 5 },
+      makeMockHass([cameraEntity()]),
+    );
+    const before = card.shadowRoot?.querySelector('img')?.getAttribute('src') ?? '';
+    vi.advanceTimersByTime(5000);
+    await card.updateComplete;
+    const after = card.shadowRoot?.querySelector('img')?.getAttribute('src') ?? '';
+    expect(after).not.toBe(before);
+    expect(after.startsWith('/api/camera_proxy/camera.front_door?token=abc&time=')).toBe(true);
     card.remove();
   });
 
@@ -184,6 +202,89 @@ describe('quiet-luxe-camera-card', () => {
     expect(seen[0]?.bubbles).toBe(true);
     expect(seen[0]?.composed).toBe(true);
     card.remove();
+  });
+
+  /* The tile used to be one big role="button", which gives ARIA's button
+     role to its whole subtree and made the LIVE pill, the Motion pill and
+     the name all lose their own role. The tile is a plain div now; the name
+     is the one real, independently focusable button. */
+  it('is a plain div with a real identity button, not a role="button" tile', async () => {
+    const card = await mount({ entity: 'camera.front_door' }, makeMockHass([cameraEntity()]));
+    const root = card.shadowRoot?.querySelector<HTMLElement>('.camera');
+    expect(root?.getAttribute('role')).toBeNull();
+    expect(root?.hasAttribute('tabindex')).toBe(false);
+    const identity = card.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info');
+    expect(identity?.tagName).toBe('BUTTON');
+    expect(identity?.getAttribute('type')).toBe('button');
+    expect(identity?.querySelector('.name')?.textContent?.trim()).toBe('Front Door');
+    card.remove();
+  });
+
+  it('the identity button opens more-info on its own, once — not doubled by the tile', async () => {
+    const card = await mount({ entity: 'camera.front_door' }, makeMockHass([cameraEntity()]));
+    const seen: Array<CustomEvent<{ entityId: string }>> = [];
+    const record = (event: Event): void => {
+      seen.push(event as CustomEvent<{ entityId: string }>);
+    };
+    document.body.addEventListener('hass-more-info', record);
+    // Click lands on the text span; it must bubble to the button that owns
+    // both the more-info handler and the shared touch-target overlay.
+    card.shadowRoot?.querySelector<HTMLSpanElement>('.name')?.click();
+    document.body.removeEventListener('hass-more-info', record);
+    expect(seen.map((event) => event.detail.entityId)).toEqual(['camera.front_door']);
+    card.remove();
+  });
+
+  /*
+   * Empirically verified against the real dev harness (`?view=security`,
+   * 390px): with .ql-clamp-2 on the same element as .ql-info, the clamp's
+   * own overflow:hidden clipped the shared `.ql-info::after` touch-target
+   * overlay (`ql-base-card.ts`) down to the painted text — a real
+   * elementFromPoint hit-test at the button's centre only ever found the
+   * button within its own 30px painted box. Moving .ql-clamp-2 onto an
+   * inner span, with .ql-info left clean, took the same probe to 55px (the
+   * ::after overlay's own overflow now governs, not .ql-clamp-2's). happy-dom
+   * does not lay out real boxes, so this only asserts the structural
+   * invariant the fix depends on: neither .ql-info button carries its own
+   * clamp class.
+   */
+  it('keeps .ql-clamp-2 off the .ql-info button itself, in both live and offline name buttons', async () => {
+    const live = await mount({ entity: 'camera.front_door' }, makeMockHass([cameraEntity()]));
+    const liveButton = live.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info');
+    expect(liveButton?.classList.contains('ql-clamp-2')).toBe(false);
+    expect(liveButton?.querySelector('.name.ql-clamp-2')).not.toBeNull();
+    live.remove();
+
+    const offline = await mount(
+      { entity: 'camera.front_door' },
+      makeMockHass([makeEntity('camera.front_door', 'unavailable', { friendly_name: 'Front Door' })]),
+    );
+    const offlineButton = offline.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info');
+    expect(offlineButton?.classList.contains('ql-clamp-2')).toBe(false);
+    expect(offlineButton?.querySelector('.offline-name.ql-clamp-2')).not.toBeNull();
+    offline.remove();
+  });
+
+  /* The Motion pill is colour and an icon; nothing reaches assistive tech
+     unless it also folds into the identity button's accessible name. */
+  it('folds motion into the identity button’s accessible name only while the pill shows', async () => {
+    const withMotion = await mount(
+      { entity: 'camera.front_door', motion_entity: 'binary_sensor.front_motion' },
+      makeMockHass([cameraEntity(), makeEntity('binary_sensor.front_motion', 'on')]),
+    );
+    expect(
+      withMotion.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.getAttribute('aria-label'),
+    ).toBe('Front Door — Motion, Show details');
+    withMotion.remove();
+
+    const clear = await mount(
+      { entity: 'camera.front_door', motion_entity: 'binary_sensor.front_motion' },
+      makeMockHass([cameraEntity(), makeEntity('binary_sensor.front_motion', 'off')]),
+    );
+    expect(
+      clear.shadowRoot?.querySelector<HTMLButtonElement>('.ql-info')?.getAttribute('aria-label'),
+    ).toBe('Front Door — Show details');
+    clear.remove();
   });
 
   it('clears its timer on disconnect', async () => {

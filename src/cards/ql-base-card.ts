@@ -12,8 +12,65 @@ import type { Locale } from '../i18n/types';
 import { syncDarkMode } from '../theme/inject-theme';
 import { displayName } from './display-name';
 import { fireMoreInfo, moreInfoTargetOf } from './more-info';
+import { TYPE } from '../tokens/type';
 
 export type EntityAvailability = 'available' | 'unavailable' | 'missing';
+
+/**
+ * Every field of `hass` except `states`, compared by identity.
+ *
+ * HA rebuilds `hass` by spreading (`{ ...hass, states }`), so every field it
+ * did not touch keeps its reference across a `state_changed`. Comparing the
+ * whole surface rather than a hand-listed few means a card reading
+ * `hass.user`, `hass.entities`, `hass.services`, `hass.locale` — or a field
+ * this base class has never heard of — still re-renders when it changes, with
+ * no per-subclass declaration to keep in step.
+ */
+function contextChanged(previous: HomeAssistant, next: HomeAssistant): boolean {
+  const before = previous as unknown as Record<string, unknown>;
+  const after = next as unknown as Record<string, unknown>;
+  const afterKeys = Object.keys(after);
+  if (afterKeys.length !== Object.keys(before).length) {
+    return true;
+  }
+  return afterKeys.some((key) => key !== 'states' && before[key] !== after[key]);
+}
+
+/**
+ * Whether a new `hass` can change what this card draws. Deliberately biased
+ * towards rendering: a skipped frame is a card showing stale state, which is
+ * far worse than a wasted one.
+ */
+function hassAffectsRender(
+  previous: HomeAssistant,
+  next: HomeAssistant,
+  watched: ReadonlySet<string> | undefined,
+): boolean {
+  // Dark mode is document-wide and published by whichever card updates first,
+  // so a flip has to reach willUpdate even when no watched entity moved. HA
+  // replaces `themes` wholesale, which contextChanged would also catch, but
+  // the flag is load-bearing enough to compare by value rather than rely on it.
+  if (previous.themes?.darkMode !== next.themes?.darkMode) {
+    return true;
+  }
+  if (contextChanged(previous, next)) {
+    return true;
+  }
+  // No frame recorded yet, or a card that draws no entity state at all: there
+  // is no watch set to reason about, so it wakes for everything.
+  if (watched === undefined || watched.size === 0) {
+    return true;
+  }
+  if (previous.states === next.states) {
+    return false;
+  }
+  for (const entityId of watched) {
+    if (previous.states[entityId] !== next.states[entityId]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Base class for all Quiet Luxe cards.
@@ -30,20 +87,72 @@ export abstract class QlBaseCard extends LitElement {
 
   declare hass?: HomeAssistant;
 
+  /**
+   * Entity ids read while building the last frame — the set this card may be
+   * woken by. Derived rather than declared: all nineteen subclasses reach
+   * state through entity()/availability()/nameOf(), so recording those reads
+   * cannot drift out of step with what a card actually draws, the way a
+   * hand-kept `static watches = [...]` would. `undefined` means "nothing
+   * recorded yet", which reads as "wake for anything".
+   */
+  private watchedEntities?: ReadonlySet<string>;
+
+  /** Open only between willUpdate and the end of update(), i.e. across render. */
+  private entityRecorder?: Set<string>;
+
   /** Public wrapper so tests and the strategy can query availability. */
   availabilityOf(entityId: string): EntityAvailability {
     return this.availability(entityId);
   }
 
   /**
+   * HA hands every card a NEW `hass` object on every `state_changed` event in
+   * the house, so Lit's default identity check makes all nineteen card types
+   * re-render for every entity rather than their own. Gate on what the last
+   * frame actually read.
+   */
+  protected override shouldUpdate(changed: PropertyValues): boolean {
+    if (changed.size !== 1 || !changed.has('hass')) {
+      return true;
+    }
+    const previous = changed.get('hass') as HomeAssistant | undefined;
+    const next = this.hass;
+    // The first assignment, and any teardown to undefined, always render.
+    if (previous === undefined || next === undefined) {
+      return true;
+    }
+    return hassAffectsRender(previous, next, this.watchedEntities);
+  }
+
+  /**
    * Publishes HA's dark-mode flag to the document so the injected base
    * stylesheet follows HA instead of the OS preference. Cards are the only
    * place the bundle sees `hass`, and the attribute is document-wide, so the
-   * first card to update settles the mode for every card.
+   * first card to update settles the mode for every card. A dark-mode flip is
+   * part of shouldUpdate's watch, so gating never starves this call.
    */
   protected override willUpdate(changed: PropertyValues): void {
+    this.entityRecorder = new Set();
     if (changed.has('hass')) {
       syncDarkMode(this.ownerDocument, this.hass?.themes?.darkMode);
+    }
+  }
+
+  /**
+   * Renders with the read recorder open, so each frame declares the watch set
+   * for the next one. A throw drops the set rather than keeping it half-filled:
+   * an incomplete watch set would silently stop waking the card.
+   */
+  protected override update(changed: PropertyValues): void {
+    const recorder = (this.entityRecorder ??= new Set());
+    try {
+      super.update(changed);
+      this.watchedEntities = recorder;
+    } catch (error) {
+      this.watchedEntities = undefined;
+      throw error;
+    } finally {
+      this.entityRecorder = undefined;
     }
   }
 
@@ -53,6 +162,7 @@ export abstract class QlBaseCard extends LitElement {
   }
 
   protected entity(entityId: string): HassEntity | undefined {
+    this.entityRecorder?.add(entityId);
     return this.hass?.states[entityId];
   }
 
@@ -61,6 +171,7 @@ export abstract class QlBaseCard extends LitElement {
    * See display-name.ts for the precedence rules.
    */
   protected nameOf(entityId: string, configName?: string): string {
+    this.entityRecorder?.add(entityId);
     return displayName(this.hass, entityId, configName);
   }
 
@@ -118,7 +229,7 @@ export abstract class QlBaseCard extends LitElement {
       min-width: 0;
     }
     .ql-unavailable {
-      color: var(--ql-ink-muted, #8c8578);
+      color: var(--ql-ink-muted, #736d63);
       opacity: 0.7;
     }
     /* The identity region: tapping a card's name or reading opens HA's
@@ -127,6 +238,7 @@ export abstract class QlBaseCard extends LitElement {
        control uses, so the card still reads as a surface, not a button. */
     .ql-info {
       display: block;
+      position: relative;
       margin: calc(-1 * var(--ql-space-xs, 4px)) calc(-1 * var(--ql-space-s, 8px));
       padding: var(--ql-space-xs, 4px) var(--ql-space-s, 8px);
       border: 0;
@@ -138,6 +250,32 @@ export abstract class QlBaseCard extends LitElement {
       width: calc(100% + 2 * var(--ql-space-s, 8px));
       cursor: pointer;
       transition: background 200ms ease;
+    }
+    /* Hit-area floor. The negative margin above is the older half of this: it
+       turns the button's own padding into 8px of extra hit area without
+       shifting the text. That is not enough on its own — the identity regions
+       on the room, camera, media and door/motion cards are only as tall as
+       their text, 26–32px against a 56px touch minimum — so an invisible
+       overlay claims the rest, the same technique ql-toggle, ql-dial-button
+       and the media card's transport discs use. The two compose rather than
+       fight: the overlay is measured from the border box the padding already
+       made, so those 8px sit inside it rather than adding to it.
+       A floor, not a size. The overlay is additive, so the instances that
+       already measure 50–68px keep every pixel of their own hit area.
+       It cannot reach a neighbouring card: .ql-card is overflow:hidden, which
+       clips the overlay — and with it the hit test — to the card's own
+       box, so a card shorter than 56px (ql-row-door-motion is 52) takes the
+       height it has rather than stealing taps from the row above. Centring it
+       rather than anchoring it to an edge halves what it asks of either
+       neighbour for the same total height. */
+    .ql-info::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: var(--ql-touch-min, 56px);
+      transform: translateY(-50%);
     }
     .ql-info:hover {
       background: color-mix(in srgb, var(--ql-accent-champagne, #b08d57) 8%, transparent);
@@ -199,8 +337,8 @@ export abstract class QlBaseCard extends LitElement {
       gap: var(--ql-space-s, 8px);
     }
     .ql-control-label {
-      color: var(--ql-ink-muted, #8c8578);
-      font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.eyebrow}
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }

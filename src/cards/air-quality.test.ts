@@ -116,13 +116,19 @@ describe('airReadings', () => {
         no2: 'sensor.tp09_no2',
       },
       lookup,
+      'en',
     );
     expect(readings.map((reading) => reading.id)).toEqual(['pm25', 'pm10', 'voc', 'no2']);
     expect(readings.map((reading) => reading.text)).toEqual(['4', '6', '6.4', '0.2']);
   });
 
+  it('formats the decimal point per locale', () => {
+    const readings = airReadings({ voc: 'sensor.tp09_voc' }, lookup, 'id');
+    expect(readings.map((reading) => reading.text)).toEqual(['6,4']);
+  });
+
   it('degrades to the one sensor a device actually has', () => {
-    const readings = airReadings({ pm25: 'sensor.tp09_pm_2_5' }, lookup);
+    const readings = airReadings({ pm25: 'sensor.tp09_pm_2_5' }, lookup, 'en');
     expect(readings).toHaveLength(1);
     expect(readings[0]?.label).toBe('PM2.5');
   });
@@ -131,18 +137,20 @@ describe('airReadings', () => {
     const readings = airReadings(
       { pm25: 'sensor.tp09_pm_2_5', pm10: 'sensor.missing' },
       lookup,
+      'en',
     );
     expect(readings.map((reading) => reading.id)).toEqual(['pm25']);
   });
 
   it('has nothing to draw for a device with no air sensors', () => {
-    expect(airReadings({}, lookup)).toEqual([]);
+    expect(airReadings({}, lookup, 'en')).toEqual([]);
   });
 
   it('summarises to the worst pollutant, not the first', () => {
     const readings = airReadings(
       { pm25: 'sensor.tp09_pm_2_5', voc: 'sensor.tp09_voc' },
       lookup,
+      'en',
     );
     expect(readings[0]?.band).toBe('good');
     expect(summaryBand(readings)).toBe('very-poor');

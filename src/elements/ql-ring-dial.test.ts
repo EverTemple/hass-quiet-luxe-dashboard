@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { angleForValue, DIAL_START_ANGLE, DIAL_SWEEP } from '../cards/climate-dial';
 import { DIAL_GEOMETRY, QlRingDial } from './ql-ring-dial';
 
@@ -145,12 +145,51 @@ describe('ql-ring-dial', () => {
     expect(seen).toEqual([]);
   });
 
+  it('Home/End jump straight to the entity’s own band ends', async () => {
+    const el = await mount({ min: 17, max: 30, step: 1, value: 23 });
+    const seen = changes(el);
+    key(grips(el)[0], { key: 'End' });
+    expect(seen[0]?.value).toBe(30);
+    key(grips(el)[0], { key: 'Home' });
+    expect(seen[1]?.value).toBe(17);
+  });
+
+  it('Page Up/Down move the same coarse step as Shift+Arrow', async () => {
+    const el = await mount({ value: 23 });
+    const seen = changes(el);
+    key(grips(el)[0], { key: 'PageUp' });
+    expect(seen[0]?.value).toBe(28);
+    key(grips(el)[0], { key: 'PageDown' });
+    expect(seen[1]?.value).toBe(23);
+  });
+
   it('ignores keys the dial does not own', async () => {
     const el = await mount({ value: 23 });
     const seen = changes(el);
     key(grips(el)[0], { key: 'Enter' });
     key(grips(el)[0], { key: 'a' });
     expect(seen).toEqual([]);
+  });
+
+  /*
+   * pointermove can dispatch well above the paint rate; getBoundingClientRect
+   * is a synchronous layout read, so it is throttled to once per animation
+   * frame rather than once per event — a burst of moves within the same
+   * frame must reuse the one read from pointerdown.
+   */
+  it('reads the stage rect once for a burst of pointermoves, not once per move', async () => {
+    const el = await mount({ value: 23 });
+    const grip = grips(el)[0];
+    if (grip === undefined) throw new Error('no grip');
+    const rectSpy = vi.spyOn(Element.prototype, 'getBoundingClientRect');
+    grip.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 1 }));
+    for (let i = 0; i < 5; i += 1) {
+      grip.dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, pointerId: 1, clientX: i, clientY: i }),
+      );
+    }
+    expect(rectSpy).toHaveBeenCalledTimes(1);
+    rectSpy.mockRestore();
   });
 
   it('is inert when the entity is not answering', async () => {
@@ -238,13 +277,50 @@ describe('ql-ring-dial', () => {
     const styles = QlRingDial.styles.toString();
     expect(styles).toContain('var(--ql-touch-min, 56px)');
     expect(styles).toContain('var(--ql-accent-champagne, #b08d57)');
-    expect(styles).toContain('var(--ql-status-good, #7e8b6f)');
+    // .reading.low / .reading.high are 12px text, so they take the siblings.
+    expect(styles).toContain('var(--ql-accent-champagne-text, #846a41)');
+    expect(styles).toContain('var(--ql-status-good-text, #67715b)');
     expect(styles).toContain('prefers-reduced-motion');
   });
 
   it('draws the full-size numeral at Outfit ExtraLight, per Figma', () => {
     const styles = QlRingDial.styles.toString();
     expect(styles).toContain('font: 200 56px/60px');
+  });
+
+  /*
+   * The numeral drags and repeats on a held key, so it — and only it — is the
+   * live region: the humidity readout and the ambient caption are siblings
+   * outside it, or every drag tick and key repeat would re-announce them too.
+   */
+  it('marks the numeral as a live region scoped to just the numeral text', async () => {
+    const el = await mount({
+      value: 23,
+      step: 1,
+      humidityText: '77%',
+      ambientText: 'Now 22.6°',
+    });
+    const status = el.shadowRoot?.querySelector('[role="status"]');
+    expect(status).not.toBeNull();
+    expect(status?.tagName).toBe('OUTPUT');
+    expect(status?.classList.contains('numeral')).toBe(true);
+    expect(status?.textContent?.trim()).toBe('23°');
+    expect(el.shadowRoot?.querySelectorAll('[role="status"]')).toHaveLength(1);
+  });
+
+  it('keeps the live region scoped the same way for a heat_cool range pair', async () => {
+    const el = await mount({
+      kind: 'range',
+      mode: 'heat_cool',
+      low: 21,
+      high: 25,
+      humidityText: '60%',
+      ambientText: 'Now 22°',
+    });
+    const status = el.shadowRoot?.querySelector('[role="status"]');
+    expect(status?.tagName).toBe('OUTPUT');
+    expect(status?.textContent?.trim()).toBe('21°25°');
+    expect(el.shadowRoot?.querySelectorAll('[role="status"]')).toHaveLength(1);
   });
 
   it('shows the humidity reading above the numeral, first in the centre stack', async () => {

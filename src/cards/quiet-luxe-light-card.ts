@@ -1,9 +1,11 @@
 import { css, html, type CSSResultGroup, type TemplateResult } from 'lit';
 import '../elements/ql-slider';
+import { formatInteger } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export interface LightCardConfig {
   readonly type: string;
@@ -42,6 +44,7 @@ export class QuietLuxeLightCard extends QlBaseCard {
     QlBaseCard.qlCardStyles,
     css`
       .head {
+        position: relative;
         display: flex;
         align-items: center;
         gap: var(--ql-space-s, 8px);
@@ -51,9 +54,25 @@ export class QuietLuxeLightCard extends QlBaseCard {
         cursor: pointer;
         color: inherit;
       }
+      /* .head is a bare row around a 14px icon+eyebrow — far under the 56px
+         minimum. An invisible layer grows the hit area upward from the row's
+         own bottom edge (never past it) so it never encroaches on the
+         value/slider controls that sit directly beneath. */
+      .head::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: var(--ql-touch-min, 56px);
+      }
+      .head:focus-visible {
+        outline: 2px solid var(--ql-accent-champagne, #b08d57);
+        outline-offset: 2px;
+      }
       .eyebrow {
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -77,11 +96,17 @@ export class QuietLuxeLightCard extends QlBaseCard {
       .value {
         display: block;
         margin: var(--ql-space-s, 8px) 0;
-        font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.numeral}
+        font-variant-numeric: tabular-nums;
       }
       .ql-unavailable .value {
         font-size: 14px;
         line-height: 20px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bulb {
+          transition: none;
+        }
       }
     `,
   ];
@@ -145,7 +170,7 @@ export class QuietLuxeLightCard extends QlBaseCard {
           aria-label=${`${label} — ${t(this.locale(), 'common.show_details')}`}
           @click=${this.onMoreInfo}
         >
-          <span class="value">${available ? `${pct}%` : t(this.locale(), 'common.unavailable')}</span>
+          <span class="value">${available ? `${formatInteger(pct, this.locale())}%` : t(this.locale(), 'common.unavailable')}</span>
         </button>
         <ql-slider
           .value=${pct}

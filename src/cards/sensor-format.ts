@@ -1,4 +1,6 @@
 import type { QlStatus } from '../elements/ql-status-dot';
+import { formatFixed, formatInteger } from '../i18n/format-number';
+import type { Locale } from '../i18n/types';
 
 export type SensorMetric = 'aqi' | 'temp' | 'humidity' | 'uv' | 'rain';
 
@@ -19,22 +21,26 @@ function numeric(state: string | undefined): number | undefined {
 }
 
 /** Exact display formatting per metric; '—' placeholder for non-numeric. */
-export function formatSensorValue(metric: SensorMetric, state: string | undefined): string {
+export function formatSensorValue(
+  metric: SensorMetric,
+  state: string | undefined,
+  locale: Locale,
+): string {
   const value = numeric(state);
   if (value === undefined) {
     return '—';
   }
   switch (metric) {
     case 'aqi':
-      return String(Math.round(value));
+      return formatInteger(value, locale);
     case 'temp':
-      return `${value.toFixed(1)}°`;
+      return `${formatFixed(value, locale, 1)}°`;
     case 'humidity':
-      return `${Math.round(value)}%`;
+      return `${formatInteger(value, locale)}%`;
     case 'uv':
-      return String(Math.round(value));
+      return formatInteger(value, locale);
     case 'rain':
-      return `${Math.round(value)}%`;
+      return `${formatInteger(value, locale)}%`;
   }
 }
 

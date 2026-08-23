@@ -65,7 +65,7 @@ describe('bundle entry', () => {
     expect(bundle.QuietLuxeCoverCard).toBeDefined();
     expect(bundle.QuietLuxeSensorTile).toBeDefined();
     expect(bundle.detectClimateDeviceType('climate.a')).toBe('ac');
-    expect(bundle.formatSensorValue('aqi', '18')).toBe('18');
+    expect(bundle.formatSensorValue('aqi', '18', 'en')).toBe('18');
     expect(typeof bundle.navigate).toBe('function');
     expect(typeof bundle.registerCard).toBe('function');
   });
@@ -141,8 +141,8 @@ describe('bundle entry', () => {
     expect(bundle.QlRowDoorMotion).toBeDefined();
     expect(bundle.QlRowNetworkFlow).toBeDefined();
     expect(bundle.QlIdleClock).toBeDefined();
-    expect(bundle.formatPower(1236)).toBe('1.24 kW');
-    expect(bundle.formatEnergy(8.61)).toBe('8.6 kWh');
+    expect(bundle.formatPower(1236, 'en')).toBe('1.24 kW');
+    expect(bundle.formatEnergy(8.61, 'en')).toBe('8.6 kWh');
     expect(bundle.LANGUAGE_TILES).toHaveLength(5);
     expect(bundle.CAR_BODY_PATHS.bmw.startsWith('M')).toBe(true);
     expect(typeof bundle.fetchAgenda).toBe('function');

@@ -5,10 +5,12 @@ import {
   type PropertyDeclarations,
   type TemplateResult,
 } from 'lit';
+import { t } from '../i18n/translate';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/types';
 import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export interface LanguageTile {
   readonly code: Locale;
@@ -39,6 +41,13 @@ export interface LanguageCardConfig {
  * and composed so the HA frontend root receives it; HA updates hass.locale,
  * browser storage, and the user profile (saveTranslationPreferences).
  * Selected state derives from the live hass locale.
+ *
+ * The tiles are one mutually-exclusive choice, so they carry `radiogroup`/
+ * `radio` semantics (roving tabindex, arrow-key move-and-select) rather than
+ * a row of independent toggle buttons — `ql-preset-row`/`ql-segmented` cover
+ * this pattern for a single text label per option, but a tile's two-line
+ * native/gloss layout doesn't fit their API, so the semantics are hand-rolled
+ * here on the same two-line tile Figma drew.
  */
 export class QuietLuxeLanguageCard extends QlBaseCard {
   static override properties: PropertyDeclarations = {
@@ -82,6 +91,40 @@ export class QuietLuxeLanguageCard extends QlBaseCard {
     );
   }
 
+  /**
+   * Arrow keys move AND select, per the radiogroup pattern — but unlike
+   * `ql-preset-row`/`ql-segmented`, selection here isn't local state; it
+   * only becomes true once hass round-trips the new locale back down. So
+   * the button to focus is found by its position in the rendered list, not
+   * by re-reading `aria-checked` after the (not yet updated) selection.
+   */
+  private onKeydown(event: KeyboardEvent, index: number): void {
+    const tiles = this.tiles();
+    const count = tiles.length;
+    if (count === 0) {
+      return;
+    }
+    let direction: 1 | -1;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      direction = 1;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      direction = -1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    const next = (((index + direction) % count) + count) % count;
+    const tile = tiles[next];
+    if (tile === undefined) {
+      return;
+    }
+    this.onSelect(tile.code);
+    this.shadowRoot
+      ?.querySelectorAll<HTMLButtonElement>('button[role="radio"]')
+      .item(next)
+      ?.focus();
+  }
+
   static override styles: CSSResultGroup = [
     QlBaseCard.qlCardStyles,
     css`
@@ -96,23 +139,34 @@ export class QuietLuxeLanguageCard extends QlBaseCard {
         padding: var(--ql-space-m, 12px) var(--ql-space-l, 16px);
         border-radius: var(--ql-radius-card, 18px);
         border: 1px solid var(--ql-surface-border, #e4dccb);
-        background: var(--ql-surface-card, #fdfbf6);
+        background: var(--ql-surface-inset, #fdfbf6);
         color: var(--ql-ink-primary, #2b2620);
         cursor: pointer;
         text-align: left;
         transition: border-color 200ms ease;
       }
-      button[aria-pressed='true'] {
+      button[aria-checked='true'] {
         border-color: var(--ql-accent-champagne, #b08d57);
       }
+      button:focus-visible {
+        outline: 2px solid var(--ql-accent-champagne, #b08d57);
+        outline-offset: 2px;
+      }
       .native {
+        display: block;
         margin: 0;
-        font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.title}
       }
       .gloss {
+        display: block;
         margin: 2px 0 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
+      }
+      @media (prefers-reduced-motion: reduce) {
+        button {
+          transition: none;
+        }
       }
     `,
   ];
@@ -122,17 +176,22 @@ export class QuietLuxeLanguageCard extends QlBaseCard {
       return html``;
     }
     const current = this.locale();
+    const tiles = this.tiles();
     return html`
-      <div class="grid">
-        ${this.tiles().map(
-          (tile) => html`
+      <div class="grid" role="radiogroup" aria-label=${t(current, 'view.language')}>
+        ${tiles.map(
+          (tile, index) => html`
             <button
-              aria-pressed=${String(tile.code === current)}
+              type="button"
+              role="radio"
+              aria-checked=${String(tile.code === current)}
+              tabindex=${tile.code === current ? 0 : -1}
               lang=${tile.code}
               @click=${(): void => this.onSelect(tile.code)}
+              @keydown=${(event: KeyboardEvent): void => this.onKeydown(event, index)}
             >
-              <p class="native">${tile.native}</p>
-              <p class="gloss">${tile.gloss}</p>
+              <span class="native">${tile.native}</span>
+              <span class="gloss">${tile.gloss}</span>
             </button>
           `,
         )}

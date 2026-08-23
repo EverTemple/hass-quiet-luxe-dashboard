@@ -10,11 +10,13 @@ import '../elements/ql-chip';
 import '../elements/ql-sheet';
 import '../elements/ql-sheet-button';
 import { pictureGlyph } from '../elements/ql-glyphs';
+import { formatFixed, formatInteger } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import { navigate } from './navigate';
 import { contentGrid, COLUMNS_HALF_OF_WIDE_SECTION, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export type RoomCardSize = 's' | 'm' | 'l';
 
@@ -170,10 +172,6 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         background-color: var(--ql-bg-base, #f4f0e8);
         cursor: pointer;
       }
-      .room:focus-visible {
-        outline: 2px solid var(--ql-accent-champagne, #b08d57);
-        outline-offset: 2px;
-      }
       .photo {
         position: absolute;
         inset: 0;
@@ -247,10 +245,22 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         left: var(--ql-space-l, 16px);
         top: 14px;
         right: var(--ql-space-l, 16px);
+        min-width: 0;
+      }
+      /* The identity region: name + stats are the room's one real button, so
+         the keyboard/AT path is a genuine control rather than the
+         role="button" tile this used to be. That tile gave ARIA's button
+         role to the whole card, which made every descendant — the chips,
+         the edit affordance, its sheet — lose its own role. .ql-info
+         supplies the button reset and the hover/focus treatment every other
+         card's identity region already carries; this class only puts back
+         the header's own column layout. */
+      .identity {
         display: flex;
         flex-direction: column;
         gap: var(--ql-space-xs, 4px);
         min-width: 0;
+        text-align: left;
       }
       /* The affordance owns the top-right corner; the name stops short of it. */
       .room.editable .header {
@@ -271,26 +281,26 @@ export class QuietLuxeRoomCard extends QlBaseCard {
       /* Documented exemption: white over the scrim in both modes. */
       .name {
         color: #ffffff;
-        font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.title}
       }
       .room[data-size='l'] .name {
-        font: 400 24px/30px var(--ql-font-display, Marcellus, serif);
+        ${TYPE.displaySmall}
         letter-spacing: 0.04em;
       }
       .room[data-size='s'] .name {
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
       .stats {
         color: rgba(255, 255, 255, 0.78);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
       .room.fallback .name {
         color: var(--ql-ink-primary, #2b2620);
       }
       .room.fallback .stats {
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
       }
       .chips {
         position: absolute;
@@ -346,10 +356,10 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         background: rgba(22, 19, 16, 0.55);
       }
       .room.fallback .edit {
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
       }
       .room.fallback .edit .disc {
-        background: var(--ql-surface-card, #fdfbf6);
+        background: var(--ql-surface-inset, #fdfbf6);
         border: 1px solid var(--ql-surface-border, #e4dccb);
       }
       .room:hover .edit,
@@ -378,8 +388,8 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         gap: var(--ql-space-s, 8px);
       }
       .field label {
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -392,7 +402,7 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         border-radius: var(--ql-radius-thumb, 12px);
         background: var(--ql-bg-base, #f4f0e8);
         color: var(--ql-ink-primary, #2b2620);
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
       }
       .field input:focus-visible {
         outline: 2px solid var(--ql-accent-champagne, #b08d57);
@@ -400,14 +410,14 @@ export class QuietLuxeRoomCard extends QlBaseCard {
       }
       .hint {
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
       .error {
         margin: 0;
         color: var(--ql-status-alert, #a85b4e);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.caption}
       }
       .preview {
         width: 100%;
@@ -420,6 +430,7 @@ export class QuietLuxeRoomCard extends QlBaseCard {
   ];
 
   private statsLine(): string {
+    const locale = this.locale();
     const parts: string[] = [];
     const numeric = (entityId: string | undefined, format: (value: number) => string): void => {
       if (entityId === undefined || this.availability(entityId) !== 'available') {
@@ -430,11 +441,11 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         parts.push(format(value));
       }
     };
-    numeric(this.config?.temperature_entity, (value) => `${value.toFixed(1)}°`);
-    numeric(this.config?.humidity_entity, (value) => `${Math.round(value)}%`);
+    numeric(this.config?.temperature_entity, (value) => `${formatFixed(value, locale, 1)}°`);
+    numeric(this.config?.humidity_entity, (value) => `${formatInteger(value, locale)}%`);
     const aqi = this.aqiValue();
     if (aqi !== undefined) {
-      parts.push(`AQI ${aqi}`);
+      parts.push(`AQI ${formatInteger(aqi, locale)}`);
     }
     return parts.join(' · ');
   }
@@ -464,17 +475,16 @@ export class QuietLuxeRoomCard extends QlBaseCard {
     }
   }
 
-  private onKeydown(event: KeyboardEvent): void {
-    /* The picker's text field is a descendant, so a space typed into it would
-       otherwise bubble up here and navigate away mid-edit. */
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      this.onTap();
-    }
-  }
+  /**
+   * The identity button's own click handler. It stops the event short of the
+   * `.room` div's own `@click`, which still fires `onTap` for a pointer tap
+   * anywhere else on the tile — without the stop, a tap on the button would
+   * navigate twice.
+   */
+  private readonly onIdentityTap = (event: Event): void => {
+    event.stopPropagation();
+    this.onTap();
+  };
 
   private onChipTap(event: Event, entityId: string): void {
     event.stopPropagation();
@@ -554,6 +564,7 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         src=${url}
         alt=""
         aria-hidden="true"
+        loading="lazy"
         @load=${(): void => {
           this.photoState = 'loaded';
         }}
@@ -590,7 +601,7 @@ export class QuietLuxeRoomCard extends QlBaseCard {
         </div>
         ${draft === ''
           ? nothing
-          : html`<img class="preview" src=${draft} alt="" aria-hidden="true" />`}
+          : html`<img class="preview" src=${draft} alt="" aria-hidden="true" loading="lazy" />`}
         <ql-sheet-button
           slot="footer"
           @click=${(): void => {
@@ -626,32 +637,35 @@ export class QuietLuxeRoomCard extends QlBaseCard {
       <div
         class="room ${fallback ? 'fallback' : ''} ${editable ? 'editable' : ''}"
         data-size=${size}
-        role="button"
-        tabindex="0"
-        aria-label=${config.name}
         style="--glow-x:${glow.x}%;--glow-y:${glow.y}%;--bloom-x:${bloom.x}%;--bloom-y:${bloom.y}%"
         @click=${this.onTap}
-        @keydown=${this.onKeydown}
       >
         ${this.renderPhoto()}
         ${fallback || size === 's' ? nothing : html`<span class="scrim-top"></span>`}
         ${fallback ? nothing : html`<span class="scrim-bottom"></span>`}
         <div class="header">
-          <span class="name-row">
-            ${this.lightsOn()
-              ? html`
-                  <span
-                    class="glow-dot"
-                    role="img"
-                    aria-label=${t(this.locale(), 'room.lights_on')}
-                  ></span>
-                `
-              : nothing}
-            <span class="name ql-clamp-2">${config.name}</span>
-          </span>
-          ${size === 's' || stats === ''
-            ? nothing
-            : html`<span class="stats ql-clamp-1">${stats}</span>`}
+          <button
+            type="button"
+            class="ql-info identity"
+            aria-label=${config.name}
+            @click=${this.onIdentityTap}
+          >
+            <span class="name-row">
+              ${this.lightsOn()
+                ? html`
+                    <span
+                      class="glow-dot"
+                      role="img"
+                      aria-label=${t(this.locale(), 'room.lights_on')}
+                    ></span>
+                  `
+                : nothing}
+              <span class="name ql-clamp-2">${config.name}</span>
+            </span>
+            ${size === 's' || stats === ''
+              ? nothing
+              : html`<span class="stats ql-clamp-1">${stats}</span>`}
+          </button>
         </div>
         ${size === 's' ? nothing : this.renderChips()}
         ${editable

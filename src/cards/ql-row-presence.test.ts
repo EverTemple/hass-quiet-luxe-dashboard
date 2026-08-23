@@ -84,3 +84,11 @@ describe('ql-row-presence', () => {
     row.remove();
   });
 });
+
+describe('ql-row-presence lazy image', () => {
+  it('lazy-loads the avatar image', async () => {
+    const row = await mount({ entities: ['person.mei'] }, makeMockHass(people()));
+    expect(row.shadowRoot?.querySelector('img.avatar')?.getAttribute('loading')).toBe('lazy');
+    row.remove();
+  });
+});

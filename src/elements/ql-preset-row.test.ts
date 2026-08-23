@@ -74,6 +74,15 @@ describe('ql-preset-row', () => {
     el.remove();
   });
 
+  /* A bound value that matches none of the options (an in-flight preset, a
+     stale default) must never leave the whole group untabbable — exactly one
+     button always carries tabindex 0, falling back to the first option. */
+  it('keeps exactly one button tabbable when the bound value matches nothing', async () => {
+    const el = await mount(SWEEPS, 'not-a-real-value');
+    expect(buttons(el).map((b) => b.tabIndex)).toEqual([0, -1, -1, -1, -1]);
+    el.remove();
+  });
+
   it('click selects and emits ql-change', async () => {
     const el = await mount();
     const events: string[] = [];
@@ -111,6 +120,16 @@ describe('ql-preset-row', () => {
     const cssText = QlPresetRow.styles.toString();
     expect(cssText).toContain('background: var(--ql-ink-primary, #2b2620)');
     expect(cssText).toContain('color: var(--ql-bg-base, #f4f0e8)');
+  });
+
+  it('extends the pill hit area to the touch minimum without growing the row', () => {
+    const cssText = QlPresetRow.styles.toString();
+    const buttonRule = /button \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    // The painted pill keeps its 6px vertical padding — 28px tall, unchanged.
+    expect(buttonRule).toContain('padding: 6px');
+    const hitAreaRule = /button::before \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(hitAreaRule).toContain('height: var(--ql-touch-min, 56px)');
+    expect(hitAreaRule).toContain('position: absolute');
   });
 
   it('keeps a seven-segment row inside its container', () => {

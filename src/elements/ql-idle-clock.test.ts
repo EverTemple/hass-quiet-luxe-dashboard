@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { DARK_COLORS } from '../tokens/palette';
 import { QlIdleClock } from './ql-idle-clock';
 
 async function mount(props: Partial<QlIdleClock> = {}): Promise<QlIdleClock> {
@@ -33,7 +34,16 @@ describe('ql-idle-clock', () => {
     const cssText = QlIdleClock.styles.toString();
     expect(cssText).toContain('#262019');
     expect(cssText).toContain('#100d0a');
-    expect(cssText).toContain('#ede6d8');
     expect(cssText).not.toContain('var(--ql-bg-base');
+    expect(cssText).not.toContain('var(--ql-ink-primary');
+    expect(cssText).not.toContain('var(--ql-ink-muted');
+  });
+
+  /** The ink colors are drawn from the palette module, not a second
+   * hard-coded copy, so a future palette change can't desync from this face. */
+  it('sources its fixed ink colors from DARK_COLORS', () => {
+    const cssText = QlIdleClock.styles.toString();
+    expect(cssText).toContain(DARK_COLORS.inkPrimary);
+    expect(cssText).toContain(DARK_COLORS.inkMuted);
   });
 });

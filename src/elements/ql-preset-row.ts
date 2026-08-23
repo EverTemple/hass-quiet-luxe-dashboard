@@ -1,4 +1,5 @@
 import { css, html, LitElement, type CSSResult, type TemplateResult } from 'lit';
+import { TYPE } from '../tokens/type';
 
 export interface QlPresetOption {
   readonly value: string;
@@ -53,17 +54,18 @@ export class QlPresetRow extends LitElement {
       padding: var(--ql-space-xs, 4px);
       border-radius: var(--ql-radius-chip, 999px);
       border: 1px solid var(--ql-surface-border, #e4dccb);
-      background: var(--ql-surface-card, #fdfbf6);
+      background: var(--ql-surface-inset, #fdfbf6);
     }
     button {
+      position: relative;
       flex: 1 1 0;
       min-width: 0;
       padding: 6px var(--ql-space-s, 8px);
       border: 0;
       border-radius: var(--ql-radius-chip, 999px);
       background: transparent;
-      color: var(--ql-ink-muted, #8c8578);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
@@ -73,6 +75,20 @@ export class QlPresetRow extends LitElement {
       transition:
         background 200ms ease,
         color 200ms ease;
+    }
+    /* The pill stays a 28px-tall visual chip — matching segmented exactly —
+       while an invisible ::before extends the actual hit area to the shared
+       touch minimum. It is taken out of flow (position: absolute) so it never
+       grows the row's own height, and it is sized to the button's own width
+       rather than the row's, so it doesn't reach across into a neighbour. */
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: var(--ql-touch-min, 56px);
+      transform: translateY(-50%);
     }
     button[aria-checked='true'] {
       background: var(--ql-ink-primary, #2b2620);
@@ -144,15 +160,21 @@ export class QlPresetRow extends LitElement {
   }
 
   protected override render(): TemplateResult {
+    // Exactly one button must always be tabbable, or the group falls out of
+    // the tab order the moment the bound value matches none of the options
+    // (an in-flight preset value, a stale default): the selected index falls
+    // back to the first option so the group's own arrow keys stay reachable.
+    const selectedIndex = this.options.findIndex((option) => option.value === this.value);
+    const tabbableIndex = selectedIndex === -1 ? 0 : selectedIndex;
     return html`
       <div class="row" role="radiogroup" aria-label=${this.label} @keydown=${this.onKeydown}>
         ${this.options.map(
-          (option) => html`
+          (option, index) => html`
             <button
               type="button"
               role="radio"
               aria-checked=${String(option.value === this.value)}
-              tabindex=${option.value === this.value ? 0 : -1}
+              tabindex=${index === tabbableIndex ? 0 : -1}
               @click=${(): void => this.select(option)}
             >
               ${option.label}

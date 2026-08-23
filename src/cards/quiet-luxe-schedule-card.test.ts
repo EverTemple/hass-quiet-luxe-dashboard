@@ -241,3 +241,25 @@ describe('quiet-luxe-schedule-card', () => {
     expect(seen).toEqual(['todo.family']);
   });
 });
+
+describe('quiet-luxe-schedule-card touch target', () => {
+  /** The row's own min-height, not the 14px checkbox, is what reaches the
+   * touch minimum — the <label> wrapping the checkbox is the real target,
+   * so growing it (not the box) keeps the row's added height genuinely
+   * tappable rather than a dead zone that only looks like part of the row. */
+  it('.task rows meet the 56px touch minimum', () => {
+    const cssText = QuietLuxeScheduleCard.styles.toString();
+    expect(cssText).toContain('min-height: var(--ql-touch-min, 56px)');
+  });
+
+  it('each task row is one label wrapping its own checkbox — no separate target', async () => {
+    const card = await mount({ todo_entity: 'todo.family' }, makeMockHass([todoEntity()], CAL_STUB));
+    const rows = [...(card.shadowRoot?.querySelectorAll<HTMLLabelElement>('.task') ?? [])];
+    expect(rows).toHaveLength(3);
+    for (const row of rows) {
+      expect(row.tagName).toBe('LABEL');
+      expect(row.querySelectorAll('input[type="checkbox"]')).toHaveLength(1);
+    }
+    card.remove();
+  });
+});

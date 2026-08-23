@@ -116,6 +116,6 @@ describe('climateModeGlyph', () => {
     expect(byMode.get('heat_cool')).toBe(byMode.get('other'));
     const distinct = ['heat', 'cool', 'heat_cool', 'off'] as const;
     expect(new Set(distinct.map((mode) => byMode.get(mode))).size).toBe(distinct.length);
-    expect(byMode.get('off')).toBe('var(--ql-ink-muted, #8c8578)');
+    expect(byMode.get('off')).toBe('var(--ql-ink-muted, #736d63)');
   });
 });

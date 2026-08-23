@@ -154,6 +154,25 @@ export const ROOM_CONTROLS_ROW_SPAN = 3;
  * at 378 it sorted BELOW the 382 fan card and inverted the intended order;
  * at 384 it sorts above again.
  *
+ * Remeasured 2026-08-23 after the accessibility remediation, by walking the
+ * composed tree of all eleven rendered views at a 1680px viewport and taking
+ * the MODAL height per card type (n in the comments below). Two entries moved
+ * for a real reason and the rest were already drifting:
+ *
+ *   - schedule 140 → 228. `.task` rows went from a 28px min-height to
+ *     `--ql-touch-min` (56), which is +28px per visible task. This is the one
+ *     change here that alters emission order: the schedule card now sorts
+ *     above the room (192) and camera (260 modal) cards it used to sit below.
+ *   - cover 184 → 202 and media#player 178 → 196, both +18 from the touch
+ *     work on their control rows.
+ *
+ * Four entries were carrying Figma numbers because the 2026-08-03 instance had
+ * no such card; the Tung Chung snapshot now does, so they are measured for the
+ * first time — light 108 → 134, sensor tile 84 → 74, device cutout 108 → 72,
+ * door-motion row 57 → 55. Two more had no entry at all and were silently
+ * taking DEFAULT_CARD_HEIGHT_PX (108): the language card (222) and the network
+ * flow row (82).
+ *
  * Still approximate by design: the only thing they decide is the ORDER cards
  * are emitted in, and being 10px out never changes a comparison. Entries with
  * no live instance to measure keep their drawn value and are marked.
@@ -164,21 +183,25 @@ const CARD_HEIGHT_PX: Readonly<Record<string, number>> = {
   'custom:quiet-luxe-fan-card': 382,
   'custom:quiet-luxe-fan-card#compact': 190,
   'custom:quiet-luxe-climate-card': 130,
-  'custom:quiet-luxe-camera-card': 190,
-  'custom:quiet-luxe-cover-card': 184,
+  'custom:quiet-luxe-camera-card': 260,
+  'custom:quiet-luxe-cover-card': 202,
   'custom:quiet-luxe-room-card': 192,
-  'custom:quiet-luxe-schedule-card': 140,
-  'custom:quiet-luxe-media-card#player': 178,
+  'custom:quiet-luxe-schedule-card': 228,
+  'custom:quiet-luxe-language-card': 222,
+  'custom:quiet-luxe-media-card#player': 196,
   'custom:quiet-luxe-media-card#bar': 68,
-  'custom:ql-row-door-motion': 57,
+  'custom:quiet-luxe-light-card': 134,
+  'custom:quiet-luxe-sensor-tile': 74,
+  'custom:quiet-luxe-device-cutout-card': 72,
+  'custom:ql-row-network-flow': 82,
+  'custom:ql-row-door-motion': 55,
   /* Not present on the instance these were measured on — Figma values. */
-  'custom:quiet-luxe-light-card': 108,
   'custom:quiet-luxe-media-card': 50,
   'custom:quiet-luxe-energy-card': 64,
   'custom:quiet-luxe-energy-card#ring': 140,
-  'custom:quiet-luxe-sensor-tile': 84,
-  'custom:quiet-luxe-device-cutout-card': 108,
   'custom:ql-row-presence': 38,
+  /* HA's own heading card. The dev harness stubs it, so its 28px there is not
+     authoritative — this stays the drawn value. */
   heading: 26,
 };
 

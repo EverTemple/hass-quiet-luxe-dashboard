@@ -12,6 +12,7 @@ import type {
   ClimateSheetGroup,
 } from './climate-sheet';
 import { optionLabel, titleCase } from './device-controls';
+import { TYPE } from '../tokens/type';
 
 /**
  * The body of `modal/climate-controls` (Figma 56:4698), rendered into the
@@ -37,9 +38,13 @@ export const climateSheetStyles: CSSResult = css`
     gap: var(--ql-space-m, 12px);
     min-width: 0;
   }
+  /* An <h3> under the sheet's own <h2> (ql-sheet.ts), not a styled span: a
+     screen reader user can then navigate the Mode / Fan / Swing / Humidity
+     groups by heading, the way sighted users already scan them visually. */
   .ql-sheet-title {
-    color: var(--ql-ink-muted, #8c8578);
-    font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+    margin: 0;
+    color: var(--ql-ink-muted, #736d63);
+    ${TYPE.eyebrow}
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
@@ -84,11 +89,12 @@ function renderControl(
   emit: ClimateSheetEmit,
 ): TemplateResult {
   const label = t(locale, control.labelKey);
-  const name = needsOwnName(group, control)
-    ? html`<span class="ql-sheet-name">${label}</span>`
-    : nothing;
+  const ownName = needsOwnName(group, control);
+  const name = ownName ? html`<span class="ql-sheet-name">${label}</span>` : nothing;
 
   if (control.kind === 'select') {
+    /* No sibling name span in this branch — .label is ql-preset-row's only
+       accessible name, so it stays, unlike the toggle/stepper cases below. */
     return html`
       <ql-preset-row
         .options=${control.options.map((option) => ({
@@ -103,13 +109,23 @@ function renderControl(
     `;
   }
 
+  /* When the group has a single control that shares its own titleKey,
+     `ownName` is false and `name` renders nothing — .label is then the only
+     name the control has and must stay. Only when the sibling span is
+     actually drawn does passing the same string into .label become the
+     genuine duplicate render-controls.ts fixed: the wrapper carries the one
+     accessible name (role="group" + aria-label) and .label is dropped. */
   if (control.kind === 'toggle') {
     return html`
-      <div class="ql-sheet-row">
+      <div
+        class="ql-sheet-row"
+        role=${ownName ? 'group' : nothing}
+        aria-label=${ownName ? label : nothing}
+      >
         ${name}
         <ql-toggle
           .checked=${control.on}
-          .label=${label}
+          .label=${ownName ? '' : label}
           ?disabled=${disabled}
           @ql-change=${(event: CustomEvent<{ checked: boolean }>): void =>
             emit(control.id, event.detail.checked ? control.onValue : control.offValue)}
@@ -119,7 +135,11 @@ function renderControl(
   }
 
   return html`
-    <div class="ql-sheet-row">
+    <div
+      class="ql-sheet-row"
+      role=${ownName ? 'group' : nothing}
+      aria-label=${ownName ? label : nothing}
+    >
       ${name}
       <ql-stepper
         .value=${control.target.value}
@@ -127,7 +147,8 @@ function renderControl(
         .max=${control.target.max}
         .step=${control.target.step}
         .unit=${control.unit}
-        .label=${label}
+        .label=${ownName ? '' : label}
+        .locale=${locale}
         decrease-label=${t(locale, 'control.decrease')}
         increase-label=${t(locale, 'control.increase')}
         ?disabled=${disabled}
@@ -184,7 +205,7 @@ export function renderClimateSheet(options: ClimateSheetOptions): TemplateResult
         ${options.groups.map(
           (group) => html`
             <div class="ql-sheet-group">
-              <span class="ql-sheet-title">${t(locale, group.titleKey)}</span>
+              <h3 class="ql-sheet-title">${t(locale, group.titleKey)}</h3>
               ${group.controls.map((control) =>
                 renderControl(group, control, locale, options.disabled, options.emit),
               )}

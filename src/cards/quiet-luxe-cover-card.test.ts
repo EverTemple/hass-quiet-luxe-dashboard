@@ -96,6 +96,20 @@ describe('quiet-luxe-cover-card', () => {
     ]);
   });
 
+  /** A bare <button> defaults to type=submit, which would try to submit a
+   * form if one ever wrapped this card. */
+  it('open/stop/close buttons declare type=button', async () => {
+    const card = await mount({ entity: 'cover.living' }, makeMockHass([coverEntity('cover.living', 65)]));
+    const buttons = [...(card.shadowRoot?.querySelectorAll<HTMLButtonElement>('.ops button') ?? [])];
+    expect(buttons).toHaveLength(3);
+    expect(buttons.every((b) => b.getAttribute('type') === 'button')).toBe(true);
+  });
+
+  it('.ops buttons carry a visible focus ring', () => {
+    const cssText = QuietLuxeCoverCard.styles.toString();
+    expect(cssText).toContain('.ops button:focus-visible');
+  });
+
   it('unavailable: muted, controls disabled; missing: placeholder value', async () => {
     const card = await mount(
       { entity: 'cover.living' },

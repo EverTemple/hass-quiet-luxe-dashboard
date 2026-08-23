@@ -12,6 +12,7 @@ import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { CONFIRM_TIMEOUT_MS } from './quiet-luxe-climate-card';
+import { TYPE } from '../tokens/type';
 
 export interface NetworkFlowRowConfig {
   readonly type: string;
@@ -98,21 +99,21 @@ export class QlRowNetworkFlow extends QlBaseCard {
       .name {
         display: block;
         margin: 0;
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
       }
       .description {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
       .hint {
         margin: var(--ql-space-xs, 4px) 0 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
       .hint.armed {
-        color: var(--ql-status-warn, #c08552);
+        color: var(--ql-status-warn-text, #91643e);
       }
     `,
   ];
@@ -149,7 +150,7 @@ export class QlRowNetworkFlow extends QlBaseCard {
             @ql-change=${this.onToggle}
           ></ql-toggle>
         </div>
-        <p class="hint ${this.armed ? 'armed' : ''}">
+        <p class="hint ${this.armed ? 'armed' : ''}" role="status">
           ${this.armed ? t(locale, 'common.tap_confirm') : t(locale, 'flow.confirm_hint')}
         </p>
       </div>

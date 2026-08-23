@@ -9,6 +9,7 @@ import '../elements/ql-timer-dial';
 import '../elements/ql-toggle';
 import { dysonIcon } from '../elements/dyson-icons';
 import type { QlPresetOption } from '../elements/ql-preset-row';
+import { formatInteger, formatTrimmed } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import type { Locale } from '../i18n/types';
 import type { HassEntity } from '../types/home-assistant';
@@ -58,6 +59,7 @@ import { COLUMNS_FULL, contentGrid, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
 import { formatSensorValue } from './sensor-format';
+import { TYPE } from '../tokens/type';
 
 export interface FanCardConfig {
   readonly type: string;
@@ -212,21 +214,21 @@ export class QuietLuxeFanCard extends QlBaseCard {
         min-width: 0;
       }
       .eyebrow {
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
       .numeral {
         color: var(--ql-ink-primary, #2b2620);
-        font: 300 26px/30px var(--ql-font-display, Outfit, sans-serif);
+        ${TYPE.numeral}
         letter-spacing: 0.01em;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
       }
       .numeral-xl {
         color: var(--ql-ink-primary, #2b2620);
-        font: 300 44px/48px var(--ql-font-display, Outfit, sans-serif);
+        ${TYPE.numeralXl}
         letter-spacing: 0.01em;
         font-variant-numeric: tabular-nums;
       }
@@ -285,16 +287,22 @@ export class QuietLuxeFanCard extends QlBaseCard {
         }
       }
       .caption {
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
         letter-spacing: 0.02em;
       }
       /* The floor is the one moment the readout stops answering the finger, so
          it says so in the accent rather than going quiet. */
       .numeral.locked,
       .caption.locked {
-        color: var(--ql-accent-champagne, #b08d57);
+        color: var(--ql-accent-champagne-text, #846a41);
       }
+      /* Carries role="status" in markup, matching ql-stepper's <output
+         role="status">: the numeral and its caption move while focus stays
+         on the +/- glyph or a bar, so nothing is announced otherwise. As
+         with ql-stepper, there is no extra debounce on the announcement
+         itself — a "polite" region already coalesces to the latest value
+         when updates arrive faster than an AT can speak them. */
       .readout {
         display: flex;
         flex-direction: column;
@@ -320,17 +328,17 @@ export class QuietLuxeFanCard extends QlBaseCard {
         padding: var(--ql-space-xl, 24px) var(--ql-space-l, 16px);
         border: 1px solid var(--ql-surface-border, #e4dccb);
         border-radius: var(--ql-radius-card, 18px);
-        background: var(--ql-surface-card, #fdfbf6);
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+        background: var(--ql-surface-inset, #fdfbf6);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.title}
         cursor: pointer;
       }
-      .tile[aria-pressed='true'] {
+      .tile[aria-checked='true'] {
         border: 1.5px solid var(--ql-accent-champagne, #b08d57);
-        color: var(--ql-accent-champagne, #b08d57);
+        color: var(--ql-accent-champagne-text, #846a41);
       }
       /* A separate tint layer keeps the 10% wash off the text and the border. */
-      .tile[aria-pressed='true']::before {
+      .tile[aria-checked='true']::before {
         content: '';
         position: absolute;
         inset: -1.5px;
@@ -354,20 +362,37 @@ export class QuietLuxeFanCard extends QlBaseCard {
         display: flex;
         align-items: flex-end;
         gap: var(--ql-space-xs, 4px);
-        height: 58px;
+        height: var(--ql-steps-height, 58px);
       }
       .step {
+        position: relative;
         flex: 1 1 0;
         min-width: 0;
         padding: 0;
         border: 0;
         border-radius: var(--ql-radius-thumb, 12px);
-        background: var(--ql-ink-muted, #8c8578);
+        background: var(--ql-ink-muted, #736d63);
         opacity: 0.28;
         cursor: pointer;
         transition:
           background 200ms ease,
           opacity 200ms ease;
+      }
+      /* The bars are a graph, not a uniform button row — they run 24-58px
+         tall by design, so the short end sits well under --ql-touch-min
+         (56px). Widening the hit area sideways would overlap the next bar,
+         which sits 4px away; growing it upward does not, since every bar is
+         bottom-aligned in the row and the row itself is already close to
+         --ql-touch-min tall. This invisible overlay claims that full row
+         height as the hit area without moving the painted bar or its
+         neighbours. */
+      .step::before {
+        content: '';
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: var(--ql-steps-height, 58px);
       }
       .step.active {
         background: var(--ql-accent-champagne, #b08d57);
@@ -392,7 +417,7 @@ export class QuietLuxeFanCard extends QlBaseCard {
       }
       .auto-name {
         color: var(--ql-ink-primary, #2b2620);
-        font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.title}
       }
       @media (prefers-reduced-motion: reduce) {
         .step {
@@ -674,7 +699,7 @@ export class QuietLuxeFanCard extends QlBaseCard {
         .closeLabel=${t(locale, 'common.close')}
         @ql-sheet-close=${this.closeSheet}
       >
-        <div class="readout">
+        <div class="readout" role="status">
           <span class="numeral ${locked ? 'locked' : ''}">${String(angle.span)}°</span>
           <span class="caption ${locked ? 'locked' : ''}">
             ${this.oscillationCaption(locale, angle)}
@@ -727,7 +752,12 @@ export class QuietLuxeFanCard extends QlBaseCard {
       value: String(preset),
       label: timerLabel(preset) ?? t(locale, 'common.off'),
     }));
-    const reading = minutes === 0 ? t(locale, 'common.off') : minutes < 60 ? String(minutes) : String(Number(hours.toFixed(1)));
+    const reading =
+      minutes === 0
+        ? t(locale, 'common.off')
+        : minutes < 60
+          ? formatInteger(minutes, locale)
+          : formatTrimmed(hours, locale, 1);
     const caption = minutes === 0 ? '' : minutes < 60 ? t(locale, 'fan.minutes') : t(locale, 'fan.hours');
     return html`
       <ql-sheet
@@ -772,25 +802,56 @@ export class QuietLuxeFanCard extends QlBaseCard {
     this.closeSheet();
   };
 
+  /**
+   * Front and back are mutually exclusive — radio semantics, not two
+   * independent toggles — so arrow keys move between the two tiles the way
+   * they do in `ql-preset-row` and `ql-segmented` elsewhere in this file.
+   * Neither of those components has a slot for the icon and hint caption the
+   * tiles carry, so the radiogroup pattern is applied directly to the
+   * existing tiles rather than swapping the component in.
+   */
+  private readonly onAirflowKeydown = (event: KeyboardEvent): void => {
+    if (
+      event.key !== 'ArrowRight' &&
+      event.key !== 'ArrowLeft' &&
+      event.key !== 'ArrowUp' &&
+      event.key !== 'ArrowDown'
+    ) {
+      return;
+    }
+    event.preventDefault();
+    this.draftDirection = this.draftDirection === 'front' ? 'back' : 'front';
+    void this.updateComplete.then(() => {
+      this.shadowRoot
+        ?.querySelector<HTMLButtonElement>(".tile[aria-checked='true']")
+        ?.focus();
+    });
+  };
+
   private renderAirflowSheet(locale: Locale): TemplateResult {
     const tile = (
       direction: AirflowDirection,
       nameKey: 'fan.forward' | 'fan.reverse',
       hintKey: 'fan.front_hint' | 'fan.back_hint',
-    ): TemplateResult => html`
-      <button
-        class="tile"
-        type="button"
-        aria-pressed=${String(this.draftDirection === direction)}
-        @click=${(): void => {
-          this.draftDirection = direction;
-        }}
-      >
-        ${dysonIcon(direction === 'front' ? 'arrow-front' : 'arrow-back', 32)}
-        <span class="tile-name">${t(locale, nameKey)}</span>
-        <span class="caption">${t(locale, hintKey)}</span>
-      </button>
-    `;
+    ): TemplateResult => {
+      const checked = this.draftDirection === direction;
+      return html`
+        <button
+          class="tile"
+          type="button"
+          role="radio"
+          aria-checked=${String(checked)}
+          tabindex=${checked ? 0 : -1}
+          @click=${(): void => {
+            this.draftDirection = direction;
+          }}
+        >
+          ${dysonIcon(direction === 'front' ? 'arrow-front' : 'arrow-back', 32)}
+          <span class="tile-name">${t(locale, nameKey)}</span>
+          <span class="caption">${t(locale, hintKey)}</span>
+        </button>
+      `;
+    };
     return html`
       <ql-sheet
         .open=${true}
@@ -798,7 +859,12 @@ export class QuietLuxeFanCard extends QlBaseCard {
         .closeLabel=${t(locale, 'common.close')}
         @ql-sheet-close=${this.closeSheet}
       >
-        <div class="tiles">
+        <div
+          class="tiles"
+          role="radiogroup"
+          aria-label=${t(locale, 'fan.airflow_direction')}
+          @keydown=${this.onAirflowKeydown}
+        >
           ${tile('front', 'fan.forward', 'fan.front_hint')}
           ${tile('back', 'fan.reverse', 'fan.back_hint')}
         </div>
@@ -839,7 +905,7 @@ export class QuietLuxeFanCard extends QlBaseCard {
         .closeLabel=${t(locale, 'common.close')}
         @ql-sheet-close=${this.closeSheet}
       >
-        <div class="readout">
+        <div class="readout" role="status">
           <span class="numeral-xl">${String(this.draftStep)}</span>
           <span class="caption">${t(locale, 'fan.of')} ${String(steps)}</span>
         </div>
@@ -938,7 +1004,7 @@ export class QuietLuxeFanCard extends QlBaseCard {
           @click=${this.onMoreInfo}
         >
           <span class="eyebrow ql-clamp-1">${eyebrow}</span>
-          <span class="numeral">${formatSensorValue('temp', temperature)}</span>
+          <span class="numeral">${formatSensorValue('temp', temperature, locale)}</span>
         </button>
         ${readings.length === 0
           ? nothing
@@ -975,6 +1041,7 @@ export class QuietLuxeFanCard extends QlBaseCard {
         no2: config.no2_entity,
       },
       (entityId) => this.entity(entityId),
+      this.locale(),
       resolveThresholds(config.air_quality_thresholds),
     );
   }

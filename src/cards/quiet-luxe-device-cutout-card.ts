@@ -12,6 +12,7 @@ import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_HALF, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 export interface DeviceCutoutCardConfig {
   readonly type: string;
@@ -66,15 +67,36 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
+      /* Measured 157x22: an invisible layer over the header button reaches
+         the 56px minimum. Nothing below it is independently interactive
+         (the cutout image and status line are both read-only), so growing
+         past the button's own footprint carries no risk of stealing a tap
+         meant for something else. */
+      .ql-info {
+        position: relative;
+      }
+      .ql-info::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: var(--ql-touch-min, 56px);
+        transform: translateY(-50%);
+      }
+      /* A fixed height (not max-height) reserves the box before the browser
+         knows the image's intrinsic size, so the card doesn't shift on load.
+         object-fit: contain keeps arbitrary device-photo aspect ratios
+         undistorted inside it. */
       img.cutout {
         display: block;
         width: 100%;
-        max-height: 96px;
+        height: 96px;
         object-fit: contain;
         margin: var(--ql-space-m, 12px) 0;
       }
@@ -83,8 +105,8 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
         align-items: center;
         gap: var(--ql-space-s, 8px);
         margin: var(--ql-space-s, 8px) 0 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
     `,
   ];
@@ -116,7 +138,13 @@ export class QuietLuxeDeviceCutoutCard extends QlBaseCard {
           <span class="eyebrow ql-clamp-2">${name}</span>
         </button>
         ${showImage
-          ? html`<img class="cutout" src=${config.image} alt="" @error=${this.onImageError} />`
+          ? html`<img
+              class="cutout"
+              src=${config.image}
+              alt=""
+              loading="lazy"
+              @error=${this.onImageError}
+            />`
           : nothing}
         <p class="status"><ql-status-dot status=${dot}></ql-status-dot>${statusText}</p>
       </div>

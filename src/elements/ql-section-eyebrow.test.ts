@@ -16,7 +16,7 @@ describe('ql-section-eyebrow', () => {
     const cssText = QlSectionEyebrow.styles.toString();
     expect(cssText).toContain('text-transform: uppercase');
     expect(cssText).toContain('letter-spacing: 0.14em');
-    expect(cssText).toContain('var(--ql-ink-muted, #8c8578)');
-    expect(cssText).toContain('var(--ql-accent-champagne, #b08d57)');
+    expect(cssText).toContain('var(--ql-ink-muted, #736d63)');
+    expect(cssText).toContain('var(--ql-accent-champagne-text, #846a41)');
   });
 });

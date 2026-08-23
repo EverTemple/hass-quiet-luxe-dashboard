@@ -10,12 +10,14 @@ import {
 import { live } from 'lit/directives/live.js';
 import '../elements/ql-status-dot';
 import '../elements/ql-toggle';
+import { formatInteger } from '../i18n/format-number';
 import { t } from '../i18n/translate';
 import { CAR_BODY_PATHS, CAR_VIEWBOX, CAR_WHEELS, type CarBrand } from './car-silhouettes';
 import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
 import { CONFIRM_TIMEOUT_MS } from './quiet-luxe-climate-card';
 import { registerCard } from './register';
+import { TYPE } from '../tokens/type';
 
 const BRANDS: ReadonlyArray<CarBrand> = ['bmw', 'audi', 'liauto'];
 
@@ -81,7 +83,7 @@ export class QuietLuxeCarCard extends QlBaseCard {
       return '—';
     }
     const value = Number(this.entity(entityId)?.state);
-    return Number.isFinite(value) ? `${Math.round(value)}%` : '—';
+    return Number.isFinite(value) ? `${formatInteger(value, this.locale())}%` : '—';
   }
 
   private rangeValue(): string | undefined {
@@ -95,7 +97,7 @@ export class QuietLuxeCarCard extends QlBaseCard {
     const entity = this.entity(entityId);
     const value = Number(entity?.state);
     const unit = (entity?.attributes.unit_of_measurement as string | undefined) ?? 'km';
-    return Number.isFinite(value) ? `${Math.round(value)} ${unit}` : '—';
+    return Number.isFinite(value) ? `${formatInteger(value, this.locale())} ${unit}` : '—';
   }
 
   /**
@@ -138,8 +140,8 @@ export class QuietLuxeCarCard extends QlBaseCard {
       .eyebrow {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.eyebrow}
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -159,12 +161,14 @@ export class QuietLuxeCarCard extends QlBaseCard {
         margin: 0;
       }
       .stat .value {
-        font: 300 26px/30px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.numeral}
         letter-spacing: 0.01em;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
       }
       .stat .label {
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
       .row {
         display: flex;
@@ -177,17 +181,17 @@ export class QuietLuxeCarCard extends QlBaseCard {
         display: inline-flex;
         align-items: center;
         gap: var(--ql-space-s, 8px);
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
       }
       .confirm {
         margin: var(--ql-space-xs, 4px) 0 0;
-        color: var(--ql-status-warn, #c08552);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-status-warn-text, #91643e);
+        ${TYPE.caption}
       }
       .caption {
         margin: var(--ql-space-s, 8px) 0 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
     `,
   ];

@@ -80,6 +80,7 @@ export function renderClimateDial(options: ClimateDialOptions): TemplateResult {
         size=${options.size}
         mode=${options.mode}
         kind=${setpoints.kind}
+        .locale=${locale}
         .min=${scale.min}
         .max=${scale.max}
         .step=${scale.step}

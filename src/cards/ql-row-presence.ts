@@ -8,6 +8,7 @@ import {
 import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
+import { TYPE } from '../tokens/type';
 
 export interface PresenceRowConfig {
   readonly type: string;
@@ -75,15 +76,15 @@ export class QlRowPresence extends QlBaseCard {
         font: 500 10px/1 var(--ql-font-body, Outfit, sans-serif);
       }
       .name {
-        color: var(--ql-accent-champagne, #b08d57);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-accent-champagne-text, #846a41);
+        ${TYPE.caption}
       }
       .state {
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
       .person.away .name {
-        color: var(--ql-ink-muted, #8c8578);
+        color: var(--ql-ink-muted, #736d63);
       }
     `,
   ];
@@ -119,7 +120,7 @@ export class QlRowPresence extends QlBaseCard {
               @click=${this.onMoreInfo}
             >
               ${picture !== undefined
-                ? html`<img class="avatar" src=${picture} alt=${name} />`
+                ? html`<img class="avatar" src=${picture} alt=${name} loading="lazy" />`
                 : html`<span class="initial" aria-hidden="true"
                     >${name.charAt(0).toUpperCase()}</span
                   >`}

@@ -1,5 +1,6 @@
 import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } from 'lit';
 import { dysonIcon, type DysonIconName } from './dyson-icons';
+import { TYPE } from '../tokens/type';
 
 export type QlDialState = 'off' | 'on' | 'auto';
 
@@ -75,8 +76,8 @@ export class QlDialButton extends LitElement {
       height: 64px;
       border-radius: var(--ql-radius-chip, 999px);
       border: 1px solid var(--ql-surface-border, #e4dccb);
-      background: var(--ql-surface-card, #fdfbf6);
-      color: var(--ql-ink-muted, #8c8578);
+      background: var(--ql-surface-inset, #fdfbf6);
+      color: var(--ql-ink-muted, #736d63);
       transition:
         background 200ms ease,
         border-color 200ms ease,
@@ -86,13 +87,13 @@ export class QlDialButton extends LitElement {
     /* The state word is set in the caption face so a numeral ("5", "90°") and a
        word ("AUTO") share one baseline inside the dial. */
     .word {
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
       font-variant-numeric: tabular-nums;
     }
     .label {
-      color: var(--ql-ink-muted, #8c8578);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
       text-align: center;
       width: 100%;
@@ -110,7 +111,7 @@ export class QlDialButton extends LitElement {
     }
     :host([state='auto']) .dial {
       border: 1.5px solid var(--ql-accent-champagne, #b08d57);
-      color: var(--ql-accent-champagne, #b08d57);
+      color: var(--ql-accent-champagne-text, #846a41);
     }
     :host([state='on']) .label,
     :host([state='auto']) .label {
@@ -144,14 +145,19 @@ export class QlDialButton extends LitElement {
   }
 
   protected override render(): TemplateResult {
-    // The dial's own state word is decorative once the label and pressed state
-    // are announced, so the accessible name stays "Oscillation", not "90° Oscillation".
+    // aria-pressed only ever says on/off, so it can't carry what the state
+    // word shows sighted users — 45° vs 90° oscillation, a 2h vs 4h timer are
+    // otherwise indistinguishable to assistive tech. The state word rides
+    // along in the accessible name instead of being silently overridden by
+    // the label alone.
     const pressed = this.state === 'off' ? 'false' : 'true';
+    const accessibleLabel =
+      this.stateWord === '' || this.label === '' ? this.label : `${this.label}, ${this.stateWord}`;
     return html`
       <button
         type="button"
         aria-pressed=${pressed}
-        aria-label=${this.label === '' ? nothing : this.label}
+        aria-label=${accessibleLabel === '' ? nothing : accessibleLabel}
         ?disabled=${this.disabled}
         @click=${this.onClick}
       >

@@ -9,6 +9,8 @@ import {
   type TemplateResult,
 } from 'lit';
 import { snapToStep } from '../cards/supported-features';
+import { formatFixed, formatInteger } from '../i18n/format-number';
+import type { Locale } from '../i18n/types';
 
 /**
  * How long the stepper waits after the last press before committing. Tapping
@@ -57,6 +59,7 @@ export class QlStepper extends LitElement {
     decreaseLabel: { attribute: 'decrease-label', type: String },
     increaseLabel: { attribute: 'increase-label', type: String },
     disabled: { type: Boolean, reflect: true },
+    locale: { type: String },
     pending: { state: true },
   };
 
@@ -69,6 +72,8 @@ export class QlStepper extends LitElement {
   declare decreaseLabel: string;
   declare increaseLabel: string;
   declare disabled: boolean;
+  /** Session locale for the numeral's decimal separator; defaults to `en` for a caller that has none. */
+  declare locale: Locale;
   declare pending?: number;
 
   private commitTimer?: number;
@@ -84,6 +89,7 @@ export class QlStepper extends LitElement {
     this.decreaseLabel = 'Decrease';
     this.increaseLabel = 'Increase';
     this.disabled = false;
+    this.locale = 'en';
   }
 
   override disconnectedCallback(): void {
@@ -124,7 +130,7 @@ export class QlStepper extends LitElement {
       padding: 0;
       border-radius: var(--ql-radius-chip, 999px);
       border: 1px solid var(--ql-surface-border, #e4dccb);
-      background: var(--ql-surface-card, #fdfbf6);
+      background: var(--ql-surface-inset, #fdfbf6);
       color: var(--ql-ink-primary, #2b2620);
       cursor: pointer;
       transition:
@@ -151,7 +157,7 @@ export class QlStepper extends LitElement {
        keeps its full size so the row stays symmetrical. */
     button:disabled {
       border-color: transparent;
-      color: var(--ql-ink-muted, #8c8578);
+      color: var(--ql-ink-muted, #736d63);
       cursor: default;
     }
     /* A stepper whose entity is not answering dims as a whole, which is a
@@ -173,7 +179,7 @@ export class QlStepper extends LitElement {
     }
     /* Uncommitted intent reads champagne until the device confirms it. */
     .readout.pending {
-      color: var(--ql-accent-champagne, #b08d57);
+      color: var(--ql-accent-champagne-text, #846a41);
     }
     @media (prefers-reduced-motion: reduce) {
       button,
@@ -224,7 +230,9 @@ export class QlStepper extends LitElement {
   private readout(): string {
     const value = this.shown();
     const fractional = this.step > 0 && !Number.isInteger(this.step);
-    const text = fractional ? value.toFixed(1) : String(Math.round(value * 10) / 10);
+    const text = fractional
+      ? formatFixed(value, this.locale, 1)
+      : formatInteger(value, this.locale);
     return `${text}${this.unit}`;
   }
 

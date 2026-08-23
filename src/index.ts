@@ -384,5 +384,5 @@ injectFontStylesheet(document, import.meta.url);
 console.info(
   `%c QUIET LUXE %c v${version} `,
   'background:#B08D57;color:#FDFBF6;font-weight:500',
-  'color:#8C8578',
+  'color:#736D63',
 );

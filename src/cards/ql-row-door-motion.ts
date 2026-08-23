@@ -12,6 +12,7 @@ import type { QlStatus } from '../elements/ql-status-dot';
 import { t } from '../i18n/translate';
 import { contentGrid, COLUMNS_FULL, type QlGridOptions } from './grid-options';
 import { QlBaseCard } from './ql-base-card';
+import { TYPE } from '../tokens/type';
 
 export type DoorMotionKind = 'door' | 'motion';
 
@@ -112,13 +113,13 @@ export class QlRowDoorMotion extends QlBaseCard {
         margin: 0;
         flex: 1 1 auto;
         min-width: 0;
-        font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+        ${TYPE.body}
       }
       .state {
         display: block;
         margin: 0;
-        color: var(--ql-ink-muted, #8c8578);
-        font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+        color: var(--ql-ink-muted, #736d63);
+        ${TYPE.caption}
       }
     `,
   ];
