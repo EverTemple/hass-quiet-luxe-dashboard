@@ -35,6 +35,18 @@ export class QlToggle extends LitElement {
       padding: 0;
       transition: background 200ms ease;
     }
+    /* The track stays the drawn 44×26 switch; an invisible ::before extends
+       the actual hit area to the shared touch minimum, matching the width so
+       it never reaches sideways into whatever sits next to the toggle. */
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 44px;
+      height: var(--ql-touch-min, 56px);
+      transform: translate(-50%, -50%);
+    }
     button::after {
       content: '';
       position: absolute;
@@ -43,7 +55,7 @@ export class QlToggle extends LitElement {
       width: 22px;
       height: 22px;
       border-radius: var(--ql-radius-chip, 999px);
-      background: var(--ql-ink-muted, #8c8578);
+      background: var(--ql-ink-muted, #736d63);
       transition:
         transform 200ms ease,
         background 200ms ease;
@@ -65,6 +77,12 @@ export class QlToggle extends LitElement {
       opacity: 0.5;
       cursor: default;
     }
+    @media (prefers-reduced-motion: reduce) {
+      button,
+      button::after {
+        transition: none;
+      }
+    }
   `;
 
   private onClick(): void {
@@ -84,6 +102,7 @@ export class QlToggle extends LitElement {
   protected override render(): TemplateResult {
     return html`
       <button
+        type="button"
         role="switch"
         aria-checked=${String(this.checked)}
         aria-label=${this.label === '' ? nothing : this.label}

@@ -116,6 +116,10 @@ describe('ql-header-home', () => {
     expect(el.shadowRoot?.querySelector<HTMLImageElement>('img.avatar')?.getAttribute('src')).toBe(
       '/api/image/steven.png',
     );
+    /* Eager on purpose. This row is in the Home header, above the fold at every
+       breakpoint, so deferring it only delays first paint — lazy-loading is for
+       the room photos and camera frames further down the page. */
+    expect(el.shadowRoot?.querySelector('img.avatar')?.hasAttribute('loading')).toBe(false);
     el.remove();
   });
 

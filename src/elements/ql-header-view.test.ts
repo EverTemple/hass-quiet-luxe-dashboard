@@ -34,7 +34,21 @@ describe('ql-header-view', () => {
     const back = query(header, 'button.back');
     expect(back?.textContent?.trim()).toBe('Home');
     expect(back?.querySelector('svg')).not.toBeNull();
-    expect(back?.getAttribute('aria-label')).toBe('Back');
+    expect(back?.getAttribute('type')).toBe('button');
+  });
+
+  /*
+   * WCAG 2.5.3 Label in Name: the old aria-label="Back" overrode the visible
+   * "Home" text, so a speech-input user saying what they read would not match
+   * anything. No aria-label at all means the composed content — the
+   * aria-hidden arrow contributes nothing — names the button, so the
+   * accessible name is exactly the visible text.
+   */
+  it('carries no aria-label that would override the visible label as the accessible name', async () => {
+    const header = await makeHeader({ backLabel: 'Living Room' });
+    const back = query(header, 'button.back');
+    expect(back?.hasAttribute('aria-label')).toBe(false);
+    expect(back?.textContent?.trim()).toBe('Living Room');
   });
 
   it('falls back to the localised Home label when none is given', async () => {
@@ -65,6 +79,7 @@ describe('ql-header-view', () => {
     header.addEventListener('ql-action', () => (fired += 1));
     const action = query(header, 'button.action');
     expect(action?.textContent?.trim()).toContain('All climates');
+    expect(action?.getAttribute('type')).toBe('button');
     action?.click();
     expect(fired).toBe(1);
   });

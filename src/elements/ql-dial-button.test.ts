@@ -19,7 +19,7 @@ describe('ql-dial-button', () => {
   });
 
   it('renders a real button carrying the label as its accessible name', async () => {
-    const el = await mount({ label: 'Oscillation', stateWord: '90°', icon: 'oscillation' });
+    const el = await mount({ label: 'Oscillation', icon: 'oscillation' });
     const button = el.shadowRoot?.querySelector('button');
     expect(button?.tagName).toBe('BUTTON');
     expect(button?.getAttribute('type')).toBe('button');
@@ -27,17 +27,22 @@ describe('ql-dial-button', () => {
     el.remove();
   });
 
-  /** The state word is decorative: "90° Oscillation" would be read out twice. */
-  it('keeps the state word out of the accessible name but shows it in the dial', async () => {
+  /* aria-pressed only ever says on/off, so 45° vs 90° oscillation (or a 2h vs
+     4h timer) is otherwise indistinguishable to assistive tech — the state
+     word has to ride along in the accessible name. */
+  it('folds the state word into the accessible name, not just the visible dial', async () => {
     const el = await mount({ label: 'Oscillation', stateWord: '90°' });
     expect(el.shadowRoot?.querySelector('.word')?.textContent?.trim()).toBe('90°');
-    expect(el.shadowRoot?.querySelector('button')?.getAttribute('aria-label')).toBe('Oscillation');
+    expect(el.shadowRoot?.querySelector('button')?.getAttribute('aria-label')).toBe(
+      'Oscillation, 90°',
+    );
     el.remove();
   });
 
   it('omits the state word entirely when there is none', async () => {
     const el = await mount({ label: 'More', icon: 'more' });
     expect(el.shadowRoot?.querySelector('.word')).toBeNull();
+    expect(el.shadowRoot?.querySelector('button')?.getAttribute('aria-label')).toBe('More');
     el.remove();
   });
 
@@ -95,10 +100,13 @@ describe('ql-dial-button', () => {
 
   it('draws every state from --ql-* tokens', () => {
     const cssText = QlDialButton.styles.toString();
-    expect(cssText).toContain('var(--ql-surface-card, #fdfbf6)');
+    expect(cssText).toContain('var(--ql-surface-inset, #fdfbf6)');
     expect(cssText).toContain('var(--ql-surface-border, #e4dccb)');
+    // The lit/auto fill and stroke keep the base champagne; only the state word
+    // it prints on top moves to the 4.5:1 text sibling.
     expect(cssText).toContain('var(--ql-accent-champagne, #b08d57)');
-    expect(cssText).toContain('var(--ql-ink-muted, #8c8578)');
+    expect(cssText).toContain('var(--ql-accent-champagne-text, #846a41)');
+    expect(cssText).toContain('var(--ql-ink-muted, #736d63)');
   });
 });
 

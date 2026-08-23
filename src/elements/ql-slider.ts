@@ -5,6 +5,11 @@ import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } f
  * Wraps a native <input type="range"> so arrow/Home/End keys work for free.
  * Emits `ql-input` {value} while dragging and `ql-change` {value} on commit;
  * never calls hass. Fill is painted via the --ql-slider-fill host property.
+ *
+ * The drawn track/thumb are 16px tall, well under the shared touch minimum —
+ * padding plus a matching negative margin gives the input's own pointer
+ * target the full `--ql-touch-min` height without growing the visible strip
+ * or the layout space this element occupies (see the `input` rule below).
  */
 export class QlSlider extends LitElement {
   static override properties = {
@@ -37,10 +42,21 @@ export class QlSlider extends LitElement {
     :host {
       display: block;
     }
+    /* A native range input's whole box is its pointer/drag target, not just
+       the painted track — so the touch minimum comes from padding around the
+       16px content box, kept centred (::-webkit-slider-runnable-track and its
+       Firefox equivalent stay 4px, positioned by the browser at the padded
+       box's centre either way). The matching negative margin pulls that extra
+       padding back out of the surrounding layout, so nothing downstream of
+       this element grows — only the invisible hit area does. touch-action is
+       left at its default so a vertical scroll gesture over the control still
+       passes through as a scroll rather than being captured as a drag. */
     input {
+      box-sizing: content-box;
       width: 100%;
       height: 16px;
-      margin: 0;
+      padding: calc((var(--ql-touch-min, 56px) - 16px) / 2) 0;
+      margin: calc(-1 * (var(--ql-touch-min, 56px) - 16px) / 2) 0;
       -webkit-appearance: none;
       appearance: none;
       background: transparent;

@@ -1,4 +1,5 @@
 import { css, html, LitElement, type CSSResult, type TemplateResult } from 'lit';
+import { TYPE } from '../tokens/type';
 
 export type QlSheetButtonEmphasis = 'primary' | 'secondary';
 
@@ -44,7 +45,7 @@ export class QlSheetButton extends LitElement {
       border-radius: var(--ql-radius-chip, 999px);
       background: transparent;
       color: var(--ql-ink-primary, #2b2620);
-      font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.title}
       cursor: pointer;
       transition:
         background 200ms ease,

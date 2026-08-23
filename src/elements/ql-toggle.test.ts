@@ -20,10 +20,31 @@ describe('ql-toggle', () => {
   it('renders a native button with role=switch and aria-checked', async () => {
     const el = await mount({ checked: true, label: 'Motion detection' });
     const button = el.shadowRoot?.querySelector('button');
+    expect(button?.getAttribute('type')).toBe('button');
     expect(button?.getAttribute('role')).toBe('switch');
     expect(button?.getAttribute('aria-checked')).toBe('true');
     expect(button?.getAttribute('aria-label')).toBe('Motion detection');
     el.remove();
+  });
+
+  it('extends the hit area to the touch minimum without growing the 44×26 track', () => {
+    const cssText = QlToggle.styles.toString();
+    const trackRule = /button \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(trackRule).toContain('width: 44px');
+    expect(trackRule).toContain('height: 26px');
+    const hitAreaRule = /button::before \{([^}]*)\}/.exec(cssText)?.[1] ?? '';
+    expect(hitAreaRule).toContain('width: 44px');
+    expect(hitAreaRule).toContain('height: var(--ql-touch-min, 56px)');
+  });
+
+  it('disables the track and thumb transitions under reduced motion', () => {
+    const cssText = QlToggle.styles.toString();
+    const start = cssText.indexOf('@media (prefers-reduced-motion: reduce)');
+    expect(start).toBeGreaterThan(-1);
+    const reduced = cssText.slice(start);
+    expect(reduced).toContain('button,');
+    expect(reduced).toContain('button::after');
+    expect(reduced).toContain('transition: none');
   });
 
   it('click flips checked and emits ql-change with the new value', async () => {

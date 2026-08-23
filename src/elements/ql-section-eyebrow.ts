@@ -1,4 +1,5 @@
 import { css, html, LitElement, type CSSResult, type TemplateResult } from 'lit';
+import { TYPE } from '../tokens/type';
 
 /**
  * Section eyebrow (Figma `section/eyebrow`): letterspaced uppercase micro-label
@@ -25,14 +26,14 @@ export class QlSectionEyebrow extends LitElement {
       gap: var(--ql-space-s, 8px);
     }
     .label {
-      color: var(--ql-ink-muted, #8c8578);
-      font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.eyebrow}
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }
     ::slotted(*) {
-      color: var(--ql-accent-champagne, #b08d57);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-accent-champagne-text, #846a41);
+      ${TYPE.caption}
       text-decoration: none;
     }
   `;

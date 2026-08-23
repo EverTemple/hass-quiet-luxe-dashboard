@@ -1,4 +1,5 @@
 import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } from 'lit';
+import { TYPE } from '../tokens/type';
 
 export type QlChipVariant = 'device' | 'scene';
 export type QlChipEmphasis = 'primary' | 'secondary';
@@ -37,6 +38,7 @@ export class QlChip extends LitElement {
       display: inline-flex;
     }
     button {
+      position: relative;
       display: inline-flex;
       align-items: center;
       gap: var(--ql-space-xs, 4px);
@@ -44,13 +46,29 @@ export class QlChip extends LitElement {
       padding: 4px var(--ql-space-m, 12px);
       border-radius: var(--ql-radius-chip, 999px);
       border: 1px solid var(--ql-surface-border, #e4dccb);
-      background: var(--ql-surface-card, #fdfbf6);
+      background: var(--ql-surface-inset, #fdfbf6);
       color: var(--ql-ink-primary, #2b2620);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.caption}
       cursor: pointer;
       transition:
         background 200ms ease,
         color 200ms ease;
+    }
+    /* The default and scene pills paint at 28px/36px — under the touch
+       minimum, and this is what a room card's own chip row taps. An
+       invisible ::before extends the hit area to --ql-touch-min without
+       growing the painted pill. Width stays at the chip's own 100% (never
+       the row's), so it can never reach into the small gap that separates
+       wrapped chips from their neighbours. Harmless, same-size no-op on a
+       [touch] chip, which already clears the floor via min-height below. */
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: var(--ql-touch-min, 56px);
+      transform: translateY(-50%);
     }
     /* Label on a filled chip reads against the base, like the primary scene
        chip. --ql-surface-card is a near-transparent white in dark mode, which
@@ -74,11 +92,16 @@ export class QlChip extends LitElement {
       min-height: var(--ql-touch-min, 56px);
       padding: var(--ql-space-s, 8px) var(--ql-space-l, 16px);
     }
+    @media (prefers-reduced-motion: reduce) {
+      button {
+        transition: none;
+      }
+    }
   `;
 
   protected override render(): TemplateResult {
     return html`
-      <button aria-pressed=${this.variant === 'device' ? String(this.active) : nothing}>
+      <button type="button" aria-pressed=${this.variant === 'device' ? String(this.active) : nothing}>
         <slot name="icon"></slot><slot></slot>
       </button>
     `;

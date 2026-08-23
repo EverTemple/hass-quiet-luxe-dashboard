@@ -2,6 +2,7 @@ import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } f
 import { t } from '../i18n/translate';
 import type { Locale } from '../i18n/types';
 import type { QlHeaderVariant } from './ql-header-home';
+import { TYPE } from '../tokens/type';
 
 /**
  * View header (Figma `header/view`, 99:2442) — the chrome every non-Home view
@@ -88,13 +89,13 @@ export class QlHeaderView extends LitElement {
     }
     h1 {
       margin: 0;
-      font: 400 34px/40px var(--ql-font-display, Marcellus, serif);
+      ${TYPE.display}
       letter-spacing: 0.04em;
     }
     .subtitle {
       margin: 0;
-      color: var(--ql-ink-muted, #8c8578);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
     }
     button {
@@ -118,10 +119,10 @@ export class QlHeaderView extends LitElement {
       border: none;
       border-radius: 0;
       color: var(--ql-ink-primary, #2b2620);
-      font: 500 16px/22px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.title}
     }
     .back:hover {
-      color: var(--ql-accent-champagne, #b08d57);
+      color: var(--ql-accent-champagne-text, #846a41);
     }
     .back-icon {
       display: flex;
@@ -138,8 +139,8 @@ export class QlHeaderView extends LitElement {
     .action {
       padding: var(--ql-space-s, 8px) var(--ql-space-m, 12px);
       background: none;
-      color: var(--ql-accent-champagne, #b08d57);
-      font: 400 14px/20px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-accent-champagne-text, #846a41);
+      ${TYPE.body}
     }
     button:focus-visible {
       outline: 2px solid var(--ql-accent-champagne, #b08d57);
@@ -164,10 +165,16 @@ export class QlHeaderView extends LitElement {
 
   private renderBack(): TemplateResult {
     const label = this.backLabel === '' ? t(this.locale, 'view.home') : this.backLabel;
+    // No aria-label here: the old "Back" overrode the composed content and
+    // left the accessible name silent on what the visible word said (WCAG
+    // 2.5.3, Label in Name — a speech-input user saying what they see, "Home",
+    // would not match). Dropping it lets the icon (aria-hidden, so it
+    // contributes nothing) plus the label span name the button, so the
+    // accessible name is exactly the visible text.
     return html`
-      <button class="back" aria-label=${t(this.locale, 'common.back')} @click=${this.onBack}>
+      <button type="button" class="back" @click=${this.onBack}>
         <span class="back-icon">
-          <svg viewBox="0 0 16 10" aria-hidden="true" fill="none">
+          <svg viewBox="0 0 16 10" aria-hidden="true" focusable="false" fill="none">
             <path
               d="M 16 5 L 0 5 M 0 5 L 5 0 M 0 5 L 5 10"
               stroke="currentColor"
@@ -187,7 +194,7 @@ export class QlHeaderView extends LitElement {
       return nothing;
     }
     return html`
-      <button class="action" @click=${this.onAction}>${this.actionLabel} →</button>
+      <button type="button" class="action" @click=${this.onAction}>${this.actionLabel} →</button>
     `;
   }
 

@@ -1,11 +1,11 @@
-import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } from 'lit';
+import { css, html, LitElement, type CSSResult, type TemplateResult } from 'lit';
+import { TYPE } from '../tokens/type';
 
 export interface QlSegmentOption {
   readonly value: string;
   readonly label: string;
-  /** Disabled segments render inert with a hint tooltip (native title). */
+  /** Disabled segments render inert. */
   readonly disabled?: boolean;
-  readonly hint?: string;
 }
 
 /**
@@ -45,19 +45,38 @@ export class QlSegmented extends LitElement {
       padding: 2px;
       border-radius: var(--ql-radius-chip, 999px);
       border: 1px solid var(--ql-surface-border, #e4dccb);
-      background: var(--ql-surface-card, #fdfbf6);
+      background: var(--ql-surface-inset, #fdfbf6);
     }
     button {
+      position: relative;
       border: 0;
       background: transparent;
-      color: var(--ql-ink-muted, #8c8578);
+      color: var(--ql-ink-muted, #736d63);
       padding: 4px var(--ql-space-m, 12px);
       border-radius: var(--ql-radius-chip, 999px);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.caption}
       cursor: pointer;
       transition:
         background 200ms ease,
         color 200ms ease;
+    }
+    /* At compact size the pill paints at 24px — well under the touch
+       minimum, and the most-tapped choice on cards like the Home view's
+       Tasks/Agenda switch. An invisible ::before extends the hit area to
+       --ql-touch-min without growing the painted segment. Width stays at
+       the button's own 100% (never the group's), so it can never reach past
+       a 2px gap into the segment next to it — segments sit directly
+       adjacent, and a wider overlay would fire the wrong option. Harmless,
+       same-size no-op at the touch size, which already clears the floor via
+       min-height below. */
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: var(--ql-touch-min, 56px);
+      transform: translateY(-50%);
     }
     button[aria-checked='true'] {
       background: var(--ql-ink-primary, #2b2620);
@@ -144,16 +163,23 @@ export class QlSegmented extends LitElement {
   }
 
   protected override render(): TemplateResult {
+    // Exactly one button must always be tabbable, or the group falls out of
+    // the tab order the moment the bound value matches none of the options.
+    // The fallback skips disabled options — landing tab focus on an inert
+    // segment would be its own dead end.
+    const selectedIndex = this.options.findIndex((option) => option.value === this.value);
+    const fallbackIndex = this.options.findIndex((option) => option.disabled !== true);
+    const tabbableIndex = selectedIndex !== -1 ? selectedIndex : Math.max(fallbackIndex, 0);
     return html`
       <div class="group" role="radiogroup" aria-label=${this.label} @keydown=${this.onKeydown}>
         ${this.options.map(
-          (option) => html`
+          (option, index) => html`
             <button
+              type="button"
               role="radio"
               aria-checked=${String(option.value === this.value)}
-              tabindex=${option.value === this.value ? 0 : -1}
+              tabindex=${index === tabbableIndex ? 0 : -1}
               ?disabled=${option.disabled === true}
-              title=${option.hint ?? nothing}
               @click=${(): void => this.select(option)}
             >
               ${option.label}

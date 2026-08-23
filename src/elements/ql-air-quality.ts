@@ -1,6 +1,7 @@
 import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } from 'lit';
 import type { AirBand, AirReading } from '../cards/air-quality';
 import { summaryBand } from '../cards/air-quality';
+import { TYPE } from '../tokens/type';
 
 /**
  * Chrome-free multi-sensor air-quality readout (Figma `readout/air-quality`,
@@ -65,10 +66,10 @@ export class QlAirQuality extends LitElement {
       width: 8px;
       height: 8px;
       border-radius: var(--ql-radius-chip, 999px);
-      background: var(--ql-air-band, var(--ql-ink-muted, #8c8578));
+      background: var(--ql-air-band, var(--ql-ink-muted, #736d63));
     }
     .band {
-      color: var(--ql-air-band, var(--ql-ink-muted, #8c8578));
+      color: var(--ql-air-band-text, var(--ql-ink-muted, #736d63));
     }
     /* Two cells across while there is room, one when there is not. Each cell is
        a fixed 78px so the values line up into a column even when the labels
@@ -89,14 +90,14 @@ export class QlAirQuality extends LitElement {
     }
     .band,
     .cell {
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
     }
     .name {
-      color: var(--ql-ink-muted, #8c8578);
+      color: var(--ql-ink-muted, #736d63);
     }
     .value {
-      color: var(--ql-air-band, var(--ql-ink-muted, #8c8578));
+      color: var(--ql-air-band-text, var(--ql-ink-muted, #736d63));
       font-variant-numeric: tabular-nums;
     }
     @container (max-width: 223px) {
@@ -119,7 +120,26 @@ export class QlAirQuality extends LitElement {
       case 'very-poor':
         return 'var(--ql-status-alert, #a85b4e)';
       case 'fair':
-        return 'var(--ql-ink-muted, #8c8578)';
+        return 'var(--ql-ink-muted, #736d63)';
+    }
+  }
+
+  /**
+   * The same bands as text. The dot only has to clear the 3:1 non-text floor and
+   * keeps the base hue; the band word and the values are small text and need
+   * 4.5:1, which is what the `*-text` siblings carry. `alert` has no sibling —
+   * it already clears the text floor in both modes.
+   */
+  private static tintText(band: AirBand): string {
+    switch (band) {
+      case 'good':
+        return 'var(--ql-status-good-text, #67715b)';
+      case 'poor':
+        return 'var(--ql-status-warn-text, #91643e)';
+      case 'very-poor':
+        return 'var(--ql-status-alert, #a85b4e)';
+      case 'fair':
+        return 'var(--ql-ink-muted, #736d63)';
     }
   }
 
@@ -138,7 +158,10 @@ export class QlAirQuality extends LitElement {
         ${overall === undefined
           ? nothing
           : html`
-              <span class="summary" style=${`--ql-air-band:${QlAirQuality.tint(overall)}`}>
+              <span
+                class="summary"
+                style=${`--ql-air-band:${QlAirQuality.tint(overall)};--ql-air-band-text:${QlAirQuality.tintText(overall)}`}
+              >
                 <span class="dot" aria-hidden="true"></span>
                 <span class="band" data-band=${overall}>${this.bandLabel}</span>
               </span>
@@ -148,7 +171,9 @@ export class QlAirQuality extends LitElement {
             (reading) => html`
               <span class="cell" data-pollutant=${reading.id}>
                 <span class="name">${reading.label}</span>
-                <span class="value" style=${`--ql-air-band:${QlAirQuality.tint(reading.band)}`}
+                <span
+                  class="value"
+                  style=${`--ql-air-band-text:${QlAirQuality.tintText(reading.band)}`}
                   >${reading.text}</span
                 >
               </span>

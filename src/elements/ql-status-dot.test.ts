@@ -22,6 +22,6 @@ describe('ql-status-dot', () => {
     expect(cssText).toContain("var(--ql-status-good, #7e8b6f)");
     expect(cssText).toContain("var(--ql-status-warn, #c08552)");
     expect(cssText).toContain("var(--ql-status-alert, #a85b4e)");
-    expect(cssText).toContain("var(--ql-ink-muted, #8c8578)");
+    expect(cssText).toContain("var(--ql-ink-muted, #736d63)");
   });
 });

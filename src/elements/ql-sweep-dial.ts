@@ -12,6 +12,15 @@ import {
   type SweepHandle,
 } from '../cards/fan-capabilities';
 import { ANGLE_MAX, ANGLE_MIN, type OscillationAngle } from '../cards/supported-features';
+import { TYPE } from '../tokens/type';
+
+/**
+ * Page Up/Down move five times the arrow step — the same multiplier the
+ * climate ring dial uses for its own coarse jump (`DIAL_COARSE_MULTIPLIER`)
+ * — so the 350°-wide track takes about a dozen presses to cross instead of
+ * seventy.
+ */
+const SWEEP_PAGE_STEP = SWEEP_COARSE_STEP * 5;
 
 /** Figma `modal/oscillation-v2` dial stage: 372x284, centre (186,162), track r=120. */
 const STAGE_W = 372;
@@ -107,6 +116,7 @@ export class QlSweepDial extends LitElement {
     frontLabel: { attribute: 'front-label', type: String },
     dragging: { type: String, reflect: true },
     minLocked: { attribute: 'min-locked', type: Boolean, reflect: true },
+    disabled: { type: Boolean, reflect: true },
   };
 
   declare angle: OscillationAngle;
@@ -117,6 +127,7 @@ export class QlSweepDial extends LitElement {
   /** Reflected so the sheet and the styles can both see the live gesture. */
   declare dragging?: SweepDrag;
   declare minLocked: boolean;
+  declare disabled: boolean;
 
   /**
    * The bisector the last pointer sample resolved to, unwrapped. Held across
@@ -133,6 +144,7 @@ export class QlSweepDial extends LitElement {
     this.aimLabel = 'Sweep direction';
     this.frontLabel = 'Front';
     this.minLocked = false;
+    this.disabled = false;
   }
 
   static override styles: CSSResult = css`
@@ -154,8 +166,8 @@ export class QlSweepDial extends LitElement {
       height: 100%;
     }
     .front {
-      fill: var(--ql-ink-muted, #8c8578);
-      font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+      fill: var(--ql-ink-muted, #736d63);
+      ${TYPE.eyebrow}
       letter-spacing: 0.14em;
       text-transform: uppercase;
     }
@@ -169,7 +181,7 @@ export class QlSweepDial extends LitElement {
        The shipped v1 bound this to accent/champagne and rendered grey from a
        stale literal — the grey was right and the binding was not. */
     .wedge {
-      fill: var(--ql-ink-muted, #8c8578);
+      fill: var(--ql-ink-muted, #736d63);
     }
     /* The whole wedge is the aim target. It is the only large thing on the
        stage, so grabbing "the pie" needs no instruction. */
@@ -188,7 +200,7 @@ export class QlSweepDial extends LitElement {
       stroke-linecap: round;
     }
     .aim-line {
-      stroke: var(--ql-ink-muted, #8c8578);
+      stroke: var(--ql-ink-muted, #736d63);
       stroke-width: 1;
       pointer-events: none;
     }
@@ -273,7 +285,7 @@ export class QlSweepDial extends LitElement {
       width: 1.5px;
       height: 11px;
       border-radius: 0.75px;
-      background: var(--ql-ink-muted, #8c8578);
+      background: var(--ql-ink-muted, #736d63);
     }
     :host([dragging='aim']) .grip {
       border-color: transparent;
@@ -281,6 +293,11 @@ export class QlSweepDial extends LitElement {
     }
     :host([dragging='aim']) .grip-bar {
       background: var(--ql-bg-base, #f4f0e8);
+    }
+    :host([disabled]) .handle,
+    :host([disabled]) .aim,
+    :host([disabled]) .wedge-hit {
+      cursor: default;
     }
   `;
 
@@ -324,6 +341,31 @@ export class QlSweepDial extends LitElement {
     return { x: box.left + (box.width * CX) / STAGE_W, y: box.top + (box.height * CY) / STAGE_H };
   }
 
+  /** Set while `centreCache` is good for the current animation frame. */
+  private centreFresh = false;
+  private centreCache?: { readonly x: number; readonly y: number };
+
+  /**
+   * `getBoundingClientRect` is a synchronous layout read; `pointermove` can
+   * fire well above the paint rate, so the read is throttled to once per
+   * animation frame instead of once per event. It is not cached for the
+   * whole gesture: this dial can sit on a live dashboard where an unrelated
+   * card's own update reflows the page mid-drag, and freezing the stage's
+   * position for the whole gesture would let the drag silently drift off the
+   * track's actual box. Refreshing every frame keeps that drift to at most
+   * one frame.
+   */
+  private currentCentre(): { readonly x: number; readonly y: number } | undefined {
+    if (!this.centreFresh) {
+      this.centreCache = this.centre();
+      this.centreFresh = true;
+      requestAnimationFrame(() => {
+        this.centreFresh = false;
+      });
+    }
+    return this.centreCache;
+  }
+
   /** The sweep the control operates on, never narrower than the floor. */
   private sweep(): OscillationAngle {
     return normaliseSweep(this.angle);
@@ -336,13 +378,17 @@ export class QlSweepDial extends LitElement {
 
   private readonly onPointerDown = (event: PointerEvent): void => {
     const drag = QlSweepDial.dragOf(event);
-    if (drag === undefined) {
+    if (drag === undefined || this.disabled) {
       return;
     }
     event.preventDefault();
     this.dragging = drag;
     this.aimBearing = sweepBearing(this.sweep());
     capturePointer(event.currentTarget, event.pointerId, true);
+    // Force a fresh read at the start of the gesture rather than trusting
+    // whatever frame the cache last settled on.
+    this.centreFresh = false;
+    this.currentCentre();
     // Announced on grab, not on first movement, so the sheet can say what this
     // gesture does before the user has found out by trying it.
     this.emit('ql-input');
@@ -353,7 +399,7 @@ export class QlSweepDial extends LitElement {
     if (drag === undefined) {
       return;
     }
-    const centre = this.centre();
+    const centre = this.currentCentre();
     if (centre === undefined) {
       return;
     }
@@ -374,26 +420,54 @@ export class QlSweepDial extends LitElement {
     }
     this.dragging = undefined;
     capturePointer(event.currentTarget, event.pointerId, false);
+    this.centreFresh = false;
+    this.centreCache = undefined;
     this.emit('ql-change');
   };
 
+  /**
+   * Home/End jump the dragged handle (or the aim bearing) straight to the
+   * hardware limit; Page Up/Down move `SWEEP_PAGE_STEP`. Delta-based, like
+   * every other key here, so the existing floor/range clamps in `sweepNudge`
+   * and `sweepRotate` still apply — an End on the low handle still stops
+   * `MIN_SWEEP` short of the high one, exactly as an Arrow key would.
+   */
   private readonly onKeyDown = (event: KeyboardEvent): void => {
     const drag = QlSweepDial.dragOf(event);
-    if (drag === undefined) {
+    if (drag === undefined || this.disabled) {
       return;
     }
-    let direction: 1 | -1;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
-      direction = 1;
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
-      direction = -1;
-    } else {
-      return;
+    const sweep = this.sweep();
+    const rotateOrNudge = (delta: number): OscillationAngle =>
+      drag === 'aim' ? sweepRotate(sweep, delta) : sweepNudge(sweep, drag, delta);
+    const current = drag === 'aim' ? sweepBearing(sweep) : sweep[drag];
+    let next: OscillationAngle;
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowUp':
+        next = rotateOrNudge(event.shiftKey ? SWEEP_FINE_STEP : SWEEP_COARSE_STEP);
+        break;
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        next = rotateOrNudge(-(event.shiftKey ? SWEEP_FINE_STEP : SWEEP_COARSE_STEP));
+        break;
+      case 'PageUp':
+        next = rotateOrNudge(SWEEP_PAGE_STEP);
+        break;
+      case 'PageDown':
+        next = rotateOrNudge(-SWEEP_PAGE_STEP);
+        break;
+      case 'Home':
+        next = rotateOrNudge(ANGLE_MIN - current);
+        break;
+      case 'End':
+        next = rotateOrNudge(ANGLE_MAX - current);
+        break;
+      default:
+        return;
     }
     event.preventDefault();
-    const step = (event.shiftKey ? SWEEP_FINE_STEP : SWEEP_COARSE_STEP) * direction;
-    const sweep = this.sweep();
-    this.apply(drag === 'aim' ? sweepRotate(sweep, step) : sweepNudge(sweep, drag, step), 'ql-change');
+    this.apply(next, 'ql-change');
   };
 
   private renderHandle(handle: SweepHandle): TemplateResult {
@@ -412,6 +486,7 @@ export class QlSweepDial extends LitElement {
         aria-valuenow=${device}
         aria-valuetext=${`${device > 180 ? '+' : ''}${String(device - 180)}°`}
         style=${`left:${String((x / STAGE_W) * 100)}%;top:${String((y / STAGE_H) * 100)}%`}
+        ?disabled=${this.disabled}
         @pointerdown=${this.onPointerDown}
         @pointermove=${this.onPointerMove}
         @pointerup=${this.onPointerUp}
@@ -438,6 +513,7 @@ export class QlSweepDial extends LitElement {
         aria-valuenow=${Math.round(bearing)}
         aria-valuetext=${`${bearing > 180 ? '+' : ''}${String(Math.round(bearing) - 180)}°`}
         style=${`left:${String((x / STAGE_W) * 100)}%;top:${String((y / STAGE_H) * 100)}%`}
+        ?disabled=${this.disabled}
         @pointerdown=${this.onPointerDown}
         @pointermove=${this.onPointerMove}
         @pointerup=${this.onPointerUp}
@@ -465,7 +541,11 @@ export class QlSweepDial extends LitElement {
     const [aimX1, aimY1] = polar(R_AIM_LINE_OUTER, bearing);
     return html`
       <div class="stage">
-        <svg viewBox=${`0 0 ${String(STAGE_W)} ${String(STAGE_H)}`}>
+        <svg
+          viewBox=${`0 0 ${String(STAGE_W)} ${String(STAGE_H)}`}
+          aria-hidden="true"
+          focusable="false"
+        >
           <text class="front" x=${CX} y="17" text-anchor="middle" aria-hidden="true">
             ${this.frontLabel}
           </text>

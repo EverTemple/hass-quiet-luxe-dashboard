@@ -2,6 +2,7 @@ import { css, html, LitElement, nothing, type CSSResult, type TemplateResult } f
 import type { TranslationKey } from '../i18n/locales/en';
 import { t } from '../i18n/translate';
 import type { Locale } from '../i18n/types';
+import { TYPE } from '../tokens/type';
 
 export type QlHeaderVariant = 'mobile' | 'ipad' | 'desktop';
 
@@ -88,13 +89,13 @@ export class QlHeaderHome extends LitElement {
     }
     .display {
       margin: 0;
-      font: 400 34px/40px var(--ql-font-display, Marcellus, serif);
+      ${TYPE.display}
       letter-spacing: 0.04em;
     }
     .meta {
       margin: 0;
-      color: var(--ql-ink-muted, #8c8578);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
     }
     /* Values like "26°" or "AQI 0.5" must never break across lines. */
@@ -137,11 +138,11 @@ export class QlHeaderHome extends LitElement {
     }
     .avatar.away {
       background: var(--ql-surface-border, #e4dccb);
-      color: var(--ql-ink-muted, #8c8578);
+      color: var(--ql-ink-muted, #736d63);
     }
     .presence {
-      color: var(--ql-accent-champagne, #b08d57);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-accent-champagne-text, #846a41);
+      ${TYPE.caption}
       letter-spacing: 0.02em;
       min-width: 0;
       overflow: hidden;
@@ -149,12 +150,12 @@ export class QlHeaderHome extends LitElement {
       white-space: nowrap;
     }
     .dot {
-      color: var(--ql-ink-muted, #8c8578);
-      font: 400 12px/16px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.caption}
     }
     .home-name {
-      color: var(--ql-ink-muted, #8c8578);
-      font: 500 11px/14px var(--ql-font-body, Outfit, sans-serif);
+      color: var(--ql-ink-muted, #736d63);
+      ${TYPE.eyebrow}
       letter-spacing: 0.14em;
       text-transform: uppercase;
       white-space: nowrap;
@@ -224,7 +225,15 @@ export class QlHeaderHome extends LitElement {
             ? html`<span class="avatar ${person.home ? '' : 'away'}"
                 >${person.name.charAt(0).toUpperCase()}</span
               >`
-            : html`<img class="avatar ${person.home ? '' : 'away'}" src=${person.picture} alt="" />`,
+            /* Deliberately NOT loading="lazy": this row sits in the Home
+               header, above the fold on every breakpoint, so deferring it only
+               delays first paint. Lazy-loading is for the room photos and
+               camera frames further down the page. */
+            : html`<img
+                class="avatar ${person.home ? '' : 'away'}"
+                src=${person.picture}
+                alt=""
+              />`,
         )}
       </span>
     `;

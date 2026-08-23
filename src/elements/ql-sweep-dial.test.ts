@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QlSweepDial } from './ql-sweep-dial';
 import { QlTimerDial } from './ql-timer-dial';
 
@@ -125,6 +125,76 @@ describe('ql-sweep-dial', () => {
     expect(el.angle).toEqual({ low: 135, high: 225, span: 90 });
   });
 
+  it('Home/End jump a handle straight to the hardware limit', async () => {
+    const el = await mountSweep();
+    const [low, high] = handles(el);
+    if (low === undefined || high === undefined) throw new Error('no handles');
+    press(low, 'Home');
+    await el.updateComplete;
+    expect(el.angle).toEqual({ low: 5, high: 225, span: 220 });
+    press(high, 'End');
+    await el.updateComplete;
+    expect(el.angle).toEqual({ low: 5, high: 355, span: 350 });
+  });
+
+  it('End on the low handle still stops MIN_SWEEP short of the high one', async () => {
+    const el = await mountSweep({ low: 100, high: 150, span: 50 });
+    const low = handles(el)[0];
+    if (low === undefined) throw new Error('no handle');
+    press(low, 'End');
+    await el.updateComplete;
+    expect(el.angle).toEqual({ low: 120, high: 150, span: 30 });
+  });
+
+  it('Page Up/Down move five times the arrow step', async () => {
+    const el = await mountSweep();
+    const low = handles(el)[0];
+    if (low === undefined) throw new Error('no handle');
+    press(low, 'PageUp');
+    await el.updateComplete;
+    expect(el.angle.low).toBe(160);
+    press(low, 'PageDown');
+    await el.updateComplete;
+    expect(el.angle.low).toBe(135);
+  });
+
+  it('does nothing on any key or pointer gesture while disabled', async () => {
+    const el = await mountSweep();
+    el.disabled = true;
+    await el.updateComplete;
+    const events: unknown[] = [];
+    el.addEventListener('ql-change', (e) => events.push(e));
+    el.addEventListener('ql-input', (e) => events.push(e));
+    const low = handles(el)[0];
+    if (low === undefined) throw new Error('no handle');
+    press(low, 'ArrowRight');
+    low.dispatchEvent(new Event('pointerdown', { bubbles: true, cancelable: true }));
+    await el.updateComplete;
+    expect(events).toEqual([]);
+    expect(el.angle).toEqual({ low: 135, high: 225, span: 90 });
+  });
+
+  /*
+   * pointermove can dispatch well above the paint rate; getBoundingClientRect
+   * is a synchronous layout read, so it is throttled to once per animation
+   * frame rather than once per event — a burst of moves within the same
+   * frame must reuse the one read from pointerdown.
+   */
+  it('reads the stage rect once for a burst of pointermoves, not once per move', async () => {
+    const el = await mountSweep();
+    const low = handles(el)[0];
+    if (low === undefined) throw new Error('no handle');
+    const rectSpy = vi.spyOn(Element.prototype, 'getBoundingClientRect');
+    low.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 1 }));
+    for (let i = 0; i < 5; i += 1) {
+      low.dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, pointerId: 1, clientX: i, clientY: i }),
+      );
+    }
+    expect(rectSpy).toHaveBeenCalledTimes(1);
+    rectSpy.mockRestore();
+  });
+
   it('draws the wedge, the band and the track from tokens', () => {
     const cssText = QlSweepDial.styles.toString();
     expect(cssText).toContain('var(--ql-accent-champagne, #b08d57)');
@@ -205,6 +275,16 @@ describe('ql-sweep-dial — aiming the wedge', () => {
     await el.updateComplete;
     expect(el.angle).toEqual({ low: 265, high: 355, span: 90 });
     press(aim(el), 'ArrowRight');
+    await el.updateComplete;
+    expect(el.angle).toEqual({ low: 265, high: 355, span: 90 });
+  });
+
+  it('Home/End on the aim grip rotate the whole sweep to the bearing limit, keeping its span', async () => {
+    const el = await mountSweep();
+    press(aim(el), 'Home');
+    await el.updateComplete;
+    expect(el.angle).toEqual({ low: 5, high: 95, span: 90 });
+    press(aim(el), 'End');
     await el.updateComplete;
     expect(el.angle).toEqual({ low: 265, high: 355, span: 90 });
   });
@@ -365,5 +445,64 @@ describe('ql-timer-dial', () => {
     await el.updateComplete;
     expect(el.shadowRoot?.querySelector('.reading')?.textContent?.trim()).toBe('2');
     expect(el.shadowRoot?.querySelector('.caption')?.textContent?.trim()).toBe('hours');
+  });
+
+  /*
+   * The reading drags and repeats on a held key, so it — and only it — is the
+   * live region: the caption is a sibling outside it, or every drag tick and
+   * key repeat would re-announce it too.
+   */
+  it('marks the reading as a live region scoped to just the numeral, not the caption', async () => {
+    const el = await mountTimer();
+    el.reading = '2';
+    el.caption = 'hours';
+    await el.updateComplete;
+    const status = el.shadowRoot?.querySelector('[role="status"]');
+    expect(status).not.toBeNull();
+    expect(status?.tagName).toBe('OUTPUT');
+    expect(status?.classList.contains('reading')).toBe(true);
+    expect(status?.textContent?.trim()).toBe('2');
+    expect(el.shadowRoot?.querySelectorAll('[role="status"]')).toHaveLength(1);
+  });
+
+  /*
+   * pointermove can dispatch well above the paint rate; getBoundingClientRect
+   * is a synchronous layout read, so it is throttled to once per animation
+   * frame rather than once per event — a burst of moves within the same
+   * frame must reuse the one read from pointerdown.
+   */
+  it('reads the stage rect once for a burst of pointermoves, not once per move', async () => {
+    const el = await mountTimer();
+    const rectSpy = vi.spyOn(Element.prototype, 'getBoundingClientRect');
+    grip(el).dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 1 }),
+    );
+    for (let i = 0; i < 5; i += 1) {
+      grip(el).dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, pointerId: 1, clientX: i, clientY: i }),
+      );
+    }
+    expect(rectSpy).toHaveBeenCalledTimes(1);
+    rectSpy.mockRestore();
+  });
+
+  it('Home/End jump straight to zero and the full duration', async () => {
+    const el = await mountTimer(120);
+    grip(el).dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    await el.updateComplete;
+    expect(el.minutes).toBe(480);
+    grip(el).dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+    await el.updateComplete;
+    expect(el.minutes).toBe(0);
+  });
+
+  it('Page Up/Down move five times the base step', async () => {
+    const el = await mountTimer(120);
+    grip(el).dispatchEvent(new KeyboardEvent('keydown', { key: 'PageUp', bubbles: true }));
+    await el.updateComplete;
+    expect(el.minutes).toBe(195);
+    grip(el).dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true }));
+    await el.updateComplete;
+    expect(el.minutes).toBe(120);
   });
 });
