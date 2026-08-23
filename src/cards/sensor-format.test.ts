@@ -3,17 +3,22 @@ import { formatSensorValue, sensorStatus } from './sensor-format';
 
 describe('formatSensorValue', () => {
   it('formats each metric exactly', () => {
-    expect(formatSensorValue('aqi', '18.4')).toBe('18');
-    expect(formatSensorValue('temp', '24.46')).toBe('24.5°');
-    expect(formatSensorValue('humidity', '61.8')).toBe('62%');
-    expect(formatSensorValue('uv', '7.2')).toBe('7');
-    expect(formatSensorValue('rain', '80')).toBe('80%');
+    expect(formatSensorValue('aqi', '18.4', 'en')).toBe('18');
+    expect(formatSensorValue('temp', '24.46', 'en')).toBe('24.5°');
+    expect(formatSensorValue('humidity', '61.8', 'en')).toBe('62%');
+    expect(formatSensorValue('uv', '7.2', 'en')).toBe('7');
+    expect(formatSensorValue('rain', '80', 'en')).toBe('80%');
   });
 
   it('returns the placeholder for non-numeric or absent states', () => {
-    expect(formatSensorValue('aqi', 'unknown')).toBe('—');
-    expect(formatSensorValue('temp', undefined)).toBe('—');
-    expect(formatSensorValue('uv', '')).toBe('—');
+    expect(formatSensorValue('aqi', 'unknown', 'en')).toBe('—');
+    expect(formatSensorValue('temp', undefined, 'en')).toBe('—');
+    expect(formatSensorValue('uv', '', 'en')).toBe('—');
+  });
+
+  it('formats the decimal point per locale', () => {
+    expect(formatSensorValue('temp', '22.3', 'id')).toBe('22,3°');
+    expect(formatSensorValue('temp', '22.3', 'en')).toBe('22.3°');
   });
 });
 

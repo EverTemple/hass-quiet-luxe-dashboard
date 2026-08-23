@@ -1,19 +1,22 @@
+import { formatFixed, formatInteger } from '../i18n/format-number';
+import type { Locale } from '../i18n/types';
+
 /** Exact display formatting for power/energy values (Figma `card/energy`). */
-export function formatPower(watts: number | undefined): string {
+export function formatPower(watts: number | undefined, locale: Locale): string {
   if (watts === undefined || !Number.isFinite(watts)) {
     return '—';
   }
   if (Math.abs(watts) < 1000) {
-    return `${Math.round(watts)} W`;
+    return `${formatInteger(watts, locale)} W`;
   }
-  return `${(watts / 1000).toFixed(2)} kW`;
+  return `${formatFixed(watts / 1000, locale, 2)} kW`;
 }
 
-export function formatEnergy(kwh: number | undefined): string {
+export function formatEnergy(kwh: number | undefined, locale: Locale): string {
   if (kwh === undefined || !Number.isFinite(kwh)) {
     return '—';
   }
-  return `${kwh.toFixed(1)} kWh`;
+  return `${formatFixed(kwh, locale, 1)} kWh`;
 }
 
 /**
