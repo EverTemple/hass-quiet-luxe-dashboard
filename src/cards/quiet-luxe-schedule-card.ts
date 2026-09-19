@@ -23,6 +23,7 @@ import {
   isDueSoon,
   updateTodoItem,
   type AgendaItem,
+  type FailedCalendar,
   type HaTodoItem,
 } from './schedule-data';
 import { TYPE } from '../tokens/type';
@@ -68,6 +69,8 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
   declare loadFailed: boolean;
   private started = false;
   private refreshTimer?: number;
+  /** Calendar ids currently reported as failing, so a repeat poll doesn't re-log the same error every 15 minutes. */
+  private readonly failingCalendars = new Set<string>();
 
   constructor() {
     super();
@@ -142,6 +145,7 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
     window.clearInterval(this.refreshTimer);
     this.refreshTimer = undefined;
     this.started = false;
+    this.failingCalendars.clear();
   }
 
   /** Public for tests and the strategy; safe to call repeatedly. */
@@ -158,8 +162,10 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
         const end = new Date(
           start.getTime() + (config.days ?? AGENDA_DEFAULT_DAYS) * 24 * 60 * 60 * 1000,
         );
-        this.agenda = await fetchAgenda(hass, calendars, start, end);
-        this.loadFailed = false;
+        const { events, failed } = await fetchAgenda(hass, calendars, start, end);
+        this.reportCalendarFailures(failed);
+        this.agenda = events;
+        this.loadFailed = calendars.length > 0 && failed.length === calendars.length;
       } catch (error) {
         this.loadFailed = true;
         console.error('quiet-luxe-schedule-card: calendar load failed', error);
@@ -170,6 +176,28 @@ export class QuietLuxeScheduleCard extends QlBaseCard {
         this.tasks = await fetchTodoItems(hass, config.todo_entity);
       } catch (error) {
         console.error('quiet-luxe-schedule-card: to-do load failed', error);
+      }
+    }
+  }
+
+  /**
+   * Logs a calendar failure only on transition — the first poll that sees it
+   * fail, and the first poll after it recovers — instead of once every
+   * refresh (`AGENDA_REFRESH_MS`), which would otherwise spam the console for
+   * as long as a broken calendar integration (e.g. HTTP 400) stays broken.
+   */
+  private reportCalendarFailures(failed: ReadonlyArray<FailedCalendar>): void {
+    const failedIds = new Set(failed.map(({ calendarId }) => calendarId));
+    for (const { calendarId, reason } of failed) {
+      if (!this.failingCalendars.has(calendarId)) {
+        this.failingCalendars.add(calendarId);
+        console.error('quiet-luxe-schedule-card: calendar load failed', calendarId, reason);
+      }
+    }
+    for (const calendarId of [...this.failingCalendars]) {
+      if (!failedIds.has(calendarId)) {
+        this.failingCalendars.delete(calendarId);
+        console.info('quiet-luxe-schedule-card: calendar load recovered', calendarId);
       }
     }
   }

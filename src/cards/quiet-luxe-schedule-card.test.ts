@@ -217,11 +217,65 @@ describe('quiet-luxe-schedule-card', () => {
     expect(card.shadowRoot?.querySelector('.footer')?.textContent?.trim()).toBe('2 項未完成');
   });
 
-  it('degrades muted with a console error when the calendar API fails', async () => {
+  it('degrades muted with a console error naming the calendar and reason when the calendar API fails', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const card = await mount({ calendars: ['calendar.family'] }, makeMockHass([calendarEntity()]));
-    expect(errorSpy).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith(
+      'quiet-luxe-schedule-card: calendar load failed',
+      'calendar.family',
+      expect.anything(),
+    );
     expect(card.shadowRoot?.querySelector('.empty')?.textContent?.trim()).toBe('Unavailable');
+  });
+
+  it('keeps events from the calendars that succeed when one of several fails', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const card = await mount(
+      { calendars: ['calendar.family', 'calendar.birthdays'] },
+      makeMockHass([calendarEntity(), makeEntity('calendar.birthdays', 'unavailable')], CAL_STUB),
+    );
+    const titles = [...(card.shadowRoot?.querySelectorAll('.event .title') ?? [])].map((node) =>
+      node.textContent?.trim(),
+    );
+    expect(titles.some((title) => title?.includes('Dentist'))).toBe(true);
+    expect(errorSpy).toHaveBeenCalledWith(
+      'quiet-luxe-schedule-card: calendar load failed',
+      'calendar.birthdays',
+      expect.anything(),
+    );
+    expect(card.shadowRoot?.querySelector('.empty')).toBeNull();
+  });
+
+  it('shows the Unavailable state only when every calendar fails', async () => {
+    const card = await mount(
+      { calendars: ['calendar.family', 'calendar.birthdays'] },
+      makeMockHass([calendarEntity(), makeEntity('calendar.birthdays', 'unavailable')]),
+    );
+    expect(card.shadowRoot?.querySelector('.empty')?.textContent?.trim()).toBe('Unavailable');
+  });
+
+  it('logs a recovery once a previously failing calendar succeeds again, and only logs the failure once per outage', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    /* Mutated in place (not replaced) so the closure `makeMockHass` captured
+       in callApi sees each change on the next refresh(). */
+    const apiResponses: Record<string, unknown> = {};
+    const hass = makeMockHass([calendarEntity()], { apiResponses });
+    const card = await mount({ calendars: ['calendar.family'] }, hass);
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+
+    await card.refresh();
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+
+    Object.assign(apiResponses, CAL_STUB.apiResponses);
+    await card.refresh();
+    expect(infoSpy).toHaveBeenCalledWith(
+      'quiet-luxe-schedule-card: calendar load recovered',
+      'calendar.family',
+    );
+
+    await card.refresh();
+    expect(infoSpy).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the more-info region when the to-do list is unavailable', async () => {

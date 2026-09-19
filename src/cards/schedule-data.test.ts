@@ -36,12 +36,58 @@ describe('fetchAgenda', () => {
         ],
       },
     });
-    const agenda = await fetchAgenda(hass, ['calendar.family', 'calendar.school'], START, END);
-    expect(agenda.map((item) => item.title)).toEqual(['Sports day', 'Dentist']);
-    expect(agenda[0]?.allDay).toBe(true);
-    expect(agenda[0]?.calendarId).toBe('calendar.school');
-    expect(agenda[1]?.allDay).toBe(false);
+    const { events, failed } = await fetchAgenda(
+      hass,
+      ['calendar.family', 'calendar.school'],
+      START,
+      END,
+    );
+    expect(events.map((item) => item.title)).toEqual(['Sports day', 'Dentist']);
+    expect(events[0]?.allDay).toBe(true);
+    expect(events[0]?.calendarId).toBe('calendar.school');
+    expect(events[1]?.allDay).toBe(false);
     expect(hass.apiCalls).toHaveLength(2);
+    expect(failed).toEqual([]);
+  });
+
+  it('merges events from calendars that succeed and reports calendars that fail', async () => {
+    const hass = makeMockHass([], {
+      apiResponses: {
+        'calendars/calendar.family?start=2026-08-01T00:00:00.000Z&end=2026-08-08T00:00:00.000Z': [
+          {
+            summary: 'Dentist',
+            start: { dateTime: '2026-08-03T09:30:00+08:00' },
+            end: { dateTime: '2026-08-03T10:30:00+08:00' },
+          },
+        ],
+      },
+    });
+    const { events, failed } = await fetchAgenda(
+      hass,
+      ['calendar.family', 'calendar.birthdays'],
+      START,
+      END,
+    );
+    expect(events.map((item) => item.title)).toEqual(['Dentist']);
+    expect(failed).toHaveLength(1);
+    expect(failed[0]?.calendarId).toBe('calendar.birthdays');
+    expect(failed[0]?.reason).toBeInstanceOf(Error);
+    expect((failed[0]?.reason as Error).message).toContain(
+      'no apiResponses stub matches "calendars/calendar.birthdays',
+    );
+  });
+
+  it('reports every calendar as failed, each with its own reason, when all calendars fail', async () => {
+    const hass = makeMockHass([], { apiResponses: {} });
+    const { events, failed } = await fetchAgenda(
+      hass,
+      ['calendar.family', 'calendar.birthdays'],
+      START,
+      END,
+    );
+    expect(events).toEqual([]);
+    expect(failed.map((entry) => entry.calendarId)).toEqual(['calendar.family', 'calendar.birthdays']);
+    expect(failed.every((entry) => entry.reason instanceof Error)).toBe(true);
   });
 
   it('throws loudly when callApi is unavailable', async () => {

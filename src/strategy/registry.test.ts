@@ -202,6 +202,36 @@ describe('label resolution', () => {
   });
 });
 
+describe('buildRegistryIndex camera listing', () => {
+  /*
+   * De-duplicating multi-stream cameras (Dahua Main/Sub/Sub 2/Sub 3) is a
+   * section-layer concern (security.ts's orderedCameras/dedupeCamerasByDevice),
+   * not the registry's — all() must stay a lossless, generic domain filter so
+   * every consumer decides for itself whether/how to collapse siblings.
+   */
+  it('returns every entity of a domain, including multiple entities on one device', () => {
+    const index = buildRegistryIndex(
+      mockSnapshot({
+        areas: [],
+        devices: [mockDevice('dev-1')],
+        entities: [
+          mockRegEntity('camera.dining_room_main', { device_id: 'dev-1' }),
+          mockRegEntity('camera.dining_room_sub', { device_id: 'dev-1' }),
+          mockRegEntity('camera.dining_room_sub_2', { device_id: 'dev-1' }),
+          mockRegEntity('camera.parking', {}),
+        ],
+      }),
+      {},
+    );
+    expect(index.all('camera')).toEqual([
+      'camera.dining_room_main',
+      'camera.dining_room_sub',
+      'camera.dining_room_sub_2',
+      'camera.parking',
+    ]);
+  });
+});
+
 describe('referenceHome fixtures', () => {
   it('subang fixture buckets hallmark entities', () => {
     const { snapshot: subang, entities } = referenceHome('subang');

@@ -33,28 +33,58 @@ function toAgendaItem(event: HaCalendarEvent, calendarId: string): AgendaItem {
   return { title: event.summary, start: new Date(startIso), allDay, calendarId };
 }
 
+/** A calendar that failed to load, with the error that caused it (e.g. an HTTP 400 body). */
+export interface FailedCalendar {
+  readonly calendarId: string;
+  readonly reason: unknown;
+}
+
+/** Result of fetching an agenda: successful events plus the calendars that failed. */
+export interface AgendaResult {
+  readonly events: ReadonlyArray<AgendaItem>;
+  readonly failed: ReadonlyArray<FailedCalendar>;
+}
+
 /**
  * Merged, time-sorted agenda across calendars. Both HA's callApi and the mock
  * are closures, so calling the extracted reference unbound is safe.
+ *
+ * Calendars are fetched independently: one unavailable or erroring calendar
+ * (e.g. HA returns HTTP 400 for a broken integration) must not blank the
+ * whole agenda. Failures are reported via `failed` for the caller to log.
  */
 export async function fetchAgenda(
   hass: HomeAssistant,
   calendarIds: ReadonlyArray<string>,
   start: Date,
   end: Date,
-): Promise<AgendaItem[]> {
+): Promise<AgendaResult> {
   const callApi = hass.callApi;
   if (callApi === undefined) {
     throw new Error('quiet-luxe: hass.callApi unavailable — cannot load calendar events');
   }
-  const perCalendar = await Promise.all(
-    calendarIds.map(async (calendarId) => {
-      const path = `calendars/${calendarId}?start=${start.toISOString()}&end=${end.toISOString()}`;
-      const events = await callApi<ReadonlyArray<HaCalendarEvent>>('GET', path);
-      return events.map((event) => toAgendaItem(event, calendarId));
+  const results = await Promise.all(
+    calendarIds.map(async (calendarId): Promise<AgendaItem[] | FailedCalendar> => {
+      try {
+        const path = `calendars/${calendarId}?start=${start.toISOString()}&end=${end.toISOString()}`;
+        const events = await callApi<ReadonlyArray<HaCalendarEvent>>('GET', path);
+        return events.map((event) => toAgendaItem(event, calendarId));
+      } catch (reason) {
+        return { calendarId, reason };
+      }
     }),
   );
-  return perCalendar.flat().sort((a, b) => a.start.getTime() - b.start.getTime());
+  const events: AgendaItem[] = [];
+  const failed: FailedCalendar[] = [];
+  for (const result of results) {
+    if (Array.isArray(result)) {
+      events.push(...result);
+    } else {
+      failed.push(result);
+    }
+  }
+  events.sort((a, b) => a.start.getTime() - b.start.getTime());
+  return { events, failed };
 }
 
 export async function fetchTodoItems(
