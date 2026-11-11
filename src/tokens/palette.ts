@@ -16,6 +16,7 @@ export const LIGHT_COLORS: ColorTokens = {
   inkMuted: '#736D63',
   accentChampagne: '#B08D57',
   accentChampagneText: '#846A41',
+  onAccent: '#2B2620',
   statusGood: '#7E8B6F',
   statusGoodText: '#67715B',
   statusWarn: '#C08552',
@@ -44,6 +45,7 @@ export const DARK_COLORS: ColorTokens = {
   // 4.5:1 against the dark surfaces. Keeping the token means call sites never need
   // a mode conditional.
   accentChampagneText: '#C9A86A',
+  onAccent: '#161310',
   statusGood: '#93A183',
   statusGoodText: '#93A183',
   statusWarn: '#D09A6A',

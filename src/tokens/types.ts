@@ -11,6 +11,8 @@ export interface ColorTokens {
   readonly inkMuted: string;
   readonly accentChampagne: string;
   readonly accentChampagneText: string;
+  /** Text and glyphs painted on the champagne fill (dark in both themes; cream on champagne is 2.72:1). */
+  readonly onAccent: string;
   readonly statusGood: string;
   readonly statusGoodText: string;
   readonly statusWarn: string;
