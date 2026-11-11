@@ -58,6 +58,35 @@ const hass = makeMockHass(
     }),
     makeEntity('media_player.study_sonos', 'idle', { friendly_name: 'Study Sonos' }),
     makeEntity('media_player.tv', 'off', { friendly_name: 'Living TV' }),
+    // KTV box (Isola). The catalogue is a 59-row sample of the real file, served by Vite from dev/.
+    makeEntity('sensor.ktv_box', 'playing', {
+      volume: 14,
+      vocal: 'backing',
+      now_playing: { no: '1087855', title: '富士山下', singer: '陈奕迅' },
+      queue: [
+        { no: '2002844', title: '陀飞轮', singer: '陈奕迅' },
+        { no: '11010090', title: '相思风雨中', singer: '张学友' },
+        { no: '1729413', title: '恋人', singer: '李荣浩' },
+        { no: '1318195', title: '知否知否', singer: '胡夏' },
+        { no: '11138176', title: '红色高跟鞋', singer: '蔡健雅' },
+        { no: '1456407', title: '别知己', singer: '海来阿木' },
+      ],
+      queue_count: 6,
+      catalogue_url: '/dev/ktv-catalogue.sample.json',
+      catalogue_version: 'sample-59',
+      catalogue_error: null,
+    }),
+    makeEntity('sensor.ktv_box_off', 'offline', {
+      volume: 14,
+      vocal: null,
+      now_playing: null,
+      queue: [],
+      queue_count: 0,
+      catalogue_url: '/dev/ktv-catalogue.sample.json',
+      catalogue_version: 'sample-59',
+      catalogue_error: null,
+    }),
+    makeEntity('text.ktv_command', '', { friendly_name: 'KTV command' }),
     makeEntity('camera.front_door', 'streaming', {
       friendly_name: 'Front Door',
       entity_picture: PHOTO_LIVING,
@@ -483,6 +512,19 @@ function buildPane(mode: ThemeMode): HTMLElement {
     ]),
     section('Language', [
       makeCard('quiet-luxe-language-card', { type: 'custom:quiet-luxe-language-card' }),
+    ]),
+    section('KTV', [
+      makeCard('quiet-luxe-ktv-card', {
+        type: 'custom:quiet-luxe-ktv-card',
+        entity: 'sensor.ktv_box',
+        command_entity: 'text.ktv_command',
+      }),
+      makeCard('quiet-luxe-ktv-card', {
+        type: 'custom:quiet-luxe-ktv-card',
+        title: 'Karaoke (box off)',
+        entity: 'sensor.ktv_box_off',
+        command_entity: 'text.ktv_command',
+      }),
     ]),
     section('Idle clock', [
       ((): HTMLElement => {

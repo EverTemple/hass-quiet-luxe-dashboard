@@ -23,6 +23,7 @@ const CARD_TAGS = [
   'quiet-luxe-vacuum-card',
   'quiet-luxe-device-cutout-card',
   'quiet-luxe-language-card',
+  'quiet-luxe-ktv-card',
   'quiet-luxe-header-card',
   'ql-row-presence',
   'ql-row-door-motion',

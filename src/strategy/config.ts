@@ -50,6 +50,21 @@ export interface UsersConfig {
   readonly guests?: ReadonlyArray<string>;
 }
 
+/**
+ * Opt-in KTV song picker. The card is placed in the room view of `area` only,
+ * and only while the box's sensor exists. The entity ids default to the ones the
+ * Node-RED backend publishes; they are config, not constants, so no network
+ * detail or device name is baked into the bundle.
+ */
+export interface KtvConfig {
+  /** HA area_id of the room the box lives in. */
+  readonly area: string;
+  /** The box sensor. Defaults to `sensor.ktv_box`. */
+  readonly entity?: string;
+  /** The `text` entity commands are written to. Defaults to `text.ktv_command`. */
+  readonly command_entity?: string;
+}
+
 export interface HomeConfig {
   readonly name: string;
   /** Dashboard url_path; navigation targets are built from it (D2). */
@@ -68,6 +83,7 @@ export interface HomeConfig {
   readonly admin_flows?: ReadonlyArray<AdminFlow>;
   readonly kiosk?: KioskConfig;
   readonly users?: UsersConfig;
+  readonly ktv?: KtvConfig;
 }
 
 export const DEFAULT_DASHBOARD_PATH = 'quiet-luxe';
@@ -272,6 +288,21 @@ function parseUsers(value: unknown): UsersConfig | undefined {
   };
 }
 
+function parseKtv(value: unknown): KtvConfig | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!isRecord(value)) {
+    fail('"ktv" must be an object like { area: "main_living_room" }');
+  }
+  rejectUnknownKeys(value, ['area', 'entity', 'command_entity'], '"ktv"');
+  return {
+    area: reqString(value.area, 'ktv.area'),
+    entity: optString(value.entity, 'ktv.entity'),
+    command_entity: optString(value.command_entity, 'ktv.command_entity'),
+  };
+}
+
 const TOP_KEYS = [
   'name',
   'dashboard_path',
@@ -289,6 +320,7 @@ const TOP_KEYS = [
   'admin_flows',
   'kiosk',
   'users',
+  'ktv',
 ] as const;
 
 export function validateHomeConfig(raw: unknown): HomeConfig {
@@ -318,5 +350,6 @@ export function validateHomeConfig(raw: unknown): HomeConfig {
     admin_flows: parseAdminFlows(raw.admin_flows),
     kiosk: parseKiosk(raw.kiosk),
     users: parseUsers(raw.users),
+    ktv: parseKtv(raw.ktv),
   };
 }

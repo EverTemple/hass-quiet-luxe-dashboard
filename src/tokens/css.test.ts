@@ -14,7 +14,8 @@ describe('colorCssVariables', () => {
     expect(vars['--ql-accent-champagne-text']).toBe('#846A41');
     expect(vars['--ql-status-good-text']).toBe('#67715B');
     expect(vars['--ql-status-warn-text']).toBe('#91643E');
-    expect(Object.keys(vars)).toHaveLength(17);
+    expect(vars['--ql-on-accent']).toBe('#2B2620');
+    expect(Object.keys(vars)).toHaveLength(18);
   });
 
   it('maps dark tokens with the exact dark values', () => {

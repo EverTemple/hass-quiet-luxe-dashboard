@@ -1,5 +1,7 @@
 import { contentGrid, COLUMNS_HALF_OF_WIDE_SECTION } from '../../cards/grid-options';
+import { DEFAULT_KTV_COMMAND_ENTITY, DEFAULT_KTV_ENTITY } from '../../cards/ktv-defaults';
 import { t } from '../../i18n/translate';
+import { exists } from '../availability';
 import { viewUrl } from '../config';
 import { roomName, roomScopedLabels } from '../labels';
 import { MAX_COLUMNS, REGION_SPAN, ROOM_CONTROLS_ROW_SPAN } from '../layout';
@@ -83,6 +85,31 @@ function mediaCards(ctx: StrategyContext, areaId: string): ReadonlyArray<Lovelac
   ];
 }
 
+/**
+ * The KTV song picker, only in the room named by `home.ktv.area`, and only
+ * while the box's sensor exists. `exists`, not `isUsable`: a box that is off
+ * reads `offline`/`unknown`, and the card is built to say "The KTV box is off"
+ * and still let people search, so hiding it then would hide the explanation.
+ */
+function ktvCards(ctx: StrategyContext, areaId: string): ReadonlyArray<LovelaceCardConfig> {
+  const ktv = ctx.home.ktv;
+  if (ktv === undefined || ktv.area !== areaId) {
+    return [];
+  }
+  const entity = ktv.entity ?? DEFAULT_KTV_ENTITY;
+  if (!exists(ctx, entity)) {
+    return [];
+  }
+  return [
+    {
+      type: 'custom:quiet-luxe-ktv-card',
+      entity,
+      command_entity: ktv.command_entity ?? DEFAULT_KTV_COMMAND_ENTITY,
+      grid_options: contentGrid('full'),
+    },
+  ];
+}
+
 function headerSection(ctx: StrategyContext, area: AreaEntry): LovelaceSectionConfig {
   const areaId = area.area_id;
   return viewHeaderSection(ctx, {
@@ -116,6 +143,17 @@ function headerSection(ctx: StrategyContext, area: AreaEntry): LovelaceSectionCo
  */
 export function roomView(ctx: StrategyContext, area: AreaEntry): LovelaceViewConfig {
   const areaId = area.area_id;
+  /* Its own full-band section, straight under the header. The card is the
+     room's main activity while the box is in use, and it needs the width: at
+     700px of card it switches to search | now playing + queue, which a
+     one-track column never reaches. The price is the phone stack, where it sits
+     above climate and lights; lights are the everyday control, but a ~620px
+     card under them would be a scroll away from the one thing a party opens
+     this view for. */
+  const ktv = columnSection(
+    [{ heading: headingCard(ctx.locale, 'section.ktv'), cards: ktvCards(ctx, areaId) }],
+    REGION_SPAN.roomKtv,
+  );
   const climate = columnSection(
     [
       {
@@ -147,7 +185,7 @@ export function roomView(ctx: StrategyContext, area: AreaEntry): LovelaceViewCon
     ],
     REGION_SPAN.roomSensors,
   );
-  const sections = [headerSection(ctx, area), climate, controls, sensors].filter(isSection);
+  const sections = [headerSection(ctx, area), ktv, climate, controls, sensors].filter(isSection);
   return {
     title: roomName(ctx.home, area),
     path: roomPath(areaId),

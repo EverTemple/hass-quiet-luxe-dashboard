@@ -34,6 +34,7 @@ const CARD_TAGS = [
   'quiet-luxe-vacuum-card',
   'quiet-luxe-device-cutout-card',
   'quiet-luxe-language-card',
+  'quiet-luxe-ktv-card',
 ] as const;
 
 describe('bundle entry', () => {
@@ -137,6 +138,7 @@ describe('bundle entry', () => {
     expect(bundle.QuietLuxeVacuumCard).toBeDefined();
     expect(bundle.QuietLuxeDeviceCutoutCard).toBeDefined();
     expect(bundle.QuietLuxeLanguageCard).toBeDefined();
+    expect(bundle.QuietLuxeKtvCard).toBeDefined();
     expect(bundle.QlRowPresence).toBeDefined();
     expect(bundle.QlRowDoorMotion).toBeDefined();
     expect(bundle.QlRowNetworkFlow).toBeDefined();

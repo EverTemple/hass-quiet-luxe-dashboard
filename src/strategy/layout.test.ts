@@ -129,6 +129,10 @@ describe('climate packing', () => {
     expect(estimatedCardHeight(card('custom:quiet-luxe-climate-card'))).toBe(130);
   });
 
+  it('knows the KTV card is tall rather than guessing the 108px default', () => {
+    expect(estimatedCardHeight(card('custom:quiet-luxe-ktv-card'))).toBe(620);
+  });
+
   it('falls back rather than throwing on a card it has never seen', () => {
     expect(estimatedCardHeight(card('custom:third-party-thing'))).toBeGreaterThan(0);
   });

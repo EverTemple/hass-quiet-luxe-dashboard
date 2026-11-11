@@ -157,6 +157,10 @@ strategy:
     media_rich: true             # Sonos group builder on the Media page
     camera_engine: webrtc        # webrtc | snapshot
     broadlink: true
+    ktv:                         # optional: karaoke song picker in one room's view
+      area: main_living          # required; the card appears only while the entity exists
+      # entity: sensor.ktv_box           (default)
+      # command_entity: text.ktv_command (default)
     room_order: [main_living, side_living, master_bedroom]
     rooms:
       guest_toilet: { hidden: true }

@@ -56,11 +56,14 @@ describe('ql-chip', () => {
     expect(cssText).toContain('var(--ql-touch-min, 56px)');
     expect(cssText).toContain('var(--ql-radius-chip, 999px)');
   });
-  it('reads an active device chip against the base, not the card surface', () => {
-    /* --ql-surface-card is a near-transparent white in dark mode: as a text
-       colour it made the active chip label invisible on the champagne fill. */
+  it('paints an active device chip label in --ql-on-accent, never the card surface or the cream base', () => {
+    /* --ql-surface-card is a near-transparent white in dark mode (invisible on
+       the champagne fill), and --ql-bg-base is cream in light mode (2.72:1 on
+       champagne). --ql-on-accent is dark in both themes. */
     const css = QlChip.styles.toString();
-    expect(css).toContain("variant='device'][active]");
+    const activeRule = /:host\(\[variant='device'\]\[active\]\) button \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(activeRule).toContain('var(--ql-on-accent, #2b2620)');
+    expect(activeRule).not.toContain('--ql-bg-base');
     expect(css).not.toContain('color: var(--ql-surface-card');
   });
 

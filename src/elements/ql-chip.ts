@@ -70,13 +70,14 @@ export class QlChip extends LitElement {
       height: var(--ql-touch-min, 56px);
       transform: translateY(-50%);
     }
-    /* Label on a filled chip reads against the base, like the primary scene
-       chip. --ql-surface-card is a near-transparent white in dark mode, which
-       left an active chip's label invisible on the champagne fill. */
+    /* Label on the champagne fill is dark ink in both themes. It used to be
+       --ql-bg-base, which is dark only in dark mode: in light it is cream, and
+       cream on champagne is 2.72:1. --ql-surface-card is a near-transparent
+       white in dark mode, which left the label invisible there. */
     :host([variant='device'][active]) button {
       background: var(--ql-accent-champagne, #b08d57);
       border-color: transparent;
-      color: var(--ql-bg-base, #f4f0e8);
+      color: var(--ql-on-accent, #2b2620);
     }
     :host([variant='scene']) button {
       min-height: 36px;
