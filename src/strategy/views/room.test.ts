@@ -147,3 +147,110 @@ describe('roomViews', () => {
     expect(headings).toEqual(['Climate']); // fan only → just the climate section
   });
 });
+
+describe('roomViews KTV card', () => {
+  const BOX = makeEntity('sensor.ktv_box', 'playing', {});
+
+  function ktvContext(
+    ktv: { area: string; entity?: string; command_entity?: string } | undefined,
+    extra: ReadonlyArray<ReturnType<typeof makeEntity>> = [BOX],
+  ): StrategyContext {
+    const { snapshot, entities } = referenceHome('subang');
+    return makeContext({
+      home: { ...SUBANG_CONFIG, ...(ktv === undefined ? {} : { ktv }) },
+      snapshot,
+      entities: [...entities, ...extra],
+    });
+  }
+
+  function ktvCardsOf(view: ReturnType<typeof roomViews>[number] | undefined): ReadonlyArray<Record<string, unknown>> {
+    return (view?.sections ?? []).flatMap((section) =>
+      section.cards.filter((card) => card.type === 'custom:quiet-luxe-ktv-card'),
+    );
+  }
+
+  it('places the card in the configured room when the sensor exists', () => {
+    const views = roomViews(ktvContext({ area: 'main_living' }));
+    expect(ktvCardsOf(views[0])).toEqual([
+      {
+        type: 'custom:quiet-luxe-ktv-card',
+        entity: 'sensor.ktv_box',
+        command_entity: 'text.ktv_command',
+        grid_options: { columns: 'full', rows: 'auto' },
+      },
+    ]);
+  });
+
+  it('puts it in its own full-band section under the header, headed "Karaoke"', () => {
+    const view = roomViews(ktvContext({ area: 'main_living' }))[0];
+    expect(view?.sections.map((section) => section.column_span)).toEqual([4, 4, 1, 2, 1]);
+    expect(view?.sections[1]?.cards.map((card) => card.type)).toEqual([
+      'heading',
+      'custom:quiet-luxe-ktv-card',
+    ]);
+    expect(view?.sections[1]?.cards[0]?.heading).toBe('Karaoke');
+    expect(view?.sections[1]?.row_span).toBeUndefined();
+  });
+
+  it('uses the configured entity ids', () => {
+    const views = roomViews(
+      ktvContext({ area: 'main_living', entity: 'sensor.other_box', command_entity: 'text.other' }, [
+        makeEntity('sensor.other_box', 'idle', {}),
+      ]),
+    );
+    expect(ktvCardsOf(views[0])[0]).toMatchObject({
+      entity: 'sensor.other_box',
+      command_entity: 'text.other',
+    });
+  });
+
+  it('is absent when ktv is not configured', () => {
+    for (const view of roomViews(ktvContext(undefined))) {
+      expect(ktvCardsOf(view)).toEqual([]);
+    }
+    const headings = roomViews(ktvContext(undefined))[0]?.sections.flatMap((section) =>
+      section.cards.filter((card) => card.type === 'heading').map((card) => card.heading),
+    );
+    expect(headings).not.toContain('Karaoke');
+  });
+
+  it('is absent when the sensor does not exist, heading and all', () => {
+    const views = roomViews(ktvContext({ area: 'main_living' }, []));
+    for (const view of views) {
+      expect(ktvCardsOf(view)).toEqual([]);
+    }
+    expect(views[0]?.sections.map((section) => section.column_span)).toEqual([4, 1, 2, 1]);
+  });
+
+  it('still places the card while the box is offline or unavailable', () => {
+    for (const state of ['offline', 'unavailable', 'unknown']) {
+      const views = roomViews(
+        ktvContext({ area: 'main_living' }, [makeEntity('sensor.ktv_box', state, {})]),
+      );
+      expect(ktvCardsOf(views[0]), state).toHaveLength(1);
+    }
+  });
+
+  it('is placed only in the configured area', () => {
+    const views = roomViews(ktvContext({ area: 'master_bedroom' }));
+    const placed = views.filter((view) => ktvCardsOf(view).length > 0).map((view) => view.path);
+    expect(placed).toEqual(['room-master_bedroom']);
+  });
+
+  it('is absent everywhere when the configured area is not a room', () => {
+    for (const view of roomViews(ktvContext({ area: 'no_such_room' }))) {
+      expect(ktvCardsOf(view)).toEqual([]);
+    }
+  });
+
+  it('localises the heading', () => {
+    const { snapshot, entities } = referenceHome('subang');
+    const ctx = makeContext({
+      home: { ...SUBANG_CONFIG, ktv: { area: 'main_living' } },
+      snapshot,
+      entities: [...entities, BOX],
+      locale: 'zh-Hans',
+    });
+    expect(roomViews(ctx)[0]?.sections[1]?.cards[0]?.heading).toBe('K歌');
+  });
+});

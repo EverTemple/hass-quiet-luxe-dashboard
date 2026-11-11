@@ -94,6 +94,8 @@ export const REGION_SPAN = {
   roomClimate: 1,
   roomLights: 2,
   roomSensors: 1,
+  /** Room: the KTV song picker takes the whole band, under the header. */
+  roomKtv: MAX_COLUMNS,
   /** All Climates: one span-1 section per CARD, free flow across the grid. */
   climatesArea: 1,
   /** Security: every band is 4 across, so each section takes the whole band. */
@@ -195,6 +197,14 @@ const CARD_HEIGHT_PX: Readonly<Record<string, number>> = {
   'custom:quiet-luxe-device-cutout-card': 72,
   'custom:ql-row-network-flow': 82,
   'custom:ql-row-door-motion': 55,
+  /* ESTIMATED from the card's CSS, not measured on a live render (no Playwright
+     pass yet): phone width, a six-song queue. 32 card padding + 96 now-playing
+     (40 title/singer, 16 gap, 40 volume/vocal row) + 24 to the search field + 56
+     field + 12 + 28 chips + 12 + 24 above the list + 28 head + 6 × 56 rows =
+     about 640, rounded to the ≈620 the design review saw. Each queue row is
+     +56, so it is the figure for a typical party queue, not a ceiling. Nothing
+     sorts against it today: it is the only card in its section. */
+  'custom:quiet-luxe-ktv-card': 620,
   /* Not present on the instance these were measured on — Figma values. */
   'custom:quiet-luxe-media-card': 50,
   'custom:quiet-luxe-energy-card': 64,

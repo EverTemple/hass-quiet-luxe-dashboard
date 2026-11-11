@@ -116,6 +116,56 @@ describe('validateHomeConfig', () => {
   });
 });
 
+describe('validateHomeConfig ktv', () => {
+  it('is absent by default: the KTV card is opt-in', () => {
+    expect(validateHomeConfig({ name: 'X' }).ktv).toBeUndefined();
+  });
+
+  it('accepts an area alone, leaving the entity ids to default', () => {
+    expect(validateHomeConfig({ name: 'X', ktv: { area: 'main_living_room' } }).ktv).toEqual({
+      area: 'main_living_room',
+      entity: undefined,
+      command_entity: undefined,
+    });
+  });
+
+  it('accepts explicit entity ids', () => {
+    expect(
+      validateHomeConfig({
+        name: 'X',
+        ktv: { area: 'a', entity: 'sensor.other', command_entity: 'text.other' },
+      }).ktv,
+    ).toEqual({ area: 'a', entity: 'sensor.other', command_entity: 'text.other' });
+  });
+
+  it('requires a non-empty string area', () => {
+    expect(() => validateHomeConfig({ name: 'X', ktv: {} })).toThrowError(/"ktv.area" is required/);
+    expect(() => validateHomeConfig({ name: 'X', ktv: { area: '' } })).toThrowError(
+      /"ktv.area" must be a non-empty string/,
+    );
+    expect(() => validateHomeConfig({ name: 'X', ktv: { area: 7 } })).toThrowError(
+      /"ktv.area" must be a non-empty string/,
+    );
+  });
+
+  it('rejects unknown nested keys by name', () => {
+    expect(() => validateHomeConfig({ name: 'X', ktv: { area: 'a', room: 'b' } })).toThrowError(
+      /unknown "ktv" key\(s\): room/,
+    );
+  });
+
+  it('rejects a non-object and non-string entity ids', () => {
+    expect(() => validateHomeConfig({ name: 'X', ktv: true })).toThrowError(/"ktv" must be an object/);
+    expect(() => validateHomeConfig({ name: 'X', ktv: 'main' })).toThrowError(/"ktv" must be an object/);
+    expect(() => validateHomeConfig({ name: 'X', ktv: { area: 'a', entity: '' } })).toThrowError(
+      /"ktv.entity" must be a non-empty string/,
+    );
+    expect(() =>
+      validateHomeConfig({ name: 'X', ktv: { area: 'a', command_entity: 3 } }),
+    ).toThrowError(/"ktv.command_entity" must be a non-empty string/);
+  });
+});
+
 describe('viewUrl', () => {
   it('builds absolute paths from the default dashboard path', () => {
     expect(viewUrl(validateHomeConfig({ name: 'X' }), 'home')).toBe(
