@@ -41,6 +41,7 @@ import './cards/ql-row-door-motion';
 import './cards/ql-row-network-flow';
 import './cards/quiet-luxe-device-cutout-card';
 import './cards/quiet-luxe-language-card';
+import './cards/quiet-luxe-ktv-card';
 import './cards/quiet-luxe-header-card';
 import './strategy/quiet-luxe-strategy';
 
@@ -247,6 +248,16 @@ export {
   type LanguageCardConfig,
   type LanguageTile,
 } from './cards/quiet-luxe-language-card';
+export {
+  DEFAULT_KTV_COMMAND_ENTITY,
+  DEFAULT_KTV_ENTITY,
+  KTV_ADDED_FEEDBACK_MS,
+  KTV_FAILURE_MS,
+  KTV_SEARCH_DEBOUNCE_MS,
+  KTV_UNDO_MS,
+  QuietLuxeKtvCard,
+  type KtvCardConfig,
+} from './cards/quiet-luxe-ktv-card';
 export {
   QuietLuxeHeaderCard,
   variantForWidth,
